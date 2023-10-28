@@ -244,7 +244,7 @@ class STNet(nn.Module):
     def encode(self, g_block, feat_g, feat_p=None):
         z_g = self.GeneEncoder(g_block, feat_g)
         if feat_p is None:
-            return z_g
+            return z_g, None
         else:
             z_p = self.ImageEncoder(g_block[1], feat_p)
             return z_g, z_p
@@ -252,7 +252,7 @@ class STNet(nn.Module):
     def decode(self, z_g, z_p=None):
         feat_g = self.GeneDecoder(z_g)
         if z_p is None:
-            return feat_g
+            return feat_g, None
         else:
             feat_p = self.ImageDecoder(z_p)
             return feat_g, feat_p
@@ -276,18 +276,25 @@ class STNet(nn.Module):
 
 
 class Generator_AD(STNet):
-    def __init__(self, patch_size, in_dim, 
+    def __init__(self, patch_size, in_dim, use_image: bool = True,
                  z_dim=256, mem_dim=1024, thres=0.01, tem=1, **kwargs):
         super().__init__(patch_size, in_dim, **kwargs)
-        self.Memory = MemoryBlock(mem_dim, 2*z_dim, thres, tem)
+        if use_image:
+            self.Memory = MemoryBlock(mem_dim, 2*z_dim, thres, tem)
+        else:
+            self.Memory = MemoryBlock(mem_dim, z_dim, thres, tem)
 
-    def forward(self, g_block, feat_g, feat_p):
+    def forward(self, g_block, feat_g, feat_p=None):
         z_g, z_p = self.encode(g_block, feat_g, feat_p)
-        z_g, z_p = self.Fusion(z_g, z_p)
 
-        z = torch.concat([z_g, z_p], dim=-1)
-        mem_z = self.Memory(z)
-        z_g, z_p = torch.chunk(mem_z, 2, dim = -1)
+        if z_p is not None:
+            z_g, z_p = self.Fusion(z_g, z_p)
+            z = torch.concat([z_g, z_p], dim=-1)
+            mem_z = self.Memory(z)
+            z_g, z_p = torch.chunk(mem_z, 2, dim = -1)
+        else:
+            z = z_g
+            z_g = self.Memory(z_g)
 
         feat_g, feat_p = self.decode(z_g, z_p)
         return z, feat_g, feat_p
@@ -304,8 +311,8 @@ class Generator_Pair(STNet):
         self.mapping.data.uniform_(-stdv, stdv)
 
     def forward(self, ref, tgt):
-        z_ref = self.encode([ref, ref], ref.ndata['gene'])
-        z_tgt = self.encode([tgt, tgt], tgt.ndata['gene'])
+        z_ref, _ = self.encode([ref, ref], ref.ndata['gene'])
+        z_tgt, _ = self.encode([tgt, tgt], tgt.ndata['gene'])
         z_ref = torch.mm(F.relu(self.mapping), z_ref)
         return z_ref, z_tgt, F.relu(self.mapping).detach().cpu().numpy()
 

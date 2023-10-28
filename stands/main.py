@@ -1,12 +1,12 @@
 import os
 import dgl
 import numpy as np
+import anndata as ad
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
-from typing import Optional, Dict
-from torch.nn import functional as F
+from typing import Optional, Dict, Any
 
 from .model import Generator_AD, Generator_Pair, Generator_BC
 from .model import Discriminator
@@ -33,7 +33,7 @@ class ADNet:
         self.batch_size = batch_size
         self.lr = learning_rate
         self.mem_dim = mem_dim
-        self.shrink_thres = shrink_thres
+        self.thres = shrink_thres
         self.tem = temperature
         self.n_critic = n_critic
 
@@ -45,21 +45,22 @@ class ADNet:
         else:
             self.weight = weight
 
-    def fit(self, ref_g: dgl.DGLGraph, weight_dir: Optional[str] = None, save: bool = True, **kwargs):
+    def fit(self, ref: Dict[str, Any], weight_dir: Optional[str] = None,
+            save: bool = False, **kwargs):
         '''Fine-tune STand on reference graph'''
         tqdm.write('Begin to fine-tune the model on normal spots...')
 
         # dataset provides subgraph for training
+        ref_g = ref['graph']
+        self.use_img = ref['use_image']
         self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
         self.dataset = dgl.dataloading.DataLoader(
             ref_g, ref_g.nodes(), self.sampler,
             batch_size=self.batch_size, shuffle=True,
             drop_last=True, num_workers=4, device=self.device)
 
-        self.in_dim = ref_g.ndata['gene'].shape[1]
-        self.patch_size = ref_g.ndata['patch'].shape[2]
-        self.D = Discriminator(self.patch_size, self.in_dim).to(self.device)
-        self.G = Generator_AD(self.patch_size, self.in_dim, thres=self.shrink_thres,
+        self.D = Discriminator(ref['patch_size'], ref['gene_dim']).to(self.device)
+        self.G = Generator_AD(ref['patch_size'], ref['gene_dim'], self.use_img, thres=self.thres,
                               mem_dim=self.mem_dim, tem=self.tem, **kwargs).to(self.device)
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
@@ -111,10 +112,12 @@ class ADNet:
             self.G.save_weights(weight_dir, save_module)  # save the trained STNet weights
     
     @torch.no_grad()
-    def predict(self, tgt_g: dgl.DGLGraph):
+    def predict(self, tgt: Dict[str, Any]):
         '''Detect anomalous spots on target graph'''
         if (self.G is None or self.D is None):
             raise RuntimeError('Please fine-tune the model first.')
+        
+        tgt_g = tgt['graph']
 
         dataset = dgl.dataloading.DataLoader(
             tgt_g, tgt_g.nodes(), self.sampler,
@@ -130,7 +133,7 @@ class ADNet:
         for _, _, blocks in dataset:
             # get real data from blocks
             real_g = blocks[0].srcdata['gene']
-            real_p = blocks[1].srcdata['patch']
+            real_p = blocks[1].srcdata['patch'] if self.use_img else None
             _, fake_g, fake_p = self.G(blocks, real_g, real_p)
 
             d = self.D(fake_g, fake_p)
@@ -164,27 +167,32 @@ class ADNet:
         while t < sum_t:
             for _, _, blocks in self.dataset:
                 real_g = blocks[0].srcdata['gene']
-                real_p = blocks[1].srcdata['patch']
+                real_p = blocks[1].srcdata['patch'] if self.use_img else None
                 z, _, _ = self.G(blocks, real_g, real_p)
                 self.G.Memory.update_mem(z)
                 t += 1
-    
+
     def update_D(self, blocks):
         '''Updating discriminator'''
         self.opt_D.zero_grad()
 
         # generate fake data
-        _, fake_g, fake_p = self.G(blocks,
-                                   blocks[0].srcdata['gene'],
-                                   blocks[1].srcdata['patch'])
+        _, fake_g, fake_p = self.G(blocks, blocks[0].srcdata['gene'],
+                                   blocks[1].srcdata['patch'] if self.use_img else None)
 
         # get real data from blocks
         real_g = blocks[1].dstdata['gene']
-        real_p = blocks[1].dstdata['patch']
+        real_p = blocks[1].dstdata['patch'] if self.use_img else None
 
-        d1 = torch.mean(self.D(real_g, real_p))
-        d2 = torch.mean(self.D(fake_g.detach(), fake_p.detach()))
-        gp = calculate_gradient_penalty(self.D, real_g, fake_g.detach(), real_p, fake_p.detach())
+        if self.use_img:
+            d1 = torch.mean(self.D(real_g, real_p))
+            d2 = torch.mean(self.D(fake_g.detach(), fake_p.detach()))
+            gp = calculate_gradient_penalty(self.D, real_g, fake_g.detach(),
+                                            real_p, fake_p.detach())
+        else:
+            d1 = torch.mean(self.D(real_g))
+            d2 = torch.mean(self.D(fake_g.detach()))
+            gp = calculate_gradient_penalty(self.D, real_g, fake_g.detach())
 
         # store discriminator loss for printing training information
         self.D_loss = - d1 + d2 + gp * self.weight['w_gp']
@@ -199,14 +207,17 @@ class ADNet:
 
         # get real data from blocks
         real_g = blocks[0].srcdata['gene']
-        real_p = blocks[1].srcdata['patch']
+        real_p = blocks[1].srcdata['patch'] if self.use_img else None
         real_z, fake_g, fake_p = self.G(blocks, real_g, real_p)
 
         # discriminator provides feedback
         d = self.D(fake_g, fake_p)
 
-        Loss_rec = (self.L1(blocks[-1].dstdata['gene'], fake_g) + 
-                    self.L1(blocks[-1].dstdata['patch'], fake_p))/2
+        if self.use_img:
+            Loss_rec = (self.L1(blocks[-1].dstdata['gene'], fake_g) + 
+                        self.L1(blocks[-1].dstdata['patch'], fake_p))/2
+        else:
+            Loss_rec = self.L1(blocks[-1].dstdata['gene'], fake_g)
         Loss_adv = -torch.mean(d)
 
         # store generator loss for printing training information and backward
@@ -245,16 +256,15 @@ class AlignNet:
         else:
             self.weight = weight
     
-    def fit(self, raw_g: dgl.DGLGraph, weight_dir: Optional[str] = None, **kwargs):
+    def fit(self, raw: Dict[str, Any], weight_dir: Optional[str] = None, **kwargs):
         '''Find spot pairs '''
         tqdm.write('Begin to find spot pairs between datasets...')
 
-        ref_g, tgt_g = self.unpack(raw_g)
+        raw_g = raw['graph']
+        ref_g, tgt_g = self.split(raw_g)
 
-        self.in_dim = ref_g.ndata['gene'].shape[1]
-        self.patch_size = ref_g.ndata['patch'].shape[2]
-        self.D = Discriminator(self.patch_size, 256).to(self.device)
-        self.G = Generator_Pair(self.patch_size, self.in_dim,
+        self.D = Discriminator(raw['patch_size'], 256).to(self.device)
+        self.G = Generator_Pair(raw['patch_size'], raw['gene_dim'],
                                 ref_g.num_nodes(), tgt_g.num_nodes(), **kwargs).to(self.device)
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
@@ -293,11 +303,11 @@ class AlignNet:
             ref_g = dgl.node_subgraph(ref_g, pair_id)
             tgt_g.ndata['ref_gene'] = ref_g.ndata['gene']
 
-        tqdm.write('Spot pairs have been found.')
-        return ref_g, tgt_g, m.shape[1]  # m.shape[1], the number of batches
+        tqdm.write('Spot pairs have been found.\n')
+        return ref_g, tgt_g
 
-    def unpack(self, graph):
-        '''Unpack the integrated graph to reference and target graph'''
+    def split(self, graph: dgl.DGLGraph):
+        '''Split the integrated graph to reference and target graph'''
         idx = torch.argmax(graph.ndata['batch'], -1).numpy()
         ref_id = list(np.where(idx == 0)[0])
         tgt_id = list(np.where(idx != 0)[0])
@@ -390,21 +400,24 @@ class BCNet:
         else:
             self.weight = weight
     
-    def fit(self, raw_g: dgl.DGLGraph, weight_dir: Optional[str] = None,
-            n_epochs: int = 500, learning_rate: float = 2e-4, **kwargs):
+    def fit(self, raw: Dict[str, Any], weight_dir: Optional[str] = None, **kwargs):
         '''Remove batch effects'''
-        Aligner = AlignNet(n_epochs, learning_rate, random_state=self.seed)
-        ref_g, tgt_g, data_n = Aligner.fit(raw_g)
+        adatas = raw['adata']
+        adata_ref = adatas[0]
+        adata_tgt = ad.concat(adatas[1:])
+        
+        Aligner = AlignNet(random_state=self.seed, **kwargs)
+        ref_g, tgt_g = Aligner.fit(raw)
+
         self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
         self.dataset = dgl.dataloading.DataLoader(
             tgt_g, tgt_g.nodes(), self.sampler,
             batch_size=self.batch_size, shuffle=True,
-            drop_last=False, num_workers=4, device=self.device)
-        
-        self.in_dim = ref_g.ndata['gene'].shape[1]
-        self.patch_size = ref_g.ndata['patch'].shape[2]
-        self.D = Discriminator(self.patch_size, 256).to(self.device)
-        self.G = Generator_BC(data_n, self.patch_size, self.in_dim, **kwargs).to(self.device)
+            drop_last=False, num_workers=0, device=self.device)
+
+        self.D = Discriminator(raw['patch_size'], raw['gene_dim']).to(self.device)
+        self.G = Generator_BC(raw['data_n'], raw['patch_size'],
+                              raw['gene_dim']).to(self.device)
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
         self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr, betas=(0.5, 0.999))
@@ -415,7 +428,7 @@ class BCNet:
         self.G_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_G,
                                                           T_max = self.n_epochs)
         
-        self.Loss = nn.MSELoss().to(self.device)
+        self.L1 = nn.L1Loss().to(self.device)
 
         self.prepare(weight_dir)
 
@@ -435,18 +448,32 @@ class BCNet:
                     # Update generator for one time
                     self.update_G(blocks)
 
+                # Update learning rate for G and D
+                self.D_sch.step()
+                self.G_sch.step()
                 t.set_postfix(G_Loss = self.G_loss.item(),
                               D_Loss = self.D_loss.item())
                 t.update(1)
 
-        
-
-        
         self.dataset = dgl.dataloading.DataLoader(
             tgt_g, tgt_g.nodes(), self.sampler,
             batch_size=self.batch_size, shuffle=False,
-            drop_last=False, num_workers=4, device=self.device)
-    
+            drop_last=False, num_workers=0, device=self.device)
+
+        self.G.eval()
+        corrected = []
+        with torch.no_grad():
+            for _, _, blocks in self.dataset:
+                fake_g = self.G(blocks, blocks[0].srcdata['gene'],
+                                blocks[-1].dstdata['batch'])
+                corrected.append(fake_g.cpu().detach())
+
+        corrected = torch.cat(corrected, dim=0).numpy()
+        adata_tgt.X = corrected
+        adata = ad.concat([adata_ref, adata_tgt])
+        tqdm.write('Datasets have been corrected.\n')
+        return adata
+
     def prepare(self, weight_dir):
         '''Prepare stage for pretrained weights'''
         if weight_dir:
@@ -459,6 +486,49 @@ class BCNet:
         pretrained_dict = {k: v for k, v in pre_weights.items()}
         model_dict.update(pretrained_dict)
         self.G.load_state_dict(model_dict)
+
+    def update_D(self, blocks):
+        '''Updating discriminator'''
+        self.opt_D.zero_grad()
+
+        # generate fake data
+        fake_g = self.G(blocks, blocks[0].srcdata['gene'], blocks[-1].dstdata['batch'])
+
+        # get real data from blocks
+        real_g = blocks[-1].dstdata['ref_gene']
+
+        d1 = torch.mean(self.D(real_g))
+        d2 = torch.mean(self.D(fake_g.detach()))
+        gp = calculate_gradient_penalty(self.D, real_g, fake_g.detach())
+
+        # store discriminator loss for printing training information
+        self.D_loss = - d1 + d2 + gp * self.weight['w_gp']
+        self.D_scaler.scale(self.D_loss).backward()
+
+        self.D_scaler.step(self.opt_D)
+        self.D_scaler.update()
+
+    def update_G(self, blocks):
+        '''Updating generator'''
+        self.opt_G.zero_grad()
+
+        # generate fake data
+        fake_g = self.G(blocks, blocks[0].srcdata['gene'], blocks[-1].dstdata['batch'])
+
+        # discriminator provides feedback
+        d = self.D(fake_g)
+
+        Loss_rec = self.L1(blocks[-1].dstdata['ref_gene'], fake_g)
+        Loss_adv = -torch.mean(d)
+
+        # store generator loss for printing training information and backward
+        self.G_loss = (self.weight['w_rec']*Loss_rec +
+                       self.weight['w_adv']*Loss_adv)
+
+        self.G_scaler.scale(self.G_loss).backward()
+        self.G_scaler.step(self.opt_G)
+        self.G_scaler.update()
+
         
 
 
