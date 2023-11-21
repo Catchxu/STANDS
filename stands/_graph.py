@@ -1,5 +1,6 @@
 import dgl
 import torch
+import warnings
 import numpy as np
 import pandas as pd
 import anndata as ad
@@ -51,9 +52,9 @@ class Build_graph:
  
         preprocess = transforms.Compose([
             transforms.ToTensor(),
-            # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
         ])
-        
+
         p_list = []
         for i in range(len(self.position)):
             x, y = self.position[i, :]
@@ -84,6 +85,7 @@ class Build_multi_graph:
     def __init__(self, adata: List[ad.AnnData], image: Optional[List[np.ndarray]],
                  position: List[np.ndarray], n_neighbors: int = 4,
                  patch_size: int = 48, train_mode: bool = True):
+        warnings.filterwarnings("ignore")
         self.adata = adata
         self.adata_raw = adata
         self.image = image
@@ -148,7 +150,7 @@ class Build_multi_graph:
             
             preprocess = transforms.Compose([
                 transforms.ToTensor(),
-                # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+                transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
             ])
 
             for i in range(len(position)):

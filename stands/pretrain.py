@@ -34,16 +34,16 @@ def pretrain(input_dir: str, data_name: List[str],
         seed_everything(random_state)
     
     # Initialize dataloader for train data
-    graph = read_multi_graph(input_dir, data_name, patch_size)
+    train = read_multi(input_dir, data_name, patch_size)
+    graph = train['graph']
     sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
     dataset = dgl.dataloading.DataLoader(
         graph, graph.nodes(), sampler,
         batch_size=batch_size, shuffle=True,
-        drop_last=False, num_workers=1, device=device)
+        drop_last=False, num_workers=0, device=device)
 
-    net = STNet(graph.ndata['patch'].shape[2], graph.ndata['gene'].shape[1]).to(device)
+    net = STNet(train['patch_size'], train['gene_dim']).to(device)
     opt_G = optim.Adam(net.parameters(), lr=learning_rate, betas=(0.5, 0.999))
-    G_scaler = torch.cuda.amp.GradScaler()
     G_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer = opt_G, T_max = n_epochs)
     L1 = nn.L1Loss().to(device)
 
@@ -61,14 +61,13 @@ def pretrain(input_dir: str, data_name: List[str],
                 Loss = (L1(blocks[1].dstdata['gene'], fake_g) + \
                         L1(blocks[1].dstdata['patch'], fake_p))
 
-                G_scaler.scale(Loss).backward()
-                G_scaler.step(opt_G)
-                G_scaler.update()
+                Loss.backward()
+                opt_G.step()
 
             G_scheduler.step()
             t.set_postfix(Loss = Loss.item())
             t.update(1)
-    
+
     # return net.state_dict()
     save_module = ['GeneEncoder', 'GeneDecoder',
                    'ImageEncoder', 'ImageDecoder', 'Fusion']

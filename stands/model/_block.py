@@ -17,12 +17,6 @@ class MemoryBlock(nn.Module):
         self.register_buffer("mem_ptr", torch.zeros(1, dtype=torch.long))
 
         self.reset_parameters()
-        ###VQ Codebook
-        self.beta = 0.25
-        self.batch_size = 128
-        #self.fc = nn.Linear(self.mem_dim, self.z_dim)
-        self.embedding = nn.Embedding(self.batch_size, self.z_dim)
-        self.embedding.weight.data.uniform_(-1.0 / self.batch_size, 1.0 / self.batch_size)
 
     def reset_parameters(self):
         stdv = 1. / math.sqrt(self.mem.size(1))
@@ -42,7 +36,10 @@ class MemoryBlock(nn.Module):
 
     def forward(self, input):
         att_weight = torch.mm(input, self.mem.T)  # input x mem^T, (BxC) x (CxM) = B x M
-        att_weight = F.softmax(att_weight/self.tem, dim=1)  # B x M
+        filter_value = -float('Inf')
+        indices_to_remove = att_weight < torch.topk(att_weight, k=20, dim=-1)[0][..., -1, None]
+        att_weight[indices_to_remove] = filter_value
+        att_weight = F.softmax(att_weight/self.tem, dim=1)
 
         # ReLU based shrinkage, hard shrinkage for positive value
         if (self.shrink_thres > 0):
@@ -64,16 +61,19 @@ class Attention(nn.Module):
         self.value_projection = nn.Linear(d_model, d_model)
 
         self.out_projection = nn.Linear(d_model, d_model)
+    
+    def cos_score(self, q, k):
+        norm_q = torch.norm(q, dim=1).unsqueeze(-1)
+        norm_k = torch.norm(k, dim=1).unsqueeze(-1)
+        return torch.matmul(q, k.transpose(-1,1)) / (norm_q * norm_k)
 
     def forward(self, q, k, v):
-        q = self.query_projection(q)
-        k = self.key_projection(k)
-        v = self.value_projection(v)
-
-        s = self.dropout(torch.cosine_similarity(q, k, eps=1e-08))
-        out = torch.mul(s.reshape(-1, 1), v)
-        return self.norm(q + self.out_projection(out))
-
+        q = self.query_projection(q).unsqueeze(-1)
+        k = self.key_projection(k).unsqueeze(-1)
+        v = self.value_projection(v).unsqueeze(-1)
+        s = self.dropout(self.cos_score(q, k))
+        out = torch.matmul(s, v).squeeze(-1)
+        return self.norm(q.squeeze(-1) + self.out_projection(out))
 
 class TFBlock(nn.Module):
     def __init__(self, d_model):

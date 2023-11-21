@@ -57,7 +57,7 @@ class ADNet:
         self.dataset = dgl.dataloading.DataLoader(
             ref_g, ref_g.nodes(), self.sampler,
             batch_size=self.batch_size, shuffle=True,
-            drop_last=True, num_workers=4, device=self.device)
+            drop_last=True, num_workers=0, device=self.device)
 
         self.D = Discriminator(ref['patch_size'], ref['gene_dim']).to(self.device)
         self.G = Generator_AD(ref['patch_size'], ref['gene_dim'], self.use_img, thres=self.thres,
@@ -122,7 +122,7 @@ class ADNet:
         dataset = dgl.dataloading.DataLoader(
             tgt_g, tgt_g.nodes(), self.sampler,
             batch_size=self.batch_size, shuffle=False,
-            drop_last=False, num_workers=4, device=self.device)
+            drop_last=False, num_workers=0, device=self.device)
 
         self.G.eval()
         self.D.eval()

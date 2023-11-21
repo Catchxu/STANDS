@@ -8,9 +8,6 @@ from typing import Literal, Optional, List
 from ._utils import seed_everything
 from ._graph import Build_graph, Build_multi_graph
 
-import warnings
-warnings.filterwarnings("ignore")
-
 
 def preprocess_data(adata: ad.AnnData):
     # clear the obs &var names
@@ -53,7 +50,7 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
         if (data_dir is None) or (data_name is None):
             RuntimeError('Please set the read file/path.')
         input_dir = data_dir + data_name + '.h5ad'
-        adata = sc.read(input_dir)
+        adata = sc.read_h5ad(input_dir)
 
     position = adata.obsm[spa_key]
 
@@ -64,8 +61,10 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
 
     if preprocess:
         adata = preprocess_data(adata)
-        sc.pp.filter_genes(adata, min_cells=10)
-        sc.pp.highly_variable_genes(adata, n_top_genes=n_genes, subset=True)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            sc.pp.filter_genes(adata, min_cells=10)
+            sc.pp.highly_variable_genes(adata, n_top_genes=n_genes, subset=True)
 
     if return_type == 'anndata':
 
@@ -90,7 +89,6 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
                ref: Optional[ad.AnnData] = None, tgt: Optional[ad.AnnData] = None, spa_key: str = 'spatial',
                preprocess: bool = True, n_genes: int = 3000, patch_size: Optional[int] = None,
                n_neighbors: int = 4, return_type: Literal['anndata', 'graph'] = 'graph', **kwargs):
-
     seed_everything(0)
 
     ref, ref_img, ref_pos = read(ref_dir, ref_name, ref, False, 'multi',
@@ -109,8 +107,10 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
                 'There are too few overlapping genes to perform feature selection'
             )
         else:
-            sc.pp.filter_genes(ref, min_cells=10)
-            sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
+            with warnings.catch_warnings():
+                warnings.filterwarnings("ignore", category=FutureWarning)
+                sc.pp.filter_genes(ref, min_cells=10)
+                sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
             tgt = tgt[:, ref.var_names]
     
     if return_type == 'anndata':
@@ -158,8 +158,10 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
     if preprocess:
         adatas = [preprocess_data(d) for d in adatas]
         ref = adatas[0]
-        sc.pp.filter_genes(ref, min_cells=10)
-        sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=FutureWarning)
+            sc.pp.filter_genes(ref, min_cells=10)
+            sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
         adatas = [d[:, list(ref.var_names)] for d in adatas]
 
     if return_type == 'anndata':

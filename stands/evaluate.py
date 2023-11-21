@@ -4,8 +4,12 @@ import pandas as pd
 import anndata as ad
 import scanpy as sc
 from sklearn import metrics
-from typing import Optional, Literal, Sequence
 from sklearn.neighbors import NearestNeighbors
+import rpy2.robjects as ro
+from rpy2.robjects import pandas2ri, numpy2ri
+from rpy2.robjects.conversion import localconverter
+from typing import Optional, Literal, Sequence
+
 
 
 metrics_list = Literal[
@@ -35,16 +39,19 @@ def evaluate(metrics: Sequence[metrics_list],
             correct = adata.obsm['X_tsne']
         else:
             correct = adata.obsm[emb]
-        
+
         data = {'correct': correct}
         
         if batchid is not None:
-            data.update({'batch': adata.obs[batchid].values})
+            _, idx = np.unique(adata.obs[batchid].values, return_inverse=True)
+            data.update({'batch': idx})
         if typeid is not None:
-            data.update({'type': adata.obs[typeid].values})
+            _, idx = np.unique(adata.obs[typeid].values, return_inverse=True)
+            data.update({'type': idx})
         if clustid is not None:
-            data.update({'cluster': adata.obs[clustid].values})
-    
+            _, idx = np.unique(adata.obs[clustid].values, return_inverse=True)
+            data.update({'cluster': idx})
+
     method = {
         'AUC': eval_AUC,
         'Precision': eval_P, 
@@ -61,10 +68,7 @@ def evaluate(metrics: Sequence[metrics_list],
 
     result = []
     for m in metrics:
-        try:
-            r = method[m](data)
-        except:
-            pass
+        r = method[m](data)
         result.append(r)
 
     if len(result) >= 2:
@@ -92,7 +96,7 @@ def eval_NMI(data):
 
 def eval_ASW_type(data):
     asw = metrics.silhouette_score(
-        X = data['correct'],
+        X = data['correct'], 
         labels = data['type'],
         metric = 'euclidean'
     )
@@ -100,55 +104,82 @@ def eval_ASW_type(data):
     return asw
 
 def eval_ASW_batch(data):
-    asw = metrics.silhouette_score(
-        X = data['correct'],
-        labels = data['batch'],
-        metric = 'euclidean'
-    )
-    asw = (asw + 1)/2
-    return 1 - asw
+    obs_df = {key: value for key, value in data.items() if key in ['type', 'batch']}
+    adata = ad.AnnData(np.array(data['correct'], dtype=np.float32), obs=obs_df)
+    group = adata.obs['type'].unique()
+    asw = []
+    for g in group:
+        subadata = adata[adata.obs['type'] == g, :]
+        if len(subadata.obs['batch'].unique()) == 1:
+            continue
+        s = metrics.silhouette_score(
+            X = subadata.X, 
+            labels = subadata.obs['batch'].values,
+            metric = 'euclidean'
+            )
+        s = 1 - np.abs(s)
+        asw.append(s)
+    return np.mean(np.array(asw))
 
-def eval_BatchKL(data, replicates=200, n_neighbors=100, n_cells=100, batch="BatchID"):
+def eval_BatchKL(data, replicates=200, n_neighbors=100, n_cells=100):
     np.random.seed(1)
 
     eval_data = data['correct']
     batch = data['batch']
     table_batch = np.bincount(batch)
-    tmp00 = table_batch / np.sum(table_batch)
+    q = table_batch / np.sum(table_batch)
     n = eval_data.shape[0]
 
     KL = []
     for _ in range(replicates):
         bootsamples = np.random.choice(n, n_cells)
-        nn = NearestNeighbors(n_neighbors=min(5 * len(tmp00), n_neighbors)).fit(eval_data)
+        nn = NearestNeighbors(n_neighbors=min(5 * len(q), n_neighbors)).fit(eval_data)
         _, indices = nn.kneighbors(eval_data[bootsamples, :])
-    
+
         KL_x = []
         for y in range(len(bootsamples)):
             id = indices[y]
-            tmp = np.bincount(eval_data[id])
-            tmp = tmp / np.sum(tmp)
-            KL_x.append(np.sum(tmp * np.log2(tmp / tmp00), where=tmp > 0))
+            p = np.bincount(batch[id])
+            p = p / np.sum(p)
+
+            if len(p) < len(q):
+                delta = len(q) - len(p)
+                p = np.append(p, [0]*delta)
+
+            with np.errstate(divide='ignore', invalid='ignore'):
+                KL_x.append(np.sum(p*np.log2(p/q), where=p>0))
         
         KL.append(np.mean(KL_x))
 
     return np.mean(np.array(KL))
 
 def eval_iLISI(data):
-    obs_df = pd.DataFrame(data['batch'], columns='batch')
-    adata = ad.AnnData(X=data['correct'], obs=obs_df)
-    return scib.metrics.ilisi_graph(adata, 'batch', 'knn', use_rep='X', scale=False)
+    with localconverter(pandas2ri.converter + numpy2ri.converter):
+        obs_df = pd.DataFrame(data['batch'], columns=['batch'])
+        meta = ro.conversion.get_conversion().py2rpy(obs_df)
+        emb = ro.conversion.get_conversion().py2rpy(data['correct'])
+
+    ro.r('''
+    LISI <- function(emb,meta){
+        index <- lisi::compute_lisi(emb, meta, c("batch"))
+        return(median(index$batch))
+    }
+    ''')
+    ilisi = ro.r['LISI'](emb, meta)
+    return np.asarray(ilisi)[0]
 
 def eval_cLISI(data):
-    obs_df = pd.DataFrame(data['type'], columns='celltype')
-    adata = ad.AnnData(X=data['correct'], obs=obs_df)
-    return scib.metrics.ilisi_graph(adata, 'celltype', 'knn', use_rep='X', scale=False)
+    with localconverter(pandas2ri.converter + numpy2ri.converter):
+        obs_df = pd.DataFrame(data['celltype'], columns=['celltype'])
+        meta = ro.conversion.get_conversion().py2rpy(obs_df)
+        emb = ro.conversion.get_conversion().py2rpy(data['correct'])
 
+    ro.r('''
+    LISI <- function(emb,meta){
+        index <- lisi::compute_lisi(emb, meta, c("celltype"))
+        return(median(index$celltype))
+    }
+    ''')
+    clisi = ro.r['LISI'](emb, meta)
+    return np.asarray(clisi)[0]
 
-
-
-if __name__=='main':
-    y_true = [0, 1, 1]
-    y_score = [0.1, 0.9, 0.8]
-    evaluate('AUC', y_true, y_score)
-    evaluate(['AUC', 'F1'], y_true, y_score)

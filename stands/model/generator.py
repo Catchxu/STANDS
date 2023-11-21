@@ -49,6 +49,7 @@ class GeneEncoder(nn.Module):
                         False, False, False)
 
     def forward(self, g_block, feat):
+        
         feat = self.GAT1(g_block[0], feat)
         z = self.GAT2(g_block[1], feat)
         return z
@@ -73,11 +74,11 @@ class ResidualBlock(nn.Module):
         self.residual_block = nn.Sequential(
             nn.Conv2d(in_channels=in_channels, out_channels=out_channels,
                       kernel_size=kernel_size, stride=stride, padding=1),
-            nn.InstanceNorm2d(in_channels),
+            nn.BatchNorm2d(in_channels),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(in_channels=out_channels, out_channels=out_channels,
                       kernel_size=kernel_size, stride=stride, padding=1),
-            nn.InstanceNorm2d(out_channels),
+            nn.BatchNorm2d(out_channels),
             nn.LeakyReLU(0.2, inplace=True),
         )
 
@@ -119,7 +120,7 @@ class ImageEncoder(nn.Module):
                 nn.Sequential(
                     nn.Conv2d(n_filters_1, n_filters_2,
                               kernel_size=(2, 2), stride=(2, 2), padding=0),
-                    nn.InstanceNorm2d(n_filters_2),
+                    nn.BatchNorm2d(n_filters_2),
                     nn.LeakyReLU(negative_slope=0.2, inplace=True),
                 )
             )
@@ -129,7 +130,7 @@ class ImageEncoder(nn.Module):
                     nn.Sequential(
                         nn.Conv2d(in_channels=n_filters_1, out_channels=self.max_filters,
                                   kernel_size=(ks, ks), stride=(ks, ks), padding=0),
-                        nn.InstanceNorm2d(self.max_filters),
+                        nn.BatchNorm2d(self.max_filters),
                         nn.LeakyReLU(negative_slope=0.2, inplace=True),
                     )
                 )
@@ -176,7 +177,7 @@ class ImageDecoder(nn.Module):
         self.input_conv = nn.Sequential(
             nn.Conv2d(in_channels=z_dim, out_channels=self.max_filters,
                       kernel_size=(3, 3), stride=(1, 1), padding=1),
-            nn.InstanceNorm2d(self.max_filters),
+            nn.BatchNorm2d(self.max_filters),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
         )
 
@@ -194,7 +195,7 @@ class ImageDecoder(nn.Module):
                 nn.Sequential(
                     nn.ConvTranspose2d(n_filters_0, n_filters_1,
                                        kernel_size=(2, 2), stride=(2, 2), padding=0),
-                    nn.InstanceNorm2d(n_filters_1),
+                    nn.BatchNorm2d(n_filters_1),
                     nn.LeakyReLU(negative_slope=0.2, inplace=True),
                 )
             )
@@ -204,14 +205,14 @@ class ImageDecoder(nn.Module):
                     nn.Sequential(
                         nn.ConvTranspose2d(in_channels=self.max_filters, out_channels=n_filters_1,
                                            kernel_size=(ks, ks), stride=(ks, ks), padding=0),
-                        nn.InstanceNorm2d(n_filters_1),
+                        nn.BatchNorm2d(n_filters_1),
                         nn.LeakyReLU(negative_slope=0.2, inplace=True),
                     )
                 )
 
         self.output_conv = nn.Conv2d(in_channels=n_filters_1, out_channels=output_channels,
                                      kernel_size=(3, 3), stride=(1, 1), padding=1)
-        
+
         self.z_dim = z_dim
         self.img_latent_dim = patch_size // (2**n_levels)
         self.feat_dim = self.z_dim*self.img_latent_dim**2
@@ -227,17 +228,19 @@ class ImageDecoder(nn.Module):
                 z += self.multi_res_skip_list[i](z_top)
 
         x = self.output_conv(z)
-        return x
+        return torch.tanh(x)
 
-    
+
+
+
 class STNet(nn.Module):
-    def __init__(self, patch_size, in_dim, out_dim=[512, 256], z_dim=256, **kwargs):
+    def __init__(self, patch_size, in_dim, out_dim=[512, 256], z_dim=256):
         super().__init__()
         self.GeneEncoder = GeneEncoder(in_dim, out_dim, nheads=[4, 1])
         self.GeneDecoder = GeneDecoder(in_dim, out_dim)
 
-        self.ImageEncoder = ImageEncoder(patch_size, z_dim=z_dim, **kwargs)
-        self.ImageDecoder = ImageDecoder(patch_size, z_dim=z_dim, **kwargs)
+        self.ImageEncoder = ImageEncoder(patch_size, z_dim=z_dim)
+        self.ImageDecoder = ImageDecoder(patch_size, z_dim=z_dim)
 
         self.Fusion = TFBlock(d_model=z_dim)
 
@@ -262,7 +265,7 @@ class STNet(nn.Module):
         z_g, z_p = self.Fusion(z_g, z_p)
         feat_g, feat_p = self.decode(z_g, z_p)
         return feat_g, feat_p
-    
+
     def save_weights(self, weight_dir: str, save_module: List[str]):
         state_dict = self.state_dict()
         save_state = {}
