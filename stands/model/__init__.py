@@ -1,3 +1,2 @@
-from .generator import STNet, Generator_AD, Generator_Pair, Generator_BC
+from .generator import STNet, GeneratorAD, GeneratorPair, GeneratorBC
 from .discriminator import Discriminator
-from .CAMLU import CAMLU

@@ -5,8 +5,8 @@ import anndata as ad
 from math import e
 from typing import Literal, Optional, List
 
-from ._utils import seed_everything
-from ._graph import Build_graph, Build_multi_graph
+from ._utils import seed_everything, clear_warnings
+from ._graph import BuildGraph, BuildMultiGraph
 
 
 def preprocess_data(adata: ad.AnnData):
@@ -39,6 +39,7 @@ def set_patch(adata: ad.AnnData):
     return patch_size
 
 
+@clear_warnings
 def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
          adata: Optional[ad.AnnData] = None, preprocess: bool = True,
          return_type: Literal['anndata', 'graph', 'multi'] = 'graph',
@@ -61,10 +62,8 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
 
     if preprocess:
         adata = preprocess_data(adata)
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=FutureWarning)
-            sc.pp.filter_genes(adata, min_cells=10)
-            sc.pp.highly_variable_genes(adata, n_top_genes=n_genes, subset=True)
+        sc.pp.filter_genes(adata, min_cells=10)
+        sc.pp.highly_variable_genes(adata, n_top_genes=n_genes, subset=True)
 
     if return_type == 'anndata':
 
@@ -79,11 +78,12 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
         if patch_size is None:
             patch_size = set_patch(adata)
 
-        builder = Build_graph(adata, image, position, n_neighbors,
-                              patch_size, train_mode)
+        builder = BuildGraph(adata, image, position, n_neighbors,
+                             patch_size, train_mode)
         return builder.pack()
 
 
+@clear_warnings
 def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
                ref_name: Optional[str] = None, tgt_name: Optional[str] = None,
                ref: Optional[ad.AnnData] = None, tgt: Optional[ad.AnnData] = None, spa_key: str = 'spatial',
@@ -107,10 +107,8 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
                 'There are too few overlapping genes to perform feature selection'
             )
         else:
-            with warnings.catch_warnings():
-                warnings.filterwarnings("ignore", category=FutureWarning)
-                sc.pp.filter_genes(ref, min_cells=10)
-                sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
+            sc.pp.filter_genes(ref, min_cells=10)
+            sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
             tgt = tgt[:, ref.var_names]
     
     if return_type == 'anndata':
@@ -122,11 +120,12 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
         if patch_size is None:
             patch_size = set_patch(ref)
 
-        ref_b = Build_graph(ref, ref_img, ref_pos, patch_size=patch_size, **kwargs)
-        tgt_b = Build_graph(tgt, tgt_img, tgt_pos, patch_size=patch_size, **kwargs)
+        ref_b = BuildGraph(ref, ref_img, ref_pos, patch_size=patch_size, **kwargs)
+        tgt_b = BuildGraph(tgt, tgt_img, tgt_pos, patch_size=patch_size, **kwargs)
         return ref_b.pack(), tgt_b.pack()
 
 
+@clear_warnings
 def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] = None,
                adata: Optional[List[ad.AnnData]] = None, patch_size: Optional[int] = None,
                preprocess: bool = True, n_genes: int = 3000, n_neighbors: int = 4,
@@ -158,10 +157,8 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
     if preprocess:
         adatas = [preprocess_data(d) for d in adatas]
         ref = adatas[0]
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=FutureWarning)
-            sc.pp.filter_genes(ref, min_cells=10)
-            sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
+        sc.pp.filter_genes(ref, min_cells=10)
+        sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
         adatas = [d[:, list(ref.var_names)] for d in adatas]
 
     if return_type == 'anndata':
@@ -173,8 +170,8 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
         if patch_size is None:
             patch_size = set_patch(adatas[0])
 
-        builder = Build_multi_graph(adatas, images, positions,
-                                    patch_size=patch_size, **kwargs)
+        builder = BuildMultiGraph(adatas, images, positions,
+                                  patch_size=patch_size, **kwargs)
         return builder.pack()
 
 

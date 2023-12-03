@@ -8,7 +8,7 @@ import torch.optim as optim
 from tqdm import tqdm
 from typing import Optional, Dict, Any
 
-from .model import Generator_AD, Generator_Pair, Generator_BC
+from .model import GeneratorAD, GeneratorPair, GeneratorBC
 from .model import Discriminator
 from ._utils import seed_everything, calculate_gradient_penalty
 
@@ -60,13 +60,11 @@ class ADNet:
             drop_last=True, num_workers=0, device=self.device)
 
         self.D = Discriminator(ref['patch_size'], ref['gene_dim']).to(self.device)
-        self.G = Generator_AD(ref['patch_size'], ref['gene_dim'], self.use_img, thres=self.thres,
-                              mem_dim=self.mem_dim, tem=self.tem, **kwargs).to(self.device)
+        self.G = GeneratorAD(ref['patch_size'], ref['gene_dim'], self.use_img, thres=self.thres,
+                             mem_dim=self.mem_dim, tem=self.tem, **kwargs).to(self.device)
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
         self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr*self.n_critic, betas=(0.5, 0.999))
-        self.D_scaler = torch.cuda.amp.GradScaler()
-        self.G_scaler = torch.cuda.amp.GradScaler()
         self.D_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_D,
                                                           T_max = self.n_epochs)
         self.G_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_G,
@@ -196,10 +194,8 @@ class ADNet:
 
         # store discriminator loss for printing training information
         self.D_loss = - d1 + d2 + gp * self.weight['w_gp']
-        self.D_scaler.scale(self.D_loss).backward()
-
-        self.D_scaler.step(self.opt_D)
-        self.D_scaler.update()
+        self.D_loss.backward()
+        self.opt_D.step()
 
     def update_G(self, blocks):
         '''Updating generator'''
@@ -223,13 +219,13 @@ class ADNet:
         # store generator loss for printing training information and backward
         self.G_loss = (self.weight['w_rec']*Loss_rec +
                        self.weight['w_adv']*Loss_adv)
-
-        self.G_scaler.scale(self.G_loss).backward()
-        self.G_scaler.step(self.opt_G)
-        self.G_scaler.update()
+        self.G_loss.backward()
+        self.opt_G.step()
 
         # updating memory block with generated embeddings, fake_z
         self.G.Memory.update_mem(real_z)
+
+
 
 
 class AlignNet:
@@ -264,13 +260,11 @@ class AlignNet:
         ref_g, tgt_g = self.split(raw_g)
 
         self.D = Discriminator(raw['patch_size'], 256).to(self.device)
-        self.G = Generator_Pair(raw['patch_size'], raw['gene_dim'],
-                                ref_g.num_nodes(), tgt_g.num_nodes(), **kwargs).to(self.device)
+        self.G = GeneratorPair(raw['patch_size'], raw['gene_dim'],
+                               ref_g.num_nodes(), tgt_g.num_nodes(), **kwargs).to(self.device)
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
         self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr, betas=(0.5, 0.999))
-        self.D_scaler = torch.cuda.amp.GradScaler()
-        self.G_scaler = torch.cuda.amp.GradScaler()
         self.D_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_D,
                                                           T_max = self.n_epochs)
         self.G_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_G,
@@ -348,10 +342,8 @@ class AlignNet:
 
         # store discriminator loss for printing training information
         self.D_loss = - d1 + d2 + gp * self.weight['w_gp']
-        self.D_scaler.scale(self.D_loss).backward()
-
-        self.D_scaler.step(self.opt_D)
-        self.D_scaler.update()
+        self.D_loss.backward()
+        self.opt_D.step()
     
     def update_G(self, ref_g, tgt_g):
         '''Updating generator'''
@@ -366,10 +358,10 @@ class AlignNet:
         # store generator loss for printing training information and backward
         self.G_loss = (self.weight['w_rec']*Loss_rec +
                        self.weight['w_adv']*Loss_adv)
+        self.G_loss.backward()
+        self.opt_G.step()
 
-        self.G_scaler.scale(self.G_loss).backward()
-        self.G_scaler.step(self.opt_G)
-        self.G_scaler.update()
+
 
 
 class BCNet:
@@ -407,7 +399,7 @@ class BCNet:
         adata_tgt = ad.concat(adatas[1:])
         
         Aligner = AlignNet(random_state=self.seed, **kwargs)
-        ref_g, tgt_g = Aligner.fit(raw)
+        _, tgt_g = Aligner.fit(raw)
 
         self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
         self.dataset = dgl.dataloading.DataLoader(
@@ -416,13 +408,11 @@ class BCNet:
             drop_last=False, num_workers=0, device=self.device)
 
         self.D = Discriminator(raw['patch_size'], raw['gene_dim']).to(self.device)
-        self.G = Generator_BC(raw['data_n'], raw['patch_size'],
-                              raw['gene_dim']).to(self.device)
+        self.G = GeneratorBC(raw['data_n'], raw['patch_size'],
+                             raw['gene_dim']).to(self.device)
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
         self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr, betas=(0.5, 0.999))
-        self.D_scaler = torch.cuda.amp.GradScaler()
-        self.G_scaler = torch.cuda.amp.GradScaler()
         self.D_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_D,
                                                           T_max = self.n_epochs)
         self.G_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_G,
@@ -503,10 +493,8 @@ class BCNet:
 
         # store discriminator loss for printing training information
         self.D_loss = - d1 + d2 + gp * self.weight['w_gp']
-        self.D_scaler.scale(self.D_loss).backward()
-
-        self.D_scaler.step(self.opt_D)
-        self.D_scaler.update()
+        self.D_loss.backward()
+        self.opt_D.step()
 
     def update_G(self, blocks):
         '''Updating generator'''
@@ -524,25 +512,15 @@ class BCNet:
         # store generator loss for printing training information and backward
         self.G_loss = (self.weight['w_rec']*Loss_rec +
                        self.weight['w_adv']*Loss_adv)
-
-        self.G_scaler.scale(self.G_loss).backward()
-        self.G_scaler.step(self.opt_G)
-        self.G_scaler.update()
-
-        
-
-
-
-
-        
+        self.G_loss.backward()
+        self.opt_G.step()
 
 
 
 
 
 
-        
 
 
 
-        
+

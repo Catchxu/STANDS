@@ -10,7 +10,7 @@ import torchvision.transforms as transforms
 from sklearn.neighbors import NearestNeighbors
 
 
-class Build_graph:
+class BuildGraph:
     def __init__(self, adata: ad.AnnData, image: Optional[np.ndarray],
                  position: np.ndarray, n_neighbors: int = 4,
                  patch_size: int = 48, train_mode: bool = True):
@@ -81,7 +81,7 @@ class Build_graph:
         return g_pack
 
 
-class Build_multi_graph:
+class BuildMultiGraph:
     def __init__(self, adata: List[ad.AnnData], image: Optional[List[np.ndarray]],
                  position: List[np.ndarray], n_neighbors: int = 4,
                  patch_size: int = 48, train_mode: bool = True):

@@ -156,3 +156,4 @@ class Discriminator(nn.Module):
             dis_p = self.image_dis(feat_p)
             dis = self.critic(dis_g, dis_p)
         return dis
+

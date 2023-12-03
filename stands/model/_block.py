@@ -3,7 +3,6 @@ from torch import nn
 import math
 from math import sqrt, pi
 from torch.nn import functional as F
-from .._utils import hard_shrink_relu
 
 
 class MemoryBlock(nn.Module):
@@ -34,19 +33,23 @@ class MemoryBlock(nn.Module):
 
         self.mem_ptr[0] = ptr
 
-    def forward(self, input):
-        att_weight = torch.mm(input, self.mem.T)  # input x mem^T, (BxC) x (CxM) = B x M
-        filter_value = -float('Inf')
-        indices_to_remove = att_weight < torch.topk(att_weight, k=20, dim=-1)[0][..., -1, None]
-        att_weight[indices_to_remove] = filter_value
+    def hard_shrink_relu(self, x, lambd=0, epsilon=1e-12):
+        x = (F.relu(x-lambd) * x) / (torch.abs(x - lambd) + epsilon)
+        return x
+
+    def forward(self, x):
+        att_weight = torch.mm(x, self.mem.T)
+        # filter_value = -float('Inf')
+        # indices_to_remove = att_weight < torch.topk(att_weight, k=20, dim=-1)[0][..., -1, None]
+        # att_weight[indices_to_remove] = filter_value
         att_weight = F.softmax(att_weight/self.tem, dim=1)
 
         # ReLU based shrinkage, hard shrinkage for positive value
         if (self.shrink_thres > 0):
-            att_weight = hard_shrink_relu(att_weight, lambd=self.shrink_thres)
+            att_weight = self.hard_shrink_relu(att_weight, lambd=self.shrink_thres)
             att_weight = F.normalize(att_weight, p=1, dim=1)
 
-        output = torch.mm(att_weight, self.mem)  # AttWeight x mem, (BxM) x (MxC) = B x C
+        output = torch.mm(att_weight, self.mem)
         return output
 
 
@@ -74,6 +77,7 @@ class Attention(nn.Module):
         s = self.dropout(self.cos_score(q, k))
         out = torch.matmul(s, v).squeeze(-1)
         return self.norm(q.squeeze(-1) + self.out_projection(out))
+
 
 class TFBlock(nn.Module):
     def __init__(self, d_model):

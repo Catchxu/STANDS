@@ -1,5 +1,6 @@
 import dgl
 import random
+import warnings
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -16,10 +17,13 @@ def seed_everything(seed):
     dgl.random.seed(seed)
 
 
-def hard_shrink_relu(x, lambd=0, epsilon=1e-12):
-    '''relu based hard shrinkage function'''
-    x = (F.relu(x-lambd) * x) / (torch.abs(x - lambd) + epsilon)
-    return x
+def clear_warnings(func, category=FutureWarning):
+    def warp(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=category)
+            temp = func(*args, **kwargs)
+            return temp
+    return warp
 
 
 def interpolate(real_data, fake_data, cuda):

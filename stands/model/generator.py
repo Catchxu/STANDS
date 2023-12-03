@@ -49,7 +49,6 @@ class GeneEncoder(nn.Module):
                         False, False, False)
 
     def forward(self, g_block, feat):
-        
         feat = self.GAT1(g_block[0], feat)
         z = self.GAT2(g_block[1], feat)
         return z
@@ -278,7 +277,7 @@ class STNet(nn.Module):
         torch.save(save_state, weight_dir)
 
 
-class Generator_AD(STNet):
+class GeneratorAD(STNet):
     def __init__(self, patch_size, in_dim, use_image: bool = True,
                  z_dim=256, mem_dim=1024, thres=0.01, tem=1, **kwargs):
         super().__init__(patch_size, in_dim, **kwargs)
@@ -303,7 +302,7 @@ class Generator_AD(STNet):
         return z, feat_g, feat_p
 
 
-class Generator_Pair(STNet):
+class GeneratorPair(STNet):
     def __init__(self, patch_size, in_dim, n_ref, n_tgt, **kwargs):
         super().__init__(patch_size, in_dim, **kwargs)
         self.mapping = nn.Parameter(torch.Tensor(n_tgt, n_ref))
@@ -320,7 +319,7 @@ class Generator_Pair(STNet):
         return z_ref, z_tgt, F.relu(self.mapping).detach().cpu().numpy()
 
 
-class Generator_BC(STNet):
+class GeneratorBC(STNet):
     def __init__(self, data_n, patch_size, in_dim, out_dim=[512, 256], **kwargs):
         super().__init__(patch_size, in_dim, out_dim, **kwargs)
         self.Style = StyleBlock(data_n, out_dim[-1])
