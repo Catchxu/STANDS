@@ -4,11 +4,19 @@ e.g., spatial gene expression, histology image and single cell gene expression, 
 their compositional heterogeneities across multi-sample spatial transcriptomics (ST) data.
 
 ## Outline of DDATD
-![image](image/DDATD.png){:height="60%" width="60%"}
+<br/>
+<div align=center>
+<img src="image/DDATD.png" width="70%">
+</div>
+<br/>
 The accurate detection of anomalous anatomic regions, followed by their dissection into biologically heterogeneous subdomains across multiple tissue slices, is of paramount importance in clinical diagnostics, targeted therapies and biomedical research. This procedure, which we refer to as **D**etection and **D**issection of **A**nomalous **T**issue **D**omains (DDATD), serves as the first and foremost step in a comprehensive analysis of tissues harvested from affected individuals for revealing population-level and individual-specific factors (e.g., pathogenic cell types) associated with disease developments.
 
 ## Framework of STANDS
-![image](image/STANDS.png){:height="60%" width="60%"}
+<br/>
+<div align=center>
+<img src="image/STANDS.png" width="70%">
+</div>
+<br/>
 
 ## Dependencies
 - torch==1.13.0
