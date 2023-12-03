@@ -33,6 +33,7 @@ The accurate detection of anomalous anatomic regions, followed by their dissecti
 - sklearn==0.0.post2
 - pandas==1.5.2
 - squidpy==1.2.2
+- setuptools==59.5.0
 
 
 ## Installation
