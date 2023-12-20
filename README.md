@@ -1,7 +1,5 @@
 # Detecting and dissecting anomalous anatomic regions in spatial transcriptomics with STANDS
-we introduce **S**patial **T**ranscriptomics **AN**omaly **D**etection and **S**ubtyping (**STANDS**), an innovative computational method capable of integrating multimodal information, 
-e.g., spatial gene expression, histology image and single cell gene expression, to not only delineate anomalous tissue regions but also reveal 
-their compositional heterogeneities across multi-sample spatial transcriptomics (ST) data.
+We introduce <b>S</b>patial <b>T</b>ranscriptomics <b>AN</b>omaly <b>D</b>etection and <b>S</b>ubtyping (<b>STANDS</b>), an innovative computational method capable of integrating multimodal information, e.g., spatial gene expression, histology image and single cell gene expression, to not only delineate anomalous tissue regions but also reveal their compositional heterogeneities across multi-sample spatial transcriptomics (ST) data.
 
 
 ## Outline of DDATD
@@ -10,8 +8,7 @@ their compositional heterogeneities across multi-sample spatial transcriptomics 
 <img src="/docs/images/DDATD.png" width="70%">
 </div>
 <br/>
-
-The accurate detection of anomalous anatomic regions, followed by their dissection into biologically heterogeneous subdomains across multiple tissue slices, is of paramount importance in clinical diagnostics, targeted therapies and biomedical research. This procedure, which we refer to as **D**etection and **D**issection of **A**nomalous **T**issue **D**omains (DDATD), serves as the first and foremost step in a comprehensive analysis of tissues harvested from affected individuals for revealing population-level and individual-specific factors (e.g., pathogenic cell types) associated with disease developments.
+The accurate detection of anomalous anatomic regions, followed by their dissection into biologically heterogeneous subdomains across multiple tissue slices, is of paramount importance in clinical diagnostics, targeted therapies and biomedical research. This procedure, which we refer to as <b>D</b>etection and <b>D</b>issection of <b>A</b>nomalous <b>T</b>issue <b>D</b>omains (DDATD), serves as the first and foremost step in a comprehensive analysis of tissues harvested from affected individuals for revealing population-level and individual-specific factors (e.g., pathogenic cell types) associated with disease developments.
 
 
 ## Framework of STANDS
@@ -20,6 +17,7 @@ The accurate detection of anomalous anatomic regions, followed by their dissecti
 <img src="/docs/images/STANDS.png" width="70%">
 </div>
 <br/>
+STANDS is an innovative framework built on a suite of specialized Generative Adversarial Networks (GANs) for seamlessly integrating the three tasks of DDATD. The framework consists of three components. <i>Component I</i> (C1) trains a GAN model on the reference dataset, learning to reconstruct normal spots from their multimodal representations of both spatial transcriptomics data and associated histology image. Subsequently, the model is applied on the target datasets to identify anomalous spots as those with unexpectedly large reconstruction deviances, namely anomaly scores. <i>Component II</i> (C2) aims at diminishing the non-biological variations (e.g. batch effects) among anomalies via aligning target datasets in a common space. It employs two cooperative GAN models to identify pairs of reference and target spots that share similar biological contents, based on which the target datasets are aligned to the reference data space via “style-transfer”. <i>Component III</i> (C3) fuses the embeddings and reconstruction residuals of aligned anomalous spots to serve as inputs to an iterative clustering algorithm which groups anomalies into distinct subtypes. 
 
 
 ## Dependencies
