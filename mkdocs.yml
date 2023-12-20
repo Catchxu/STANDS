@@ -1,0 +1,92 @@
+site_name: STANDS
+site_url: https://Catchxu.github.io/STANDS/
+site_author: Kaichen Xu
+
+repo_name: Catchxu/STANDS
+repo_url: https://github.com/Catchxu/STANDS
+
+theme:
+    name: "material"
+    features:
+      - announce.dismiss
+      - content.action.edit
+      - content.action.view
+      - content.code.annotate
+      - content.code.copy
+      - content.tooltips
+      - navigation.footer
+      - navigation.indexes
+      - navigation.sections
+      - navigation.tabs
+      - navigation.top
+      - navigation.tracking
+      - search.highlight
+      - search.share
+      - search.suggest
+      - toc.follow
+    favicon: 'images/favicon.ico'
+    palette:
+      - scheme: default
+        primary: black
+        accent: deep orange
+        toggle:
+          icon: material/brightness-7
+          name: Switch to dark mode
+      - scheme: slate
+        primary: black
+        accent: deep orange
+        toggle:
+          icon: material/brightness-4
+          name: Switch to light mode
+    font:
+      text: Roboto
+      code: Roboto Mono
+    language: 'en'
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:materialx.emoji.twemoji
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+
+nav:
+  - 'Home': 'index.md'

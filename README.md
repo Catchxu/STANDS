@@ -7,7 +7,7 @@ their compositional heterogeneities across multi-sample spatial transcriptomics 
 ## Outline of DDATD
 <br/>
 <div align=center>
-<img src="image/DDATD.png" width="70%">
+<img src="/docs/images/DDATD.png" width="70%">
 </div>
 <br/>
 
@@ -17,7 +17,7 @@ The accurate detection of anomalous anatomic regions, followed by their dissecti
 ## Framework of STANDS
 <br/>
 <div align=center>
-<img src="image/STANDS.png" width="70%">
+<img src="/docs/images/STANDS.png" width="70%">
 </div>
 <br/>
 
@@ -48,9 +48,12 @@ python3 setup.py install --user
 
 ## Tested environment
 - CPU: Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz
-- Memory: 256 GB
+- CPU Memory: 256 GB
+- GPU: NVIDIA GeForce RTX 3090
+- GPU Memory: 24 GB
 - System: Ubuntu 20.04.5 LTS
 - Python: 3.9.15
+
 
 ## Citation
 Coming soon.
