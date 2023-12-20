@@ -9,12 +9,13 @@ import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri, numpy2ri
 from rpy2.robjects.conversion import localconverter
 from typing import Optional, Literal, Sequence
+from SGD import *
 
 
 
 metrics_list = Literal[
     'AUC', 'Precision', 'Recall', 'F1', 'ARI', 'NMI',
-    'ASW_type', '1-ASW_batch', 'BatchKL', 'iLISI', 'cLISI'
+    'ASW_type', '1-ASW_batch', 'BatchKL', 'iLISI', 'cLISI','SGD_degree','SGD_cc'
 ]
 
 def evaluate(metrics: Sequence[metrics_list],
@@ -63,7 +64,9 @@ def evaluate(metrics: Sequence[metrics_list],
         '1-ASW_batch': eval_ASW_batch,
         'BatchKL': eval_BatchKL,
         'iLISI': eval_iLISI,
-        'cLISI': eval_cLISI
+        'cLISI': eval_cLISI,
+        'SGD_degree': eval_SGD_degree,
+        'SGD_cc': eval_SGD_cc
     }
 
     result = []
@@ -182,4 +185,23 @@ def eval_cLISI(data):
     ''')
     clisi = ro.r['LISI'](emb, meta)
     return np.asarray(clisi)[0]
+
+def eval_SGD_degree(adata):
+    g_pred_list,g_truth_list = Build_SGD_graph(adata,n_neighbors = 6,spa_key = 'spatial')
+
+    evaluator = SGDEvaluator(adata,n_neighbors = 6,spa_key = 'spatial')
+
+    SGD_degree  = evaluator.evaluate_sgd(g_pred_list,g_truth_list,metric = 'degree')
+    
+    return SGD_degree
+    
+    
+def eval_SGD_cc(adata):
+    g_pred_list,g_truth_list = Build_SGD_graph(adata,n_neighbors = 6,spa_key = 'spatial')
+
+    evaluator = SGDEvaluator(adata,n_neighbors = 6,spa_key = 'spatial')
+
+    SGD_degree  = evaluator.evaluate_sgd(g_pred_list,g_truth_list,metric = 'cc')
+    
+    return SGD_cc
 
