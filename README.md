@@ -37,23 +37,9 @@ STANDS is an innovative framework built on a suite of specialized Generative Adv
 
 
 
-## Dependencies
-- torch==1.13.0
-- dgl==1.1.1
-- torchvision==0.14.1
-- anndata==0.10.3
-- numpy==1.19.2
-- scanpy==1.9.6
-- scipy==1.9.3
-- sklearn==0.0.post2
-- pandas==1.5.2
-- squidpy==1.2.2
-- setuptools==59.5.0
-
-
-
-
 ## Installation
+STANDS is developed as a Python package. You will need to install Python, and the recommended version is Python 3.9.5.
+
 You can download the package from GitHub and install it locally:
 
 ```commandline
@@ -65,13 +51,8 @@ python3 setup.py install --user
 
 
 
-## Tested environment
-- CPU: Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz
-- CPU Memory: 256 GB
-- GPU: NVIDIA GeForce RTX 3090
-- GPU Memory: 24 GB
-- System: Ubuntu 20.04.5 LTS
-- Python: 3.9.15
+## How to use the package
+Please see https://Catchxu.github.io/STANDS/ for online documentation and tutorials in how to use the package.
 
 
 
