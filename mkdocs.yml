@@ -89,5 +89,6 @@ plugins:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
 
 nav:
-  - 'Home': 'index.md'
-  - 'Installation': 'installation.md'
+  - 'Home': 
+    - 'Home': 'index.md'
+    - 'Getting Started': 'start.md'
