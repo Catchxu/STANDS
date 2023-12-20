@@ -1,4 +1,4 @@
-STANDS is a powerful documentation framework to detect, align and subtyping anomalous tissue domains across multiple samples. 
+STANDS is a powerful documentation framework to detect, align and subtyping anomalous tissue domains across multiple samples. In the subsequent sections, we will introduce the preparatory tasks before utilizing STANDS for your research, including the installation of Python packages, downloading of datasets, and other related procedures.
 
 
 
