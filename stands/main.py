@@ -10,6 +10,7 @@ from typing import Optional, Dict, Any
 
 from .model import GeneratorAD, GeneratorPair, GeneratorBC
 from .model import Discriminator
+from .model import GMMWithPrior
 from ._utils import seed_everything, calculate_gradient_penalty
 
 
@@ -126,24 +127,14 @@ class ADNet:
         self.D.eval()
         tqdm.write('Detect anomalous spots on test dataset...')
     
-        # calucate anomaly score
-        dis = []
-        for _, _, blocks in dataset:
-            # get real data from blocks
-            real_g = blocks[0].srcdata['gene']
-            real_p = blocks[1].srcdata['patch'] if self.use_img else None
-            _, fake_g, fake_p = self.G(blocks, real_g, real_p)
-
-            d = self.D(fake_g, fake_p)
-            dis.append(d.cpu().detach())
-
-        # Normalize anomaly scores
-        dis = torch.mean(torch.cat(dis, dim=0), dim=1).numpy()
-        # dis = torch.max(torch.cat(dis, dim=0), dim=1).values.numpy()
-        score = (dis.max() - dis)/(dis.max() - dis.min())
+        ref_score = self.score(self.dataset)
+        tgt_score = self.score(dataset)
+        gmm = GMMWithPrior(ref_score, tol=0.00001)
+        threshold = gmm.fit(tgt_score=tgt)
+        tgt_label = [1 if s >= threshold else 0 for s in tgt_score]
 
         tqdm.write('Anomalous spots have been detected.\n')
-        return list(score.reshape(-1))
+        return tgt_score, tgt_label
 
     @torch.no_grad()
     def prepare(self, weight_dir: Optional[str]):
@@ -224,6 +215,26 @@ class ADNet:
 
         # updating memory block with generated embeddings, fake_z
         self.G.Memory.update_mem(real_z)
+    
+    def score(self, dataset):
+        # calucate anomaly score
+        dis = []
+        for _, _, blocks in dataset:
+            # get real data from blocks
+            real_g = blocks[0].srcdata['gene']
+            real_p = blocks[1].srcdata['patch'] if self.use_img else None
+            _, fake_g, fake_p = self.G(blocks, real_g, real_p)
+
+            d = self.D(fake_g, fake_p)
+            dis.append(d.cpu().detach())
+
+        # Normalize anomaly scores
+        dis = torch.mean(torch.cat(dis, dim=0), dim=1).numpy()
+        # dis = torch.max(torch.cat(dis, dim=0), dim=1).values.numpy()
+        score = (dis.max() - dis)/(dis.max() - dis.min())
+
+        score = list(score.reshape(-1))
+        return score
 
 
 
