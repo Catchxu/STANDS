@@ -39,9 +39,6 @@ class MemoryBlock(nn.Module):
 
     def forward(self, x):
         att_weight = torch.mm(x, self.mem.T)
-        # filter_value = -float('Inf')
-        # indices_to_remove = att_weight < torch.topk(att_weight, k=20, dim=-1)[0][..., -1, None]
-        # att_weight[indices_to_remove] = filter_value
         att_weight = F.softmax(att_weight/self.tem, dim=1)
 
         # ReLU based shrinkage, hard shrinkage for positive value
@@ -53,9 +50,12 @@ class MemoryBlock(nn.Module):
         return output
 
 
-class Attention(nn.Module):
-    def __init__(self, d_model, attention_dropout=0.1):
+class MultiHeadAttention(nn.Module):
+    def __init__(self, d_model, num_heads, attention_dropout=0.1):
         super().__init__()
+        self.num_heads = num_heads
+        self.head_dim = d_model // num_heads
+
         self.dropout = nn.Dropout(attention_dropout)
         self.norm = nn.LayerNorm(d_model)
 
@@ -65,29 +65,49 @@ class Attention(nn.Module):
 
         self.out_projection = nn.Linear(d_model, d_model)
     
+    def split_heads(self, x, batch_size):
+        return x.view(batch_size, self.num_heads, self.head_dim)
+
     def cos_score(self, q, k):
-        norm_q = torch.norm(q, dim=1).unsqueeze(-1)
-        norm_k = torch.norm(k, dim=1).unsqueeze(-1)
-        return torch.matmul(q, k.transpose(-1,1)) / (norm_q * norm_k)
+        norm_q = torch.norm(q, dim=-1, keepdim=True)
+        norm_k = torch.norm(k, dim=-1, keepdim=True)
+        q_normalized = q / norm_q
+        k_normalized = k / norm_k
+
+        dot_product = torch.matmul(q_normalized, k_normalized.transpose(-1, -2))
+        scale = q.size(-1)
+        cosine_similarity = dot_product / scale
+        return cosine_similarity
 
     def forward(self, q, k, v):
-        q = self.query_projection(q).unsqueeze(-1)
-        k = self.key_projection(k).unsqueeze(-1)
-        v = self.value_projection(v).unsqueeze(-1)
+        batch_size = q.size(0)
+
+        out_q = q = self.query_projection(q)
+        k = self.key_projection(k)
+        v = self.value_projection(v)
+
+        q = self.split_heads(q, batch_size)
+        k = self.split_heads(k, batch_size)
+        v = self.split_heads(v, batch_size)
+
         s = self.dropout(self.cos_score(q, k))
-        out = torch.matmul(s, v).squeeze(-1)
-        return self.norm(q.squeeze(-1) + self.out_projection(out))
+        out = torch.matmul(s, v)
+
+        out = out.transpose(1, 2).contiguous().view(batch_size, self.num_heads * self.head_dim)
+        out = self.out_projection(out)
+
+        return self.norm(out_q + out)
 
 
 class TFBlock(nn.Module):
-    def __init__(self, d_model):
+    def __init__(self, d_model, num_heads=4):
         super().__init__()
-        self.g_attn = Attention(d_model=d_model)
-        self.p_attn = Attention(d_model=d_model)
+        self.attn = MultiHeadAttention(d_model*2, num_heads)
 
     def forward(self, z_g, z_p):
-        z_g = self.g_attn(z_g, z_p, z_p)
-        z_p = self.p_attn(z_p, z_g, z_g)
+        z = torch.concat([z_g, z_p], dim=-1)
+        z = self.attn(z, z, z)
+        z_g, z_p = torch.chunk(z, 2, dim = -1)
         return z_g, z_p
 
 
