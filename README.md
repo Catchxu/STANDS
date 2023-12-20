@@ -51,7 +51,7 @@ python3 setup.py install --user
 
 
 
-## How to use the package
+## Getting Started
 Please see https://Catchxu.github.io/STANDS/ for online documentation and tutorials in how to use the package.
 
 

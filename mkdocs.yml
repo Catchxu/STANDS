@@ -91,4 +91,4 @@ plugins:
 nav:
   - 'Home': 
     - 'Home': 'index.md'
-    - 'Getting Started': 'start.md'
+    - 'Preparation': 'start.md'
