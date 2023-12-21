@@ -99,9 +99,7 @@ markdown_extensions:
 plugins:
   - autorefs
   - markdown-exec
-  - git-committers:
-      enabled: !ENV [DEPLOY, false]
-      repository: STANDS
+  - git-revision-date-localized
   - minify:
       minify_html: !ENV [DEPLOY, false]
   - search:
@@ -120,14 +118,14 @@ plugins:
           - https://mkdocstrings.github.io/autorefs/objects.inv
           paths: [src]
           options:
+            docstring_options:
+              ignore_init_summary: true
             allow_inspection: false
             show_source: true
             docstring_section_style: table
-            filters: ["!^_"]
             heading_level: 1
             inherited_members: true
             merge_init_into_class: true
-            preload_modules: [mkdocstrings]
             separate_signature: true
             show_root_heading: true
             show_root_full_path: false
@@ -136,7 +134,6 @@ plugins:
             show_symbol_type_toc: true
             signature_crossrefs: true
             summary: true
-            unwrap_annotated: true
             docstring_style: google
 
 extra:

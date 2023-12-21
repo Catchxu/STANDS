@@ -1,5 +1,3 @@
-"""Generate the code reference pages and navigation."""
-
 from pathlib import Path
 
 import mkdocs_gen_files
@@ -11,7 +9,7 @@ src = Path(__file__).parent.parent / "src"
 
 for path in sorted(src.rglob("*.py")):
     module_path = path.relative_to(src).with_suffix("")
-    doc_path = path.relative_to(src / "stands").with_suffix(".md")
+    doc_path = path.relative_to(src).with_suffix(".md")
     full_doc_path = Path("reference", doc_path)
 
     parts = tuple(module_path.parts)
