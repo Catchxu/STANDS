@@ -1,9 +1,16 @@
 site_name: STANDS
 site_url: https://Catchxu.github.io/STANDS/
 site_author: Kaichen Xu
-
+copyright: Copyright &copy; 2023 Kaichen Xu
 repo_name: Catchxu/STANDS
 repo_url: https://github.com/Catchxu/STANDS
+
+nav:
+  - Home: 
+    - Home: index.md
+    - Preparation: start.md
+    - License: license.md
+  - API Reference: reference/
 
 theme:
     name: "material"
@@ -42,6 +49,11 @@ theme:
       text: Roboto
       code: Roboto Mono
     language: 'en'
+
+extra_css:
+  - css/material.css
+  - css/mkdocstrings.css
+  - css/insiders.css
 
 markdown_extensions:
   - abbr
@@ -85,10 +97,49 @@ markdown_extensions:
   - pymdownx.tilde
 
 plugins:
+  - autorefs
+  - markdown-exec
+  - git-committers:
+      enabled: !ENV [DEPLOY, false]
+      repository: STANDS
+  - minify:
+      minify_html: !ENV [DEPLOY, false]
   - search:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - gen-files:
+      scripts:
+      - scripts/gen_ref_nav.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      handlers:
+        python:
+          import:
+          - https://docs.python.org/3/objects.inv
+          - https://installer.readthedocs.io/en/stable/objects.inv  # demonstration purpose in the docs
+          - https://mkdocstrings.github.io/autorefs/objects.inv
+          paths: [src]
+          options:
+            allow_inspection: false
+            show_source: true
+            docstring_section_style: table
+            filters: ["!^_"]
+            heading_level: 1
+            inherited_members: true
+            merge_init_into_class: true
+            preload_modules: [mkdocstrings]
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            signature_crossrefs: true
+            summary: true
+            unwrap_annotated: true
+            members: true
 
-nav:
-  - 'Home': 
-    - 'Home': 'index.md'
-    - 'Preparation': 'start.md'
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Catchxu
