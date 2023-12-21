@@ -137,7 +137,7 @@ plugins:
             signature_crossrefs: true
             summary: true
             unwrap_annotated: true
-            members: true
+            docstring_style: google
 
 extra:
   social:

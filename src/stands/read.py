@@ -3,7 +3,7 @@ import numpy as np
 import scanpy as sc
 import anndata as ad
 from math import e
-from typing import Literal, Optional, List
+from typing import Literal, Optional, List, Dict, Tuple, Union
 
 from ._utils import seed_everything, clear_warnings
 from ._graph import BuildGraph, BuildMultiGraph
@@ -89,6 +89,29 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
                ref: Optional[ad.AnnData] = None, tgt: Optional[ad.AnnData] = None, spa_key: str = 'spatial',
                preprocess: bool = True, n_genes: int = 3000, patch_size: Optional[int] = None,
                n_neighbors: int = 4, return_type: Literal['anndata', 'graph'] = 'graph', **kwargs):
+    """
+    Read spatial data from two sources and preprocess if required.
+
+    Parameters:
+        ref_dir (Optional[str]): Directory path for the reference spatial data.
+        tgt_dir (Optional[str]): Directory path for the target spatial data.
+        ref_name (Optional[str]): Name of the reference spatial data.
+        tgt_name (Optional[str]): Name of the target spatial data.
+        ref (Optional[ad.AnnData]): Reference AnnData object.
+        tgt (Optional[ad.AnnData]): Target AnnData object.
+        spa_key (str): Key for spatial information in AnnData objects.
+        preprocess (bool): Perform data preprocessing.
+        n_genes (int): Number of genes for feature selection.
+        patch_size (Optional[int]): Patch size for H&E images.
+        n_neighbors (Optional[int]): Number of neighbors for spatial data reading.
+        return_type (Literal['anndata', 'graph']): Type of data to return.
+
+    Other Parameters:
+        train_mode (bool): Whether to use train mode with data augmentation.
+
+    Returns:
+        (Union[Tuple, Dict]): Depending on the 'return_type', returns either a tuple of AnnData objects or a dictionary of graph-related data.
+    """
     seed_everything(0)
 
     ref, ref_img, ref_pos = read(ref_dir, ref_name, ref, False, 'multi',
@@ -120,8 +143,10 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
         if patch_size is None:
             patch_size = set_patch(ref)
 
-        ref_b = BuildGraph(ref, ref_img, ref_pos, patch_size=patch_size, **kwargs)
-        tgt_b = BuildGraph(tgt, tgt_img, tgt_pos, patch_size=patch_size, **kwargs)
+        ref_b = BuildGraph(ref, ref_img, ref_pos, patch_size=patch_size,
+                           n_neighbors=n_neighbors, **kwargs)
+        tgt_b = BuildGraph(tgt, tgt_img, tgt_pos, patch_size=patch_size,
+                           n_neighbors=n_neighbors, **kwargs)
         return ref_b.pack(), tgt_b.pack()
 
 
@@ -130,6 +155,26 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
                adata: Optional[List[ad.AnnData]] = None, patch_size: Optional[int] = None,
                preprocess: bool = True, n_genes: int = 3000, n_neighbors: int = 4,
                return_type: Literal['anndata', 'graph'] = 'graph', spa_key: str = 'spatial', **kwargs):
+    """
+    Read and preprocess multiple spatial datasets.
+
+    Parameters:
+        input_dir (Optional[str]): Directory path for spatial data.
+        data_name (Optional[List[str]]): List of names for spatial datasets.
+        adata (Optional[List[ad.AnnData]]): List of AnnData objects.
+        patch_size (Optional[int]): Patch size for H&E images.
+        preprocess (bool): Perform data preprocessing.
+        n_genes (int): Number of genes for feature selection.
+        n_neighbors (int): Number of neighbors for spatial data reading.
+        return_type (Literal['anndata', 'graph']): Type of data to return.
+        spa_key (str): Key for spatial information in AnnData objects.
+    
+    Other Parameters:
+        train_mode (bool): Whether to use train mode with data augmentation.
+
+    Returns:
+        (Union[List, Dict]): Depending on the 'return_type', returns either a list of AnnData objects or a dictionary of graph-related data.
+    """
     seed_everything(0)
 
     # initialize dataname when 'data_name = None'
@@ -170,7 +215,7 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
         if patch_size is None:
             patch_size = set_patch(adatas[0])
 
-        builder = BuildMultiGraph(adatas, images, positions,
+        builder = BuildMultiGraph(adatas, images, positions, n_neighbors=n_neighbors,
                                   patch_size=patch_size, **kwargs)
         return builder.pack()
 

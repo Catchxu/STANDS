@@ -21,6 +21,21 @@ def pretrain(input_dir: str, data_name: List[str],
              random_state: int = None,
              weight_dir: Optional[str] = None,
              ):
+    """
+    Pretrain STNet model using spatial data.
+    After the completion of pre-training, the weights will be automatically saved.
+
+    Parameters:
+        input_dir (str): Directory path for the input spatial data.
+        data_name (List[str]): List of names of spatial data.
+        n_epochs (int): Number of training epochs.
+        patch_size (Optional[int]): Patch size for H&E images.
+        batch_size (int): Batch size for training.
+        learning_rate (float): Learning rate for the optimizer.
+        GPU (bool): Whether to use GPU for training.
+        random_state (int): Random seed for reproducibility.
+        weight_dir (Optional[str]): Directory path to save the pretrained model weights.
+    """
     if GPU:
         if torch.cuda.is_available():
             device = torch.device("cuda:0")
