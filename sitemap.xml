@@ -16,62 +16,62 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/</loc>
-         <lastmod>2023-12-21</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://Catchxu.github.io/STANDS/reference/SUMMARY/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/main/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/pretrain/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/main/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/read/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/pretrain/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/evaluate/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/read/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/evaluate/SGD/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/evaluate/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/evaluate/evaluate/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/evaluate/SGD/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/model/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/evaluate/evaluate/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/model/GMM/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/model/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/model/discriminator/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/model/GMM/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://Catchxu.github.io/STANDS/reference/model/generator/</loc>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/model/discriminator/</loc>
+         <lastmod>2023-12-21</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://Catchxu.github.io/STANDS/reference/stands/model/generator/</loc>
          <lastmod>2023-12-21</lastmod>
          <changefreq>daily</changefreq>
     </url>
