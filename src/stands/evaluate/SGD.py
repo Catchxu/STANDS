@@ -1,16 +1,14 @@
 import dgl
 import torch
 import numpy as np
-import pandas as pd
 import networkx as nx
 import pyemd
-import sys
-from functools import partial
 from scipy.linalg import toeplitz
 from sklearn.neighbors import NearestNeighbors
 import itertools
 import math
 import pulp
+import anndata as ad
 
 
 def disc(samples1, samples2, kernel, *args, **kwargs):
@@ -193,14 +191,14 @@ def get_assigned_values(sgd_matrix,assignment_matrix):
     return assigned_values
 
 class Build_SGD_graph:
-    def __init__(self,adata:ad.AnnData,n_neighbors,spa_key: str = 'spatial'):
+    def __init__(self,adata:ad.AnnData, n_neighbors, spa_key: str = 'spatial'):
         self.adata = adata
         self.position = adata.obsm[spa_key]
         self.n_neighbors = n_neighbors 
         self.typeid_list = sorted(adata.obs['typeid'].unique())
         self.clustid_list = sorted(adata.obs['clustid'].unique())
         
-        
+
     def get_edge(self):
         nbrs = NearestNeighbors(n_neighbors = self.n_neighbors+1)
         nbrs.fit(self.position)   
@@ -246,7 +244,6 @@ class Build_SGD_graph:
             classification_data_list.append(mapping[classification])
         return torch.tensor(classification_data_list,dtype = torch.long)
     
-            
     def remove_edges(self, g):
         edges_to_remove = []
         for edge in zip(*g.edges()):
@@ -320,8 +317,8 @@ class Build_SGD_graph:
         return predicted_graph_list, g_truth_list
     
 class SGDEvaluator:
-    def __init__(self,adata,n_neighbors,spa_key = 'spatial'):
-        self.build_graph_sgd = Build_SGD_graph(adata,n_neighbors,spa_key)
+    def __init__(self, adata, n_neighbors, spa_key = 'spatial'):
+        self.build_graph_sgd = Build_SGD_graph(adata, n_neighbors, spa_key)
         self.predicted_graph_list = []
         self.g_truth_list = []
     

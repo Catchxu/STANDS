@@ -8,7 +8,7 @@ from tqdm import tqdm
 from typing import List, Optional
 
 from .model import STNet
-from .read import read_multi
+from ._read import read_multi
 from ._utils import seed_everything
 
 

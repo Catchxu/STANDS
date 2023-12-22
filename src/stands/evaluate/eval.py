@@ -1,4 +1,3 @@
-import scib
 import numpy as np
 import pandas as pd
 import anndata as ad
@@ -8,32 +7,75 @@ from sklearn.neighbors import NearestNeighbors
 import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri, numpy2ri
 from rpy2.robjects.conversion import localconverter
-from typing import Optional, Literal, Sequence
-from SGD import *
+from typing import Optional, Literal, Sequence, Union, Tuple
+from SGD import Build_SGD_graph, SGDEvaluator
 
 
 
 metrics_list = Literal[
-    'AUC', 'Precision', 'Recall', 'F1', 'ARI', 'NMI',
-    'ASW_type', '1-ASW_batch', 'BatchKL', 'iLISI', 'cLISI','SGD_degree','SGD_cc'
+    'AUC', 'Precision', 'Recall', 'F1', 'SGD_degree','SGD_cc'
+    'ARI', 'NMI', 'ASW_type', '1-ASW_batch', 'BatchKL', 'iLISI', 'cLISI',
 ]
 
 def evaluate(metrics: Sequence[metrics_list],
-             y_true=None, y_score=None, adata: Optional[ad.AnnData]=None,
+             y_true=None, y_score=None, y_pred=None,
+             adata: Optional[ad.AnnData]=None,
              batchid: Optional[str]=None, typeid: Optional[str]=None,
-             emb: Optional[str] = None, clustid: Optional[str] = None):
-    """calculate evaluation metrics"""
-    if (y_true is not None) and(y_score is not None):
+             emb: Optional[str] = None, clustid: Optional[str] = None,
+             spaid: Optional[str] = None, **kwargs):
+    """
+    Evaluate performance metrics based on specified evaluation metrics.
+    Different metrics require different parameters.
+    Here is a description of the metrics that can be calculated and the parameters they require.
+
+    Methods:
+        AUC: y_true, y_pred/y_score
+        Precision: y_true, y_pred/y_score
+        Recall: y_true, y_pred/y_score
+        F1: y_true, y_pred/y_score
+        SGD_degree: 
+        SGD_cc: 
+        ARI: adata, typeid, clustid, (Optional: emb)
+        NMI: adata, typeid, clustid, (Optional: emb)
+        ASW_type: adata, typeid, (Optional: emb)
+        1-ASW_batch: adata, typeid, batchid, (Optional: emb)
+        BatchKL: adata, batchid, (Optional: emb)
+        iLISI: adata, batchid, (Optional: emb)
+        cLISI: adata, typeid, (Optional: emb)
+
+    Parameters:
+        metrics (Sequence[str]): List of evaluation metrics to compute.
+        y_true (Optional[Union[pd.Series, np.ndarray]]): True labels.
+        y_score (Optional[Union[pd.Series, np.ndarray]]): Predicted scores or probabilities.
+        y_pred (Optional[Union[pd.Series, np.ndarray]]): Predicted labels.
+        adata (Optional[ad.AnnData]): Annotated data containing embeddings or clusters.
+        batchid (Optional[str]): Batch ID key in adata.obs for batch information.
+        typeid (Optional[str]): Type ID key in adata.obs for type information.
+        emb (Optional[str]): Key for embeddings in adata.obsm.
+        clustid (Optional[str]): Cluster ID key in adata.obs for clustering information.
+        spaid (Optional[str]): Spatial coordinates ID key in adata.obsm (for SGD_degree and SGD_cc metrics).
+
+    Returns:
+        (Union[Tuple, float]): Depending on the number of specified metrics, returns a tuple of metric values or a single metric value.
+    """
+    if (y_true is not None) and (y_score is not None):
         y_true = pd.Series(y_true)
         y_score = pd.Series(y_score)
 
-        ratio = 100.0 * len(np.where(y_true == 0)[0]) / len(y_true)
-        thres = np.percentile(y_score, ratio)
-        y_pred = (y_score >= thres).astype(int)
-        y_true = y_true.astype(int)
+        if y_pred is None:
+            ratio = 100.0 * len(np.where(y_true == 0)[0]) / len(y_true)
+            thres = np.percentile(y_score, ratio)
+            y_pred = (y_score >= thres).astype(int)
+            y_true = y_true.astype(int)
 
         data = {'y_true': y_true, 'y_score': y_score, 'y_pred': y_pred}
-    
+
+        # for SGD_degree and SGD_cc metrics
+        if adata is not None:
+            data.update({'adata': adata})
+        if spaid is not None:
+            data.update({'spa_key': spaid})
+
     elif adata is not None:
         if emb is None:
             sc.tl.tsne(adata, random_state=0, use_fast_tsne=False)
@@ -71,7 +113,10 @@ def evaluate(metrics: Sequence[metrics_list],
 
     result = []
     for m in metrics:
-        r = method[m](data)
+        if m in ['SGD_degree','SGD_cc']:
+            r = method[m](data, **kwargs)
+        else:
+            r = method[m](data)
         result.append(r)
 
     if len(result) >= 2:
@@ -173,35 +218,39 @@ def eval_iLISI(data):
 
 def eval_cLISI(data):
     with localconverter(pandas2ri.converter + numpy2ri.converter):
-        obs_df = pd.DataFrame(data['celltype'], columns=['celltype'])
+        obs_df = pd.DataFrame(data['type'], columns=['type'])
         meta = ro.conversion.get_conversion().py2rpy(obs_df)
         emb = ro.conversion.get_conversion().py2rpy(data['correct'])
 
     ro.r('''
     LISI <- function(emb,meta){
-        index <- lisi::compute_lisi(emb, meta, c("celltype"))
-        return(median(index$celltype))
+        index <- lisi::compute_lisi(emb, meta, c("type"))
+        return(median(index$type))
     }
     ''')
     clisi = ro.r['LISI'](emb, meta)
     return np.asarray(clisi)[0]
 
-def eval_SGD_degree(adata):
-    g_pred_list,g_truth_list = Build_SGD_graph(adata,n_neighbors = 6,spa_key = 'spatial')
+def eval_SGD_degree(data, **kwargs):
+    g_pred_list, g_truth_list = Build_SGD_graph(
+        data['adata'], spa_key = data['spaid'], **kwargs)
 
-    evaluator = SGDEvaluator(adata,n_neighbors = 6,spa_key = 'spatial')
+    evaluator = SGDEvaluator(
+        data['adata'], n_neighbors = 6, spa_key = data['spaid'], **kwargs)
 
-    SGD_degree  = evaluator.evaluate_sgd(g_pred_list,g_truth_list,metric = 'degree')
+    SGD_degree  = evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'degree')
     
     return SGD_degree
     
     
-def eval_SGD_cc(adata):
-    g_pred_list,g_truth_list = Build_SGD_graph(adata,n_neighbors = 6,spa_key = 'spatial')
+def eval_SGD_cc(data, **kwargs):
+    g_pred_list,g_truth_list = Build_SGD_graph(
+        data['adata'], spa_key = data['spaid'], **kwargs)
 
-    evaluator = SGDEvaluator(adata,n_neighbors = 6,spa_key = 'spatial')
+    evaluator = SGDEvaluator(
+        data['adata'], spa_key = data['spaid'], **kwargs)
 
-    SGD_degree  = evaluator.evaluate_sgd(g_pred_list,g_truth_list,metric = 'cc')
+    SGD_cc  = evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'cc')
     
     return SGD_cc
 

@@ -42,9 +42,30 @@ def set_patch(adata: ad.AnnData):
 @clear_warnings
 def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
          adata: Optional[ad.AnnData] = None, preprocess: bool = True,
-         return_type: Literal['anndata', 'graph', 'multi'] = 'graph',
+         return_type: Literal['anndata', 'graph', 'tuple'] = 'graph',
          n_genes: int = 3000, n_neighbors: int = 4, spa_key: str = 'spatial',
-         patch_size: Optional[int] = None, train_mode: bool = True):
+         patch_size: Optional[int] = None, **kwargs):
+    """
+    Read single spatial data and preprocess if required.
+    The read data are transformed to one graph.
+
+    Parameters:
+        data_dir (Optional[str]): Directory path for the spatial data.
+        data_name (Optional[str]): Name of the spatial data.
+        adata (Optional[ad.AnnData]): AnnData object.
+        spa_key (str): Key for spatial information in AnnData objects.
+        preprocess (bool): Perform data preprocessing.
+        n_genes (int): Number of genes for feature selection.
+        patch_size (Optional[int]): Patch size for H&E images.
+        n_neighbors (Optional[int]): Number of neighbors for spatial data reading.
+        return_type (Literal['anndata', 'graph', 'tuple']): Type of data to return.
+
+    Other Parameters:
+        train_mode (bool): Whether to use train mode with data augmentation.
+
+    Returns:
+        (Union[ad.AnnData, Tuple, Dict]): Depending on the 'return_type', returns either a tuple of AnnData objects or a dictionary of graph-related data.
+    """
     seed_everything(0)
 
     if adata is None:
@@ -69,7 +90,7 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
 
         return adata
 
-    elif return_type == 'multi':
+    elif return_type == 'tuple':
 
         return adata, image, position
 
@@ -79,7 +100,7 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
             patch_size = set_patch(adata)
 
         builder = BuildGraph(adata, image, position, n_neighbors,
-                             patch_size, train_mode)
+                             patch_size, **kwargs)
         return builder.pack()
 
 
@@ -91,6 +112,7 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
                n_neighbors: int = 4, return_type: Literal['anndata', 'graph'] = 'graph', **kwargs):
     """
     Read spatial data from two sources and preprocess if required.
+    The read data are transformed to reference and target graph.
 
     Parameters:
         ref_dir (Optional[str]): Directory path for the reference spatial data.
@@ -157,6 +179,7 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
                return_type: Literal['anndata', 'graph'] = 'graph', spa_key: str = 'spatial', **kwargs):
     """
     Read and preprocess multiple spatial datasets.
+    All the datasets are transformed to only one graph.
 
     Parameters:
         input_dir (Optional[str]): Directory path for spatial data.
