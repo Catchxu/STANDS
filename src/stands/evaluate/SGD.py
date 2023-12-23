@@ -9,7 +9,7 @@ import itertools
 import math
 import pulp
 import anndata as ad
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, List, Literal
 
 
 def disc(samples1, samples2, kernel, *args, **kwargs):
@@ -34,7 +34,6 @@ def gaussian_emd(x, y, sigma=1.0, distance_scaling=1.0):
     return np.exp(-emd * emd / (2 * sigma * sigma))
 
 def compute_mmd(samples1, samples2, kernel, is_hist=True, *args, **kwargs):
-
     # normalize histograms into pmf
     if is_hist:
         samples1 = [s1 / np.sum(s1) for s1 in samples1]
@@ -146,49 +145,6 @@ def get_distributions_for_subsets(predicted_graph, ground_truth_graph, bins=None
     
     return results
 
-## label mapping
-def solve_assignment_problems(distance_matrix):
-    
-    problem = pulp.LpProblem("Assignment Problem", pulp.LpMinimize)
-
-    rows = len(distance_matrix)
-    cols = len(distance_matrix[0])
-    x = [[pulp.LpVariable(f'x_{i}_{j}', cat='Binary') for j in range(cols)] for i in range(rows)]
-
-    # target function
-    problem += pulp.lpSum(distance_matrix[i][j] * x[i][j] for i in range(rows) for j in range(cols))
-
-    # constraints 
-    for i in range(rows):
-        problem += pulp.lpSum(x[i][j] for j in range(cols)) == 1  
-        
-    for j in range(cols):
-        problem += pulp.lpSum(x[i][j] for i in range(rows)) == 1
-
-    # CBC solver 
-    solver = pulp.PULP_CBC_CMD()
-    problem.solve(solver)
-
-    status = pulp.LpStatus[problem.status]
-
-    minimum_cost = pulp.lpSum(distance_matrix[i][j] * x[i][j].value() for i in range(rows) for j in range(cols))
-    assignment_matrix = [[x[i][j].value() for j in range(cols)] for i in range(rows)]
-            
-    return assignment_matrix
-
-def get_assigned_values(sgd_matrix,assignment_matrix):
-    assigned_values = []
-    for i,row in enumerate(assignment_matrix):
-        for j , assignment in enumerate(row):
-            if assignment == 1:
-                assigned_value = {
-                    f'truth_typeid_{i+1}':i,
-                    f'pred_clustid_{j+1}':j,
-                    'sgd_value':sgd_matrix[i][j]            
-                }
-                assigned_values.append(assigned_value)
-    return assigned_values
-
 
 
 
@@ -225,14 +181,14 @@ class Build_SGD_graph:
         Generate edges based on spatial positions.
 
         Returns:
-            Tuple: Two arrays representing source and destination nodes for edges.
+            (Tuple[np.ndarray]): Two arrays representing source and destination nodes for edges.
         """
         nbrs = NearestNeighbors(n_neighbors = self.n_neighbors + 1)
         nbrs.fit(self.position)   
-        _,indices = nbrs.kneighbors(self.position)
+        _, indices = nbrs.kneighbors(self.position)
         u = indices[:,0].repeat(self.n_neighbors)
         v = indices[:,1:].flatten()
-        return u,v
+        return u, v
 
     def get_anomaly(self, is_truth=True, typeid=None, binary_typeid=None):
         """
@@ -244,7 +200,7 @@ class Build_SGD_graph:
             binary_typeid (Optional[int]): Binary Type ID for filtering data.
 
         Returns:
-            torch.Tensor: Anomaly data as a tensor.
+            (torch.Tensor): Anomaly data as a tensor.
         """
         if is_truth:
             if typeid == 0:
@@ -269,7 +225,7 @@ class Build_SGD_graph:
             truth (int): Ground truth flag (1 for anomaly, 0 for normal).
 
         Returns:
-            str: Classification result (TP, FP, FN, or TN).
+            (str): Classification result (TP, FP, FN, or TN).
         """
         if pred == 1 and truth == 1:
             return 'TP'
@@ -285,11 +241,11 @@ class Build_SGD_graph:
         Get classification labels for nodes in predicted and ground truth graphs.
 
         Parameters:
-            pred_graph: Predicted graph.
-            truth_graph: Ground truth graph.
+            pred_graph (dgl.DGLGraph): Predicted graph.
+            truth_graph (dgl.DGLGraph): Ground truth graph.
 
         Returns:
-            torch.Tensor: Classification labels as a tensor.
+            (torch.Tensor): Classification labels as a tensor.
         """
         mapping = {'TP': 1, 'FP': 2, 'FN': 3, 'TN': 4}
         classification_data_list = []
@@ -307,7 +263,7 @@ class Build_SGD_graph:
         Remove edges from the graph based on anomaly information.
 
         Parameters:
-            g: Input graph.
+            g (dgl.DGLGraph): Input graph.
         """
         edges_to_remove = []
         for edge in zip(*g.edges()):
@@ -323,7 +279,7 @@ class Build_SGD_graph:
         Build graphs for predicted and ground truth labels.
 
         Returns:
-            List[dgl.DGLGraph]: List of DGLGraph objects representing the predicted and ground truth graphs.
+            (List[dgl.DGLGraph]): List of DGLGraph objects representing the predicted and ground truth graphs.
         """
         u, v = self.get_edge()
         
@@ -413,7 +369,20 @@ class SGDEvaluator:
         self.num_bootstrap_samples = num_bootstrap_samples
         self.sigma = sigma
     
-    def evaluate_sgd(self, g_pred_list, g_truth_list, metric='degree'):
+    def evaluate_sgd(self, g_pred_list: List[dgl.DGLGraph],
+                     g_truth_list: List[dgl.DGLGraph],
+                     metric: Literal['degree', 'cc']):
+        """
+        Evaluate SGD based on predicted and ground truth graphs.
+
+        Parameters:
+            g_pred_list (List[dgl.DGLGraph]): List of predicted DGLGraphs.
+            g_truth_list (List[dgl.DGLGraph]): List of ground truth DGLGraphs.
+            metric (Literal['degree', 'cc']): Metric to evaluate ('degree' or 'cc').
+
+        Returns:
+            (float): SGD score for the predicted and ground truth graphs.
+        """
         matrix_size = int(math.sqrt(len(g_pred_list)))
         sgd_matrix = [[0] * matrix_size for _ in range(matrix_size)]
 
@@ -462,9 +431,64 @@ class SGDEvaluator:
             
         
         if matrix_size == 1:
-            return [sgd]
-        
+            return sgd
         else:
-            assignment_matrix = solve_assignment_problems(sgd_matrix)
-            SGD_list = get_assigned_values(sgd_matrix, assignment_matrix)
-            return SGD_list
+            assignment_matrix = self.solve_assignment_problems(sgd_matrix)
+            SGD_list = self.get_assigned_values(sgd_matrix, assignment_matrix)
+            return np.average(SGD_list)
+    
+    def solve_assignment_problems(self, distance_matrix: List[List[float]]):
+        """
+        Solve the Assignment Problem using the CBC solver.
+
+        Parameters:
+            distance_matrix (List[List[float]]): Matrix representing the costs of assignments (distance).
+
+        Returns:
+            (List[List[int]]): Assignment matrix indicating optimal assignments.
+        """
+        problem = pulp.LpProblem("Assignment Problem", pulp.LpMinimize)
+
+        rows = len(distance_matrix)
+        cols = len(distance_matrix[0])
+        x = [[pulp.LpVariable(f'x_{i}_{j}', cat='Binary') for j in range(cols)] for i in range(rows)]
+
+        # target function
+        problem += pulp.lpSum(distance_matrix[i][j] * x[i][j] for i in range(rows) for j in range(cols))
+
+        # constraints 
+        for i in range(rows):
+            problem += pulp.lpSum(x[i][j] for j in range(cols)) == 1  
+        
+        for j in range(cols):
+            problem += pulp.lpSum(x[i][j] for i in range(rows)) == 1
+
+        # CBC solver 
+        solver = pulp.PULP_CBC_CMD()
+        problem.solve(solver)
+
+        status = pulp.LpStatus[problem.status]
+
+        minimum_cost = pulp.lpSum(distance_matrix[i][j] * x[i][j].value() for i in range(rows) for j in range(cols))
+        assignment_matrix = [[x[i][j].value() for j in range(cols)] for i in range(rows)]
+            
+        return assignment_matrix
+    
+    
+    def get_assigned_values(self, sgd_matrix: List[List[float]], assignment_matrix: List[List[int]]):
+        """
+        Get assigned values from the SGD matrix and assignment matrix.
+
+        Parameters:
+            sgd_matrix (List[List[float]]): Matrix of SGD values.
+            assignment_matrix (List[List[int]]): Assignment matrix indicating optimal assignments.
+
+        Returns:
+            (List[float]): List of dictionaries containing assigned values.
+        """
+        assigned_values = []
+        for i,row in enumerate(assignment_matrix):
+            for j, assignment in enumerate(row):
+                if assignment == 1:
+                    assigned_values.append(sgd_matrix[i][j])
+        return assigned_values

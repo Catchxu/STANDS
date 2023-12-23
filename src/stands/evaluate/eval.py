@@ -62,7 +62,7 @@ def evaluate(metrics: Sequence[metrics_list],
         sigma (int): Sigma parameter for Gaussian Earth Mover's Distance.
 
     Returns:
-        (Union[Tuple, float]): Depending on the number of specified metrics, returns a tuple of metric values or a single metric value.
+        (Union[Tuple[float], float]): Depending on the number of specified metrics, returns a tuple of metric values or a single metric value.
     
     Note:
         SGD_degree & SGD_cc are available for both anomaly detection and subtyping tasks. 

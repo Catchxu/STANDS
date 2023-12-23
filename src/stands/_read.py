@@ -178,7 +178,7 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
                preprocess: bool = True, n_genes: int = 3000, n_neighbors: int = 4,
                return_type: Literal['anndata', 'graph'] = 'graph', spa_key: str = 'spatial', **kwargs):
     """
-    Read and preprocess multiple spatial datasets.
+    Read multiple spatial datasets and preprocess if required.
     All the datasets are transformed to only one graph.
 
     Parameters:
