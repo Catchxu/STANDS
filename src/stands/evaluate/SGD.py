@@ -9,6 +9,7 @@ import itertools
 import math
 import pulp
 import anndata as ad
+from typing import Dict
 
 
 def disc(samples1, samples2, kernel, *args, **kwargs):
@@ -45,7 +46,6 @@ def compute_mmd(samples1, samples2, kernel, is_hist=True, *args, **kwargs):
 
 
 ## get graph stats 
-
 def calculate_degree_histogram(G,node_subset):
     degree = [G.degree(node) for node in node_subset]
     degree_hist = np.bincount(degree,minlength=G.number_of_nodes())
@@ -77,7 +77,6 @@ def dgl_to_nx(dgl_graph, include_classification=True):
 
 def get_distributions_for_subsets(predicted_graph, ground_truth_graph, bins=None,num_bootstrap_samples = None):
     results = {}
-    
 
     # predict node
     tp_fp_nodes_pred = [n for n, classif in predicted_graph.nodes(data='classification') if classif in [1, 2]]
@@ -190,39 +189,41 @@ def get_assigned_values(sgd_matrix,assignment_matrix):
                 assigned_values.append(assigned_value)
     return assigned_values
 
+
+
+
 class Build_SGD_graph:
-    def __init__(self,adata:ad.AnnData, n_neighbors, spa_key: str = 'spatial'):
-        self.adata = adata
-        self.position = adata.obsm[spa_key]
-        self.n_neighbors = n_neighbors 
-        self.typeid_list = sorted(adata.obs['typeid'].unique())
-        self.clustid_list = sorted(adata.obs['clustid'].unique())
-        
+    def __init__(self, data: Dict, n_neighbors: str = 6):
+        self.data = data['data']
+        self.position = data['spatial']
+        self.n_neighbors = n_neighbors
+        self.truth_list = np.unique(data['y_true'])
+        self.pred_list = np.unique(data['y_pred'])
 
     def get_edge(self):
-        nbrs = NearestNeighbors(n_neighbors = self.n_neighbors+1)
+        nbrs = NearestNeighbors(n_neighbors = self.n_neighbors + 1)
         nbrs.fit(self.position)   
         _,indices = nbrs.kneighbors(self.position)
         u = indices[:,0].repeat(self.n_neighbors)
         v = indices[:,1:].flatten()
         return u,v
-    
-    def get_anomaly(self,is_truth = True ,typeid=None,binary_typeid=None):
+
+    def get_anomaly(self, is_truth=True, typeid=None, binary_typeid=None):
         if is_truth:
             if typeid == 0:
-                anomaly_data = self.adata.obs['typeid'].astype(int)
+                anomaly_data = np.array(self.data['y_true']).astype(int)
             else:
-                anomaly_data = (self.adata.obs['typeid'] == binary_typeid).astype(int)
+                anomaly_data = np.array(self.data['y_true'] == binary_typeid).astype(int)
 
         else:
             if typeid == 0:
-                anomaly_data = self.adata.obs['clustid'].astype(int)
+                anomaly_data = np.array(self.data['y_pred']).astype(int)
             else:
-                anomaly_data = (self.adata.obs['clustid'] == binary_typeid).astype(int)
+                anomaly_data = np.array(self.data['y_pred'] == binary_typeid).astype(int)
             
         return torch.tensor(anomaly_data.values, dtype=torch.float32)
 
-    def classify_cells(self,pred,truth):
+    def classify_cells(self, pred: int, truth: int):
         if pred == 1 and truth == 1:
             return 'TP'
         elif pred == 1 and truth == 0:
@@ -232,15 +233,15 @@ class Build_SGD_graph:
         else:
             return 'TN'    
 
-    def get_classification(self,pred_graph,truth_graph):
+    def get_classification(self, pred_graph, truth_graph):
         mapping = {'TP': 1, 'FP': 2, 'FN': 3, 'TN': 4}
         classification_data_list = []
         
-        for pred_node,truth_node in zip(pred_graph.ndata['anomaly'],truth_graph.ndata['anomaly']):
+        for pred_node, truth_node in zip(pred_graph.ndata['anomaly'], truth_graph.ndata['anomaly']):
             pred = int(pred_node)
             truth = int(truth_node)
             
-            classification = self.classify_cells(pred,truth)
+            classification = self.classify_cells(pred, truth)
             classification_data_list.append(mapping[classification])
         return torch.tensor(classification_data_list,dtype = torch.long)
     
@@ -255,35 +256,34 @@ class Build_SGD_graph:
             g.remove_edges(edge_ids)
             
     def build_graph(self):
-        u,v = self.get_edge()
+        u, v = self.get_edge()
         
-        predicted_graph_list = []
+        g_pred_list = []
         g_truth_list = []
         
-        for typeid in self.typeid_list:
-            if typeid == 0 and len(set(self.typeid_list)) == 2:
-                
+        for typeid in self.truth_list:
+            if typeid == 0 and len(self.truth_list) == 2:
                 #ground truth
                 g_truth = dgl.graph((u,v))
                 g_truth = dgl.add_self_loop(g_truth)
-                g_truth.ndata['anomaly'] =  self.get_anomaly(is_truth = True,typeid = typeid)
-                g_truth.ndata['position'] = torch.tensor(self.position,dtype=torch.float32)
+                g_truth.ndata['anomaly'] =  self.get_anomaly(is_truth=True, typeid=typeid)
+                g_truth.ndata['position'] = torch.tensor(self.position, dtype=torch.float32)
                 self.remove_edges(g_truth)
                 g_truth_list.append(g_truth)
                 
                 # predict
-                predicted_graph = dgl.graph((u,v))
-                predicted_graph = dgl.add_self_loop(predicted_graph)
-                predicted_graph.ndata['anomaly'] = self.get_anomaly(is_truth = False,typeid = typeid)
-                predicted_graph.ndata['position'] = torch.tensor(self.position, dtype=torch.float32)
+                g_pred = dgl.graph((u,v))
+                g_pred = dgl.add_self_loop(g_pred)
+                g_pred.ndata['anomaly'] = self.get_anomaly(is_truth=False, typeid=typeid)
+                g_pred.ndata['position'] = torch.tensor(self.position, dtype=torch.float32)
                 
-                classification_data = self.get_classification(predicted_graph,g_truth)
-                predicted_graph.ndata['classification'] = classification_data
+                classification_data = self.get_classification(g_pred, g_truth)
+                g_pred.ndata['classification'] = classification_data
                 
-                self.remove_edges(predicted_graph)
-                predicted_graph_list.append(predicted_graph)
+                self.remove_edges(g_pred)
+                g_pred_list.append(g_pred)
             
-            elif typeid == 0 and len(set(self.typeid_list)) != 2:
+            elif typeid == 0 and len(set(self.truth_list)) != 2:
                 continue 
             
             else:
@@ -291,59 +291,64 @@ class Build_SGD_graph:
                 g_truth = dgl.graph((u,v))
                 g_truth = dgl.add_self_loop(g_truth)
                 
-                
-                g_truth.ndata['anomaly'] = self.get_anomaly(is_truth = True,typeid = typeid,binary_typeid = typeid)
+                g_truth.ndata['anomaly'] = self.get_anomaly(True, typeid, typeid)
                 g_truth.ndata['position'] = torch.tensor(self.position, dtype=torch.float32)
                 self.remove_edges(g_truth)
                 g_truth_list.append(g_truth)
                 
-                for clustid in self.clustid_list:
-                    if clustid == 0:
+                for predid in self.pred_list:
+                    if predid == 0:
                         continue
                     
-                    predicted_graph = dgl.graph((u,v))
-                    predicted_graph = dgl.add_self_loop(predicted_graph)
-                    predicted_graph.ndata['anomaly'] = self.get_anomaly(is_truth = False,typeid = typeid ,binary_typeid = clustid)
-                    predicted_graph.ndata['position'] = torch.tensor(self.position, dtype=torch.float32)
+                    g_pred = dgl.graph((u,v))
+                    g_pred = dgl.add_self_loop(g_pred)
+                    g_pred.ndata['anomaly'] = self.get_anomaly(False, typeid, predid)
+                    g_pred.ndata['position'] = torch.tensor(self.position, dtype=torch.float32)
                     
-                    classification_data = self.get_classification(predicted_graph,g_truth)
-                    predicted_graph.ndata['classification'] = classification_data
+                    classification_data = self.get_classification(g_pred,g_truth)
+                    g_pred.ndata['classification'] = classification_data
                     
-                    self.remove_edges(predicted_graph)                        
-                    predicted_graph_list.append(predicted_graph)
+                    self.remove_edges(g_pred)                        
+                    g_pred_list.append(g_pred)
                     
                 g_truth_list = list(itertools.chain.from_iterable(itertools.repeat(g_truth,len(set(self.clustid_list))-1) for g_truth in g_truth_list))
                     
-        return predicted_graph_list, g_truth_list
-    
+        return g_pred_list, g_truth_list
+
+
+
+
 class SGDEvaluator:
-    def __init__(self, adata, n_neighbors, spa_key = 'spatial'):
-        self.build_graph_sgd = Build_SGD_graph(adata, n_neighbors, spa_key)
-        self.predicted_graph_list = []
+    def __init__(self, data: Dict, n_neighbors: int = 6, bins: int = 10,
+                 num_bootstrap_samples: int = 50, sigma: int = 1):
+        self.build_graph_sgd = Build_SGD_graph(data, n_neighbors)
+        self.g_pred_list = []
         self.g_truth_list = []
+        self.bins = bins
+        self.num_bootstrap_samples = num_bootstrap_samples
+        self.sigma = sigma
     
-    def evaluate_sgd(self, predicted_graph_list, g_truth_list, metric='degree'):
-        matrix_size = int(math.sqrt(len(predicted_graph_list)))
+    def evaluate_sgd(self, g_pred_list, g_truth_list, metric='degree'):
+        matrix_size = int(math.sqrt(len(g_pred_list)))
         sgd_matrix = [[0] * matrix_size for _ in range(matrix_size)]
 
-        for idx,(predicted_graph, g_truth) in enumerate(zip(predicted_graph_list, g_truth_list)):
-            predict_nx_graph = dgl_to_nx(predicted_graph, include_classification=True)
+        for idx,(g_pred, g_truth) in enumerate(zip(g_pred_list, g_truth_list)):
+            pred_nx_graph = dgl_to_nx(g_pred, include_classification=True)
             true_nx_graph = dgl_to_nx(g_truth, include_classification=False)
 
-            dist = get_distributions_for_subsets(predict_nx_graph, true_nx_graph,bins = 10,num_bootstrap_samples=50)
+            dist = get_distributions_for_subsets(pred_nx_graph, true_nx_graph,
+                                                 self.bins, self.num_bootstrap_samples)
 
-            tp_count = torch.sum(predicted_graph.ndata['classification'] == 1).item()
-            fn_count = torch.sum(predicted_graph.ndata['classification'] == 3).item()
+            tp_count = torch.sum(g_pred.ndata['classification'] == 1).item()
+            fn_count = torch.sum(g_pred.ndata['classification'] == 3).item()
             weight = tp_count / (tp_count + fn_count)
 
             if metric == 'degree':
-                sgd_metric = 'Degree'
                 pred_tp_fp_key = 'Predicted TP+FP Degree'
                 gt_tp_fp_key = 'Ground Truth TP+FP Degree'
                 pred_tp_fn_key = 'Predicted TP+FN Degree'
                 gt_tp_fn_key = 'Ground Truth TP+FN Degree'
             elif metric == 'cc':
-                sgd_metric = 'cc'
                 pred_tp_fp_key = 'Predicted TP+FP Clustering'
                 gt_tp_fp_key = 'Ground Truth TP+FP Clustering'
                 pred_tp_fn_key = 'Predicted TP+FN Clustering'
@@ -355,13 +360,13 @@ class SGDEvaluator:
             pred_tp_fp_dist = dist[pred_tp_fp_key]
             gt_tp_fp_dist = dist[gt_tp_fp_key]
 
-            mmd_tp_fp = compute_mmd(gt_tp_fp_dist, pred_tp_fp_dist, kernel=gaussian_emd)
+            mmd_tp_fp = compute_mmd(gt_tp_fp_dist, pred_tp_fp_dist, kernel=gaussian_emd, sigma=self.sigma)
 
             # TP&FN
             pred_tp_fn_dist = dist[pred_tp_fn_key]
             gt_tp_fn_dist = dist[gt_tp_fn_key]
 
-            mmd_tp_fn = compute_mmd(gt_tp_fn_dist, pred_tp_fn_dist, kernel=gaussian_emd)
+            mmd_tp_fn = compute_mmd(gt_tp_fn_dist, pred_tp_fn_dist, kernel=gaussian_emd, sigma=self.sigma)
 
             sgd = weight * mmd_tp_fp + (1 - weight) * mmd_tp_fn
             
@@ -376,7 +381,5 @@ class SGDEvaluator:
         
         else:
             assignment_matrix = solve_assignment_problems(sgd_matrix)
-            
-            SGD_list = get_assigned_values(sgd_matrix,assignment_matrix)
-            
+            SGD_list = get_assigned_values(sgd_matrix, assignment_matrix)
             return SGD_list

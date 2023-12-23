@@ -53,10 +53,18 @@ def evaluate(metrics: Sequence[metrics_list],
         typeid (Optional[str]): Type ID key in adata.obs for type information.
         emb (Optional[str]): Key for embeddings in adata.obsm.
         clustid (Optional[str]): Cluster ID key in adata.obs for clustering information.
-        spaid (Optional[str]): Spatial coordinates ID key in adata.obsm (for SGD_degree and SGD_cc metrics).
+        spaid (Optional[str]): Spatial coordinates ID key in adata.obsm (for SGD_degree & SGD_cc metrics).
+
+    Other Parameters:
+        n_neighbors (Optional[int]): Number of neighbors for spatial data reading (for SGD_degree & SGD_cc).
 
     Returns:
         (Union[Tuple, float]): Depending on the number of specified metrics, returns a tuple of metric values or a single metric value.
+    
+    Note:
+        SGD_degree & SGD_cc are available for both anomaly detection and subtyping tasks. 
+        They will automatically determine the category based on the types of anomalies in y_true
+        eliminating the need for additional parameters to specify whether it is the subtyping task.
     """
     if (y_true is not None) and (y_score is not None):
         y_true = pd.Series(y_true)
@@ -74,7 +82,7 @@ def evaluate(metrics: Sequence[metrics_list],
         if adata is not None:
             data.update({'adata': adata})
         if spaid is not None:
-            data.update({'spa_key': spaid})
+            data.update({'spatial': adata.obsm[spaid]})
 
     elif adata is not None:
         if emb is None:
@@ -232,25 +240,16 @@ def eval_cLISI(data):
     return np.asarray(clisi)[0]
 
 def eval_SGD_degree(data, **kwargs):
-    g_pred_list, g_truth_list = Build_SGD_graph(
-        data['adata'], spa_key = data['spaid'], **kwargs)
-
-    evaluator = SGDEvaluator(
-        data['adata'], n_neighbors = 6, spa_key = data['spaid'], **kwargs)
-
+    graph_kwargs = {key: kwargs[key] for key in kwargs if key in ['n_neighbors']}
+    g_pred_list, g_truth_list = Build_SGD_graph(data, **graph_kwargs)
+    evaluator = SGDEvaluator(data, **kwargs)
     SGD_degree  = evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'degree')
-    
     return SGD_degree
-    
-    
+
 def eval_SGD_cc(data, **kwargs):
-    g_pred_list,g_truth_list = Build_SGD_graph(
-        data['adata'], spa_key = data['spaid'], **kwargs)
-
-    evaluator = SGDEvaluator(
-        data['adata'], spa_key = data['spaid'], **kwargs)
-
+    graph_kwargs = {key: kwargs[key] for key in kwargs if key in ['n_neighbors']}
+    g_pred_list, g_truth_list = Build_SGD_graph(data, **graph_kwargs)
+    evaluator = SGDEvaluator(data, **kwargs)
     SGD_cc  = evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'cc')
-    
     return SGD_cc
 
