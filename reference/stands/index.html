@@ -870,7 +870,84 @@
 
   <div class="doc doc-contents first">
   
-      <p>STANDS is an innovative framework seamlessly integrated detecting, aligning and subtyping anomlous tissue domains.</p>
+      <p>Spatial Transcriptomics ANomaly Detection and Subtyping (STANDS) is an innovative computational method 
+to detect anomalous tissue domains from multi-sample spatial transcriptomics (ST) data and reveal 
+their biologically heterogeneous subdomains, which can be individual-specific or shared by all 
+individuals. </p>
+<p>Detecting and characterizing anomalous anatomic regions from tissue samples from affected individuals 
+are crucial for clinical and biomedical research. This procedure, which we refer to as Detection and 
+Dissection of Anomalous Tissue Domains (DDATD), serves as the first and foremost step in the analysis 
+of clinical tissues because it reveals factors, such as pathogenic or differentiated cell types, 
+associated with the development of diseases or biological traits. Traditionally, DDATD has relied on 
+either laborious expert visual inspection or computer vision algorithms applied to histology images. 
+ST provides an unprecedent opportunity to enhance DDATD by incorporating spatial gene expression 
+information. However, to the best of our knowledge, no existing methods can perform de novo DDATD from 
+ST datasets.</p>
+<p>STANDS is built on state-of-the-art generative models for de novo DDATD from multi-sample ST by 
+integrating multimodal information including spatial gene expression, histology image, and single cell 
+gene expression. STANDS concurrently fulfills DDATD’s three sequential core tasks: detecting, aligning, 
+and subtyping anomalous tissue domains across multiple samples. STANDS first integrates and harnesses 
+multimodal information from spatial transcriptomics and associated histology images to pinpoint 
+anomalous tissue regions across multiple target datasets. Next, STANDS aligns anomalies identified 
+from target datasets in a common data space via style-transfer learning to mitigate their 
+non-biological variations. Finally, STANDS dissects aligned anomalies into biologically heterogenous 
+subtypes that are either common or unique to the target datasets. STANDS combines these processes 
+into a unified framework that maintains the methodological coherence, which leads to its unparallel 
+performances in DDATD from multi-sample ST.</p>
+
+
+
+  <p><strong>Modules:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>read</code></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Read single spatial data and preprocess if required.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code>read_cross</code></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Read spatial data from two sources and preprocess if required.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code>read_multi</code></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Read multiple spatial datasets and preprocess if required.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code>pretrain</code></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Pretrain STANDS using spatial data.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code>evaluate</code></td>
+          <td>
+            <div class="doc-md-description">
+              <p>Calculate various metrics (including SGD).</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
   
 
@@ -2687,7 +2764,7 @@ The read data are transformed to reference and target graph.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Read and preprocess multiple spatial datasets.
+      <p>Read multiple spatial datasets and preprocess if required.
 All the datasets are transformed to only one graph.</p>
 
 
@@ -2958,7 +3035,7 @@ All the datasets are transformed to only one graph.</p>
 </span><span id="__span-0-178"><a id="__codelineno-0-178" name="__codelineno-0-178"></a>               <span class="n">preprocess</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">n_genes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3000</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
 </span><span id="__span-0-179"><a id="__codelineno-0-179" name="__codelineno-0-179"></a>               <span class="n">return_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;anndata&#39;</span><span class="p">,</span> <span class="s1">&#39;graph&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="n">spa_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;spatial&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 </span><span id="__span-0-180"><a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-</span><span id="__span-0-181"><a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    Read and preprocess multiple spatial datasets.</span>
+</span><span id="__span-0-181"><a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="sd">    Read multiple spatial datasets and preprocess if required.</span>
 </span><span id="__span-0-182"><a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="sd">    All the datasets are transformed to only one graph.</span>
 </span><span id="__span-0-183"><a id="__codelineno-0-183" name="__codelineno-0-183"></a>
 </span><span id="__span-0-184"><a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">    Parameters:</span>
