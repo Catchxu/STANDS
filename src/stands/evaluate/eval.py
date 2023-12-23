@@ -28,13 +28,13 @@ def evaluate(metrics: Sequence[metrics_list],
     Different metrics require different parameters.
     Here is a description of the metrics that can be calculated and the parameters they require.
 
-    Methods:
+    Functions:
         AUC: y_true, y_pred/y_score
         Precision: y_true, y_pred/y_score
         Recall: y_true, y_pred/y_score
         F1: y_true, y_pred/y_score
-        SGD_degree: 
-        SGD_cc: 
+        SGD_degree: adata, spaid, y_true, y_pred
+        SGD_cc: adata, spaid, y_true, y_pred
         ARI: adata, typeid, clustid, (Optional: emb)
         NMI: adata, typeid, clustid, (Optional: emb)
         ASW_type: adata, typeid, (Optional: emb)
@@ -56,7 +56,10 @@ def evaluate(metrics: Sequence[metrics_list],
         spaid (Optional[str]): Spatial coordinates ID key in adata.obsm (for SGD_degree & SGD_cc metrics).
 
     Other Parameters:
-        n_neighbors (Optional[int]): Number of neighbors for spatial data reading (for SGD_degree & SGD_cc).
+        n_neighbors (int): Number of neighbors for SGD KNN graph.
+        bins (int): Number of equal-width bins in the given range when calculating SGD_cc.
+        num_bootstrap_samples (int): Number of bootstrap samples for distribution estimation.
+        sigma (int): Sigma parameter for Gaussian Earth Mover's Distance.
 
     Returns:
         (Union[Tuple, float]): Depending on the number of specified metrics, returns a tuple of metric values or a single metric value.
@@ -79,9 +82,7 @@ def evaluate(metrics: Sequence[metrics_list],
         data = {'y_true': y_true, 'y_score': y_score, 'y_pred': y_pred}
 
         # for SGD_degree and SGD_cc metrics
-        if adata is not None:
-            data.update({'adata': adata})
-        if spaid is not None:
+        if (adata is not None) and (spaid is not None):
             data.update({'spatial': adata.obsm[spaid]})
 
     elif adata is not None:
@@ -240,16 +241,18 @@ def eval_cLISI(data):
     return np.asarray(clisi)[0]
 
 def eval_SGD_degree(data, **kwargs):
-    graph_kwargs = {key: kwargs[key] for key in kwargs if key in ['n_neighbors']}
-    g_pred_list, g_truth_list = Build_SGD_graph(data, **graph_kwargs)
-    evaluator = SGDEvaluator(data, **kwargs)
+    graph_kwargs = {key: kwargs[key] for key in kwargs if key == 'n_neighbors'}
+    eval_kwargs = {key: kwargs[key] for key in kwargs if key != 'n_neighbors'}
+    g_pred_list, g_truth_list = Build_SGD_graph(data, **graph_kwargs).build_graph()
+    evaluator = SGDEvaluator(**eval_kwargs)
     SGD_degree  = evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'degree')
     return SGD_degree
 
 def eval_SGD_cc(data, **kwargs):
-    graph_kwargs = {key: kwargs[key] for key in kwargs if key in ['n_neighbors']}
-    g_pred_list, g_truth_list = Build_SGD_graph(data, **graph_kwargs)
-    evaluator = SGDEvaluator(data, **kwargs)
+    graph_kwargs = {key: kwargs[key] for key in kwargs if key == 'n_neighbors'}
+    eval_kwargs = {key: kwargs[key] for key in kwargs if key != 'n_neighbors'}
+    g_pred_list, g_truth_list = Build_SGD_graph(data, **graph_kwargs).build_graph()
+    evaluator = SGDEvaluator(**eval_kwargs)
     SGD_cc  = evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'cc')
     return SGD_cc
 

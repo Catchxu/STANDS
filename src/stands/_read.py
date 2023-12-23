@@ -57,7 +57,7 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
         preprocess (bool): Perform data preprocessing.
         n_genes (int): Number of genes for feature selection.
         patch_size (Optional[int]): Patch size for H&E images.
-        n_neighbors (Optional[int]): Number of neighbors for spatial data reading.
+        n_neighbors (int): Number of neighbors for spatial data reading.
         return_type (Literal['anndata', 'graph', 'tuple']): Type of data to return.
 
     Other Parameters:
@@ -125,7 +125,7 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
         preprocess (bool): Perform data preprocessing.
         n_genes (int): Number of genes for feature selection.
         patch_size (Optional[int]): Patch size for H&E images.
-        n_neighbors (Optional[int]): Number of neighbors for spatial data reading.
+        n_neighbors (int): Number of neighbors for spatial data reading.
         return_type (Literal['anndata', 'graph']): Type of data to return.
 
     Other Parameters:

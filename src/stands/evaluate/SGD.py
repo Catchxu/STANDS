@@ -9,7 +9,7 @@ import itertools
 import math
 import pulp
 import anndata as ad
-from typing import Dict
+from typing import Dict, Tuple, Optional
 
 
 def disc(samples1, samples2, kernel, *args, **kwargs):
@@ -48,12 +48,12 @@ def compute_mmd(samples1, samples2, kernel, is_hist=True, *args, **kwargs):
 ## get graph stats 
 def calculate_degree_histogram(G,node_subset):
     degree = [G.degree(node) for node in node_subset]
-    degree_hist = np.bincount(degree,minlength=G.number_of_nodes())
+    degree_hist = np.bincount(degree, minlength=G.number_of_nodes())
     return degree_hist
 
-def calculate_clustering_coefficient_histogram(G,node_subset,bins=None):
-    clustering_coeffs = [nx.clustering(G,node) for node in node_subset]
-    hist,_ = np.histogram(clustering_coeffs,bins=bins,range=(0.0,1.0),density=False)
+def calculate_clustering_coefficient_histogram(G, node_subset, bins=None):
+    clustering_coeffs = [nx.clustering(G, node) for node in node_subset]
+    hist,_ = np.histogram(clustering_coeffs, bins=bins, range=(0.0,1.0), density=False)
     return hist
 
 def bootstrap_sample(node_set):
@@ -193,7 +193,27 @@ def get_assigned_values(sgd_matrix,assignment_matrix):
 
 
 class Build_SGD_graph:
+    """
+    Spatial locations are represented as nodes in an undirected graph.Normal spots are isolated, 
+    while anomalous spots are connected to their k-nearest anomalous neighbors. Note that in the 
+    anomaly detection results, incorrectly identified spots as anomalies (false positives) become 
+    connected, and false negatives become isolated, which leads to a deviation from the local 
+    structures of the ground truth graph. Spots are divided into two regions: one includes true 
+    positives plus false positives (TP+FP) anomalies, and the other includes true positives plus 
+    false negatives (TP+FN) anomalies. We perform a bootstrap sampling of m sets of spots from these 
+    two regions.
+
+    Examples:
+        >>> g_pred_list, g_truth_list = Build_SGD_graph(data, n_neighbors = 6).build_graph()
+    """
     def __init__(self, data: Dict, n_neighbors: str = 6):
+        """
+        Initialize the Build_SGD_graph class. 
+
+        Parameters:
+            data (Dict): Dictionary containing spatial data and labels.
+            n_neighbors (int): Number of neighbors to consider for edge creation (default is 6).
+        """
         self.data = data['data']
         self.position = data['spatial']
         self.n_neighbors = n_neighbors
@@ -201,6 +221,12 @@ class Build_SGD_graph:
         self.pred_list = np.unique(data['y_pred'])
 
     def get_edge(self):
+        """
+        Generate edges based on spatial positions.
+
+        Returns:
+            Tuple: Two arrays representing source and destination nodes for edges.
+        """
         nbrs = NearestNeighbors(n_neighbors = self.n_neighbors + 1)
         nbrs.fit(self.position)   
         _,indices = nbrs.kneighbors(self.position)
@@ -209,6 +235,17 @@ class Build_SGD_graph:
         return u,v
 
     def get_anomaly(self, is_truth=True, typeid=None, binary_typeid=None):
+        """
+        Extract anomaly information for nodes.
+
+        Parameters:
+            is_truth (bool): If True, extract anomaly data from ground truth labels. If False, extract from predicted labels.
+            typeid (Optional[int]): Type ID for filtering data.
+            binary_typeid (Optional[int]): Binary Type ID for filtering data.
+
+        Returns:
+            torch.Tensor: Anomaly data as a tensor.
+        """
         if is_truth:
             if typeid == 0:
                 anomaly_data = np.array(self.data['y_true']).astype(int)
@@ -224,6 +261,16 @@ class Build_SGD_graph:
         return torch.tensor(anomaly_data.values, dtype=torch.float32)
 
     def classify_cells(self, pred: int, truth: int):
+        """
+        Classify cells based on prediction and ground truth.
+
+        Parameters:
+            pred (int): Predicted flag (1 for anomaly, 0 for normal).
+            truth (int): Ground truth flag (1 for anomaly, 0 for normal).
+
+        Returns:
+            str: Classification result (TP, FP, FN, or TN).
+        """
         if pred == 1 and truth == 1:
             return 'TP'
         elif pred == 1 and truth == 0:
@@ -233,7 +280,17 @@ class Build_SGD_graph:
         else:
             return 'TN'    
 
-    def get_classification(self, pred_graph, truth_graph):
+    def get_classification(self, pred_graph: dgl.DGLGraph, truth_graph: dgl.DGLGraph):
+        """
+        Get classification labels for nodes in predicted and ground truth graphs.
+
+        Parameters:
+            pred_graph: Predicted graph.
+            truth_graph: Ground truth graph.
+
+        Returns:
+            torch.Tensor: Classification labels as a tensor.
+        """
         mapping = {'TP': 1, 'FP': 2, 'FN': 3, 'TN': 4}
         classification_data_list = []
         
@@ -245,7 +302,13 @@ class Build_SGD_graph:
             classification_data_list.append(mapping[classification])
         return torch.tensor(classification_data_list,dtype = torch.long)
     
-    def remove_edges(self, g):
+    def remove_edges(self, g: dgl.DGLGraph):
+        """
+        Remove edges from the graph based on anomaly information.
+
+        Parameters:
+            g: Input graph.
+        """
         edges_to_remove = []
         for edge in zip(*g.edges()):
             if g.ndata['anomaly'][edge[0]] != 1 or g.ndata['anomaly'][edge[1]] != 1:
@@ -256,6 +319,12 @@ class Build_SGD_graph:
             g.remove_edges(edge_ids)
             
     def build_graph(self):
+        """
+        Build graphs for predicted and ground truth labels.
+
+        Returns:
+            List[dgl.DGLGraph]: List of DGLGraph objects representing the predicted and ground truth graphs.
+        """
         u, v = self.get_edge()
         
         g_pred_list = []
@@ -319,9 +388,25 @@ class Build_SGD_graph:
 
 
 class SGDEvaluator:
-    def __init__(self, data: Dict, n_neighbors: int = 6, bins: int = 10,
-                 num_bootstrap_samples: int = 50, sigma: int = 1):
-        self.build_graph_sgd = Build_SGD_graph(data, n_neighbors)
+    """
+    Evaluate SGD_degree or SGD_cc with the built predicted and ground truth SGD Graph.
+
+    Examples:
+        >>> evaluator = SGDEvaluator(bins = 10, num_bootstrap_samples = 50, sigma = 1)
+        >>> evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'degree')
+        1.01
+        >>> evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'cc')
+        0.34
+    """
+    def __init__(self, bins: int = 10, num_bootstrap_samples: int = 50, sigma: int = 1):
+        """
+        Initialize the SGDEvaluator.
+
+        Parameters:
+            bins (int): Number of equal-width bins in the given range when calculating SGD_cc.
+            num_bootstrap_samples (int): Number of bootstrap samples for distribution estimation.
+            sigma (int): Sigma parameter for Gaussian Earth Mover's Distance.
+        """
         self.g_pred_list = []
         self.g_truth_list = []
         self.bins = bins
