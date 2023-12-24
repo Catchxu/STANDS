@@ -32,6 +32,7 @@ setup(
         'pandas>=1.5.2',
         'squidpy>=1.2.2',
     ],
-    packages=find_packages(exclude=('image')),
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
     zip_safe=False,
 )
