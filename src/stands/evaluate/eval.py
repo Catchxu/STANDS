@@ -8,7 +8,8 @@ import rpy2.robjects as ro
 from rpy2.robjects import pandas2ri, numpy2ri
 from rpy2.robjects.conversion import localconverter
 from typing import Optional, Literal, Sequence, Union, Tuple
-from SGD import Build_SGD_graph, SGDEvaluator
+
+from .SGD import Build_SGD_graph, SGDEvaluator
 
 
 

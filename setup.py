@@ -31,6 +31,8 @@ setup(
         'sklearn>=0.0.post2',
         'pandas>=1.5.2',
         'squidpy>=1.2.2',
+        'pyemd>=1.0.0',
+        'pulp>=2.7.0'
     ],
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
