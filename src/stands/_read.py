@@ -136,9 +136,9 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
     """
     seed_everything(0)
 
-    ref, ref_img, ref_pos = read(ref_dir, ref_name, ref, False, 'multi',
+    ref, ref_img, ref_pos = read(ref_dir, ref_name, ref, False, 'tuple',
                                  spa_key=spa_key, n_neighbors=n_neighbors)
-    tgt, tgt_img, tgt_pos = read(tgt_dir, tgt_name, tgt, False, 'multi',
+    tgt, tgt_img, tgt_pos = read(tgt_dir, tgt_name, tgt, False, 'tuple',
                                  spa_key=spa_key, n_neighbors=n_neighbors)
     overlap_gene = list(set(ref.var_names) & set(tgt.var_names))
     ref = ref[:, overlap_gene]
@@ -211,7 +211,7 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
 
     adatas, images, positions = [], [], []
     for i in range(len(data_name)):
-        d, img, pos = read(input_dir, data_name[i], adata[i], False, 'multi',
+        d, img, pos = read(input_dir, data_name[i], adata[i], False, 'tuple',
                            spa_key=spa_key, n_neighbors=n_neighbors)
         adatas.append(d)
         images.append(img)
