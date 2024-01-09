@@ -2082,7 +2082,7 @@ import squidpy as sq</div>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># replace with the path of downloaded demo or another datasets.</span>
-<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/KDD_data/'</span>
+<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/data/'</span>
 <span class="n">ref_name</span> <span class="o">=</span> <span class="s1">'Breast_full_ref1'</span>
 <span class="n">tgt_name</span> <span class="o">=</span> <span class="s1">'Breast_full_tumor1'</span>
 
@@ -2092,7 +2092,7 @@ import squidpy as sq</div>
 <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'Cancer in situ'</span><span class="p">,</span> <span class="s1">'Invasive cancer'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tgt</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">'domain.type'</span><span class="p">]]</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-3"># replace with the path of downloaded demo or another datasets.
-input_dir = '/volume3/kxu/KDD_data/'
+input_dir = '/volume3/kxu/data/'
 ref_name = 'Breast_full_ref1'
 tgt_name = 'Breast_full_tumor1'
 
