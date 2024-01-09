@@ -92,4 +92,4 @@ def pretrain(input_dir: str, data_name: List[str],
         weight_dir = os.path.dirname(__file__) + '/model.pth'
     net.save_weights(weight_dir, save_module)
     
-    tqdm.write(f'The pretrained weights for STANDS have been automatically saved at the specified path.{}!')
+    tqdm.write(f'The pretrained weights for STANDS have been automatically saved at {weight_dir}!')

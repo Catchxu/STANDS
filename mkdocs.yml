@@ -13,6 +13,7 @@ nav:
   - API Reference: reference/
   - Tutorials:
     - Overview: tutorial/overview.md
+    - Pretrain: tutorial/pretrain.ipynb
 
 theme:
     name: "material"
@@ -101,6 +102,7 @@ markdown_extensions:
 plugins:
   - autorefs
   - markdown-exec
+  - mkdocs-jupyter
   - git-revision-date-localized
   - minify:
       minify_html: !ENV [DEPLOY, false]

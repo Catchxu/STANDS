@@ -6,4 +6,4 @@ Before starting the tutorial, we need to make some preparations, including: inst
 
 
 ## Outline of tutorials
-
+- [Tutorial 1: Pretrain your STANDS basic networks](./pretrain.ipynb)
