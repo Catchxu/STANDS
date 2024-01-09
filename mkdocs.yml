@@ -8,7 +8,7 @@ repo_url: https://github.com/Catchxu/STANDS
 nav:
   - Home: 
     - Home: index.md
-    - Preparation: start.md
+    - Preparations: start.md
     - License: license.md
   - API Reference: reference/
   - Tutorials:
