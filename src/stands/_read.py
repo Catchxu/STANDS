@@ -71,7 +71,9 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
     if adata is None:
         if (data_dir is None) or (data_name is None):
             RuntimeError('Please set the read file/path.')
-        input_dir = data_dir + data_name + '.h5ad'
+        if not data_name.endswith('.h5ad'):
+            data_name += '.h5ad'
+        input_dir = data_dir + data_name
         adata = sc.read_h5ad(input_dir)
 
     position = adata.obsm[spa_key]
