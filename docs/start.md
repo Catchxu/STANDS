@@ -20,7 +20,14 @@ python3 setup.py install --user
 ## Datasets
 All experimental datasets involved in this paper are available from their respective original sources: the 10x-Visium datasets of healthy human breast tissues (10x-hNB datasets) are available at the [CELLxGENE](https://cellxgene.cziscience.com/collections/4195ab4c-20bd-4cd3-8b3d-65601277e731); The 10x-Visium datasets of human breast cancer tissues (10x-hBC datasets) are available at the [github](https://github.com/almaan/her2st/tree/master); The scRNA-seq dataset of human pancreatic ductal (sc-hPD) and 10x-Visium datasets of the human pancreatic ductal adenocarcinomas (10x-hPDAC) are available at the [Gene Expression Omnibus](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE111672); The slide-seqV2 datasets of mouse embryo tissues (ssq-mEmb datasets) are available at the [CELLxGENE](https://cellxgene.cziscience.com/collections/d74b6979-efba-47cd-990a-9d80ccf29055).
 
-We also provide organized and processed datasets for download.
+We also provide organized and processed small datasets to demo the our code.
+You can download the demo datasets from GitHub:
+
+```commandline
+git clone https://github.com/Catchxu/STANDS.git
+cd STANDS/data/
+unzip demo.zip
+```
 
 
 
