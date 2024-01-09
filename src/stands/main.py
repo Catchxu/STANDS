@@ -49,7 +49,7 @@ class ADNet:
     def fit(self, ref: Dict[str, Any], weight_dir: Optional[str] = None,
             save: bool = False, **kwargs):
         '''Fine-tune STand on reference graph'''
-        tqdm.write('Begin to fine-tune the model on normal spots...')
+        tqdm.write('Begin to fine-tune the model on reference datasets...')
 
         # dataset provides subgraph for training
         ref_g = ref['graph']
@@ -125,12 +125,12 @@ class ADNet:
 
         self.G.eval()
         self.D.eval()
-        tqdm.write('Detect anomalous spots on test dataset...')
+        tqdm.write('Detect anomalous spots on target dataset...')
     
         ref_score = self.score(self.dataset)
         tgt_score = self.score(dataset)
         gmm = GMMWithPrior(ref_score, tol=0.00001)
-        threshold = gmm.fit(tgt_score=tgt)
+        threshold = gmm.fit(tgt_score=tgt_score)
         tgt_label = [1 if s >= threshold else 0 for s in tgt_score]
 
         tqdm.write('Anomalous spots have been detected.\n')

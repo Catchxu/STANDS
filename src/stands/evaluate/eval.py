@@ -10,6 +10,7 @@ from rpy2.robjects.conversion import localconverter
 from typing import Optional, Literal, Sequence, Union, Tuple
 
 from .SGD import Build_SGD_graph, SGDEvaluator
+from .._utils import clear_warnings
 
 
 
@@ -18,6 +19,8 @@ metrics_list = Literal[
     'ARI', 'NMI', 'ASW_type', '1-ASW_batch', 'BatchKL', 'iLISI', 'cLISI',
 ]
 
+
+@clear_warnings
 def evaluate(metrics: Sequence[metrics_list],
              y_true=None, y_score=None, y_pred=None,
              adata: Optional[ad.AnnData]=None,
@@ -65,20 +68,27 @@ def evaluate(metrics: Sequence[metrics_list],
     Returns:
         (Union[Tuple[float], float]): Depending on the number of specified metrics, returns a tuple of metric values or a single metric value.
     
+    Raises:
+        RuntimeError: In the anomaly detection, it doesn't specify `y_score` or `y_pred`.
+    
     Note:
         SGD_degree & SGD_cc are available for both anomaly detection and subtyping tasks. 
         They will automatically determine the category based on the types of anomalies in y_true
         eliminating the need for additional parameters to specify whether it is the subtyping task.
     """
-    if (y_true is not None) and (y_score is not None):
+    if  y_true is not None:
         y_true = pd.Series(y_true)
-        y_score = pd.Series(y_score)
 
-        if y_pred is None:
+        if y_score is not None:
+            y_score = pd.Series(y_score)
             ratio = 100.0 * len(np.where(y_true == 0)[0]) / len(y_true)
             thres = np.percentile(y_score, ratio)
             y_pred = (y_score >= thres).astype(int)
             y_true = y_true.astype(int)
+        elif y_pred is not None:
+            y_pred = pd.Series(y_pred).astype(int)
+        else:
+            raise RuntimeError('Please input y_score or y_pred!')
 
         data = {'y_true': y_true, 'y_score': y_score, 'y_pred': y_pred}
 

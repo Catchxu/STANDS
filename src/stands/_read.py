@@ -3,6 +3,7 @@ import numpy as np
 import scanpy as sc
 import anndata as ad
 from math import e
+from tqdm import tqdm
 from typing import Literal, Optional, List, Dict, Tuple, Union
 
 from ._utils import seed_everything, clear_warnings
@@ -71,9 +72,7 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
     if adata is None:
         if (data_dir is None) or (data_name is None):
             RuntimeError('Please set the read file/path.')
-        if not data_name.endswith('.h5ad'):
-            data_name += '.h5ad'
-        input_dir = data_dir + data_name
+        input_dir = data_dir + data_name + '.h5ad'
         adata = sc.read_h5ad(input_dir)
 
     position = adata.obsm[spa_key]

@@ -1,5 +1,6 @@
 import scanpy as sc
 import numpy as np
+from tqdm import tqdm
 from scipy.stats import beta ,invgamma, norm
 
 
@@ -74,14 +75,20 @@ class GMMWithPrior(object):
         resp = self.e_step(tgt_score)
         prob = self.log_prob(tgt_score,resp)
 
-        for _ in range(self.max_iter):
-            pre_prob = prob
-            resp = self.e_step(tgt_score)
-            self.m_step(tgt_score,resp)
-            prob = self.log_prob(tgt_score,resp)
-            if abs(pre_prob-prob) < self.tol:
-               print('Have converged.')
-               break             
+        with tqdm(total=self.max_iter) as t:
+            for _ in range(self.max_iter):
+                t.set_description(f'Inference Epochs')
+
+                pre_prob = prob
+                resp = self.e_step(tgt_score)
+                self.m_step(tgt_score, resp)
+                prob = self.log_prob(tgt_score, resp)
+                if abs(pre_prob-prob) < self.tol:
+                    print('GMM-based thresholder has converged.')
+                    break    
+
+                t.update(1)
+                
         return tgt_score[round(self.u[0]*len(tgt_score))]
 
 
@@ -90,7 +97,7 @@ if __name__=='__main__':
     tgt1 = norm.rvs(loc=0.8, scale=0.3, size=150)
     tgt2 = norm.rvs(loc=0, scale=0.5,size=850)
     tgt = np.concatenate((tgt1, tgt2))
-    gmm = GMMWithPrior(ref_score=ref,tol=1e-5,max_iter=1000)
+    gmm = GMMWithPrior(ref_score=ref, tol=1e-5,max_iter=1000)
     print(gmm.fit(tgt_score=tgt))
 
     adata = sc.read('E:/LY/NMBC/slideseq/multiple_anomaly/merge_result.h5ad')
