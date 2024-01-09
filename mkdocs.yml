@@ -11,6 +11,8 @@ nav:
     - Preparation: start.md
     - License: license.md
   - API Reference: reference/
+  - Tutorials:
+    - Overview: tutorial/overview.md
 
 theme:
     name: "material"
