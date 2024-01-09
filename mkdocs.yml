@@ -15,6 +15,7 @@ nav:
     - Overview: tutorial/overview.md
     - Pretrain: tutorial/pretrain.ipynb
     - AD: tutorial/detection.ipynb
+    - BC: tutorial/alignment.ipynb
 
 theme:
     name: "material"

@@ -33,19 +33,19 @@ def evaluate(metrics: Sequence[metrics_list],
     Here is a description of the metrics that can be calculated and the parameters they require.
 
     Functions:
-        AUC: y_true, y_pred/y_score
-        Precision: y_true, y_pred/y_score
-        Recall: y_true, y_pred/y_score
-        F1: y_true, y_pred/y_score
-        SGD_degree: adata, spaid, y_true, y_pred
-        SGD_cc: adata, spaid, y_true, y_pred
-        ARI: adata, typeid, clustid, (Optional: emb)
-        NMI: adata, typeid, clustid, (Optional: emb)
-        ASW_type: adata, typeid, (Optional: emb)
-        1-ASW_batch: adata, typeid, batchid, (Optional: emb)
-        BatchKL: adata, batchid, (Optional: emb)
-        iLISI: adata, batchid, (Optional: emb)
-        cLISI: adata, typeid, (Optional: emb)
+        AUC: `y_true`, `y_pred`/`y_score`
+        Precision: `y_true`, `y_pred`/`y_score`
+        Recall: `y_true`, `y_pred`/`y_score`
+        F1: `y_true`, `y_pred`/`y_score`
+        SGD_degree: `adata`, `spaid`, `y_true`, `y_pred`/`y_score`
+        SGD_cc: `adata`, `spaid`, `y_true`, `y_pred`/`y_score`
+        ARI: `adata`, `typeid`, `clustid`, (Optional: `emb`)
+        NMI: `adata`, `typeid`, `clustid`, (Optional: `emb`)
+        ASW_type: `adata`, `typeid`, `batchid`, (Optional: `emb`)
+        1-ASW_batch: `adata`, `typeid`, `batchid`, (Optional: `emb`)
+        BatchKL: `adata`, `batchid`, (Optional: `emb`)
+        iLISI: `adata`, `batchid`, (Optional: `emb`)
+        cLISI: `adata`, `typeid`, (Optional: `emb`)
 
     Parameters:
         metrics (Sequence[str]): List of evaluation metrics to compute.
