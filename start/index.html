@@ -23,7 +23,7 @@
     
     
       
-        <title>Preparation - STANDS</title>
+        <title>Preparations - STANDS</title>
       
     
     
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Preparation
+              Preparations
             
           </span>
         </div>
@@ -260,6 +260,22 @@
   
 
       
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../tutorial/overview/" class="md-tabs__link">
+        Tutorials
+      </a>
+    </li>
+  
+
+      
     </ul>
   </div>
 </nav>
@@ -367,12 +383,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Preparation
+          Preparations
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Preparation
+        Preparations
       </a>
       
         
@@ -418,7 +434,7 @@
       
         <li class="md-nav__item">
   <a href="#main-dependencies" class="md-nav__link">
-    Main Dependencies
+    Main dependencies
   </a>
   
 </li>
@@ -753,6 +769,75 @@
   
 
     
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Tutorials
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Tutorials
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/pretrain/" class="md-nav__link">
+        Tutorial 1: Pretraining the basic networks
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -807,7 +892,7 @@
       
         <li class="md-nav__item">
   <a href="#main-dependencies" class="md-nav__link">
-    Main Dependencies
+    Main dependencies
   </a>
   
 </li>
@@ -843,7 +928,7 @@
   
 
 
-  <h1>Preparation</h1>
+  <h1>Preparations</h1>
 
 <p>STANDS is a powerful documentation framework to detect, align and subtyping anomalous tissue domains across multiple samples. In the subsequent sections, we will introduce the preparatory tasks before utilizing STANDS for your research, including the installation of Python packages, downloading of datasets, and other related procedures.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">&para;</a></h2>
@@ -855,7 +940,7 @@
 </span></code></pre></div>
 <h2 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permanent link">&para;</a></h2>
 <p>All experimental datasets involved in this paper are available from their respective original sources: the 10x-Visium datasets of healthy human breast tissues (10x-hNB datasets) are available at the <a href="https://cellxgene.cziscience.com/collections/4195ab4c-20bd-4cd3-8b3d-65601277e731">CELLxGENE</a>; The 10x-Visium datasets of human breast cancer tissues (10x-hBC datasets) are available at the <a href="https://github.com/almaan/her2st/tree/master">github</a>; The scRNA-seq dataset of human pancreatic ductal (sc-hPD) and 10x-Visium datasets of the human pancreatic ductal adenocarcinomas (10x-hPDAC) are available at the <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE111672">Gene Expression Omnibus</a>; The slide-seqV2 datasets of mouse embryo tissues (ssq-mEmb datasets) are available at the <a href="https://cellxgene.cziscience.com/collections/d74b6979-efba-47cd-990a-9d80ccf29055">CELLxGENE</a>.</p>
-<p>We also provide organized and processed small datasets to demo the our code.
+<p>We also provide organized and processed small datasets to demo the our code and tutorials.
 You can download the demo datasets from GitHub:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>git clone https://github.com/Catchxu/STANDS.git
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>cd STANDS/data/
@@ -873,7 +958,7 @@ You can download the demo datasets from GitHub:</p>
 <li>System: Ubuntu 20.04.5 LTS</li>
 <li>Python: 3.9.15</li>
 </ul>
-<h2 id="main-dependencies">Main Dependencies<a class="headerlink" href="#main-dependencies" title="Permanent link">&para;</a></h2>
+<h2 id="main-dependencies">Main dependencies<a class="headerlink" href="#main-dependencies" title="Permanent link">&para;</a></h2>
 <ul>
 <li>torch==1.13.0</li>
 <li>dgl==1.1.1</li>
@@ -893,7 +978,7 @@ You can download the demo datasets from GitHub:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">December 20, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 9, 2024</span>
       
     
   </small>
