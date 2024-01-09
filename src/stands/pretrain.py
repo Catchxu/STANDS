@@ -62,6 +62,8 @@ def pretrain(input_dir: str, data_name: List[str],
     G_scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer = opt_G, T_max = n_epochs)
     L1 = nn.L1Loss().to(device)
 
+    tqdm.write('Begin to pretrain STANDS...')
+    
     with tqdm(total=n_epochs) as t:
         for _ in range(n_epochs):
             t.set_description(f'Pretrain STNet')
@@ -89,3 +91,5 @@ def pretrain(input_dir: str, data_name: List[str],
     if weight_dir is None:
         weight_dir = os.path.dirname(__file__) + '/model.pth'
     net.save_weights(weight_dir, save_module)
+    
+    tqdm.write(f'The pretrained weights for STANDS have been automatically saved at the specified path.{}!')
