@@ -529,6 +529,36 @@ class BCNet:
 
 
 
+class SubNet:
+    def __init__(self, generator, n_epochs: int = 10, update_interval=3,
+                 learning_rate: float = 1e-4, GPU: bool = True, 
+                 random_state: Optional[int] = None, 
+                 weight: Optional[Dict[str, float]] = None
+            ):
+        if GPU:
+            if torch.cuda.is_available():
+                self.device = torch.device("cuda:0")
+            else:
+                print("GPU isn't available, and use CPU to train STAND.")
+                self.device = torch.device("cpu")
+        else:
+            self.device = torch.device("cpu")
+
+        self.n_epochs = n_epochs
+        self.interval = update_interval
+        self.lr = learning_rate
+
+        if random_state is not None:
+            self.seed = random_state
+            seed_everything(random_state)
+
+        if weight is None:
+            self.weight = {'w_rec': 30, 'w_adv': 1, 'w_gp': 10}
+        else:
+            self.weight = weight
+
+        self.G = generator.to(self.device)
+
 
 
 
