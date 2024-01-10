@@ -15,7 +15,7 @@ from .._utils import clear_warnings
 
 
 metrics_list = Literal[
-    'AUC', 'Precision', 'Recall', 'F1', 'SGD_degree','SGD_cc'
+    'AUC', 'Precision', 'Recall', 'F1', 'F1*NMI', 'SGD_degree','SGD_cc'
     'ARI', 'NMI', 'ASW_type', '1-ASW_batch', 'BatchKL', 'iLISI', 'cLISI',
 ]
 
@@ -37,10 +37,11 @@ def evaluate(metrics: Sequence[metrics_list],
         Precision: `y_true`, `y_pred`/`y_score`
         Recall: `y_true`, `y_pred`/`y_score`
         F1: `y_true`, `y_pred`/`y_score`
+        F1*NMI: `y_true`, `y_pred`/`y_score`, `adata`, `typeid`, `clustid`
         SGD_degree: `adata`, `spaid`, `y_true`, `y_pred`/`y_score`
         SGD_cc: `adata`, `spaid`, `y_true`, `y_pred`/`y_score`
-        ARI: `adata`, `typeid`, `clustid`, (Optional: `emb`)
-        NMI: `adata`, `typeid`, `clustid`, (Optional: `emb`)
+        ARI: `adata`, `typeid`, `clustid`
+        NMI: `adata`, `typeid`, `clustid`
         ASW_type: `adata`, `typeid`, `batchid`, (Optional: `emb`)
         1-ASW_batch: `adata`, `typeid`, `batchid`, (Optional: `emb`)
         BatchKL: `adata`, `batchid`, (Optional: `emb`)
@@ -96,15 +97,15 @@ def evaluate(metrics: Sequence[metrics_list],
         if (adata is not None) and (spaid is not None):
             data.update({'spatial': adata.obsm[spaid]})
 
-    elif adata is not None:
-        if emb is None:
+    if adata is not None:
+        if emb is not None:
+            correct = adata.obsm[emb]
+        elif ['ASW_type', '1-ASW_batch', 'BatchKL', 'iLISI', 'cLISI'] in metrics:
             sc.tl.tsne(adata, random_state=0, use_fast_tsne=False)
             correct = adata.obsm['X_tsne']
-        else:
-            correct = adata.obsm[emb]
 
         data = {'correct': correct}
-        
+
         if batchid is not None:
             _, idx = np.unique(adata.obs[batchid].values, return_inverse=True)
             data.update({'batch': idx})
@@ -120,6 +121,7 @@ def evaluate(metrics: Sequence[metrics_list],
         'Precision': eval_P, 
         'Recall': eval_R, 
         'F1': eval_F1,
+        'F1*NMI': evla_F1NMI,
         'ARI': eval_ARI,
         'NMI': eval_NMI,
         'ASW_type': eval_ASW_type,
@@ -155,6 +157,11 @@ def eval_R(data):
 
 def eval_F1(data):
     return metrics.f1_score(data['y_true'], data['y_pred'], average='binary')
+
+def evla_F1NMI(data):
+    F1 = metrics.f1_score(data['y_true'], data['y_pred'], average='macro')
+    NMI = metrics.normalized_mutual_info_score(data['type'], data['cluster'])
+    return F1 * NMI
 
 def eval_ARI(data):
     return metrics.adjusted_rand_score(data['type'], data['cluster'])
