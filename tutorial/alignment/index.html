@@ -2088,14 +2088,14 @@ sc.set_figure_params(figsize=(4, 4))</div>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># replace with the path of downloaded demo or another datasets.</span>
-<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/KDD_data/'</span>
+<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/data/'</span>
 <span class="n">data_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Breast_full_ref1'</span><span class="p">,</span> <span class="s1">'Breast_full_ref2'</span><span class="p">,</span> <span class="s1">'Breast_full_ref3'</span><span class="p">]</span>
 
 <span class="n">graph</span> <span class="o">=</span> <span class="n">stands</span><span class="o">.</span><span class="n">read_multi</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">data_name</span><span class="p">)</span>
 <span class="n">raw</span> <span class="o">=</span> <span class="n">ad</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">graph</span><span class="p">[</span><span class="s1">'adata'</span><span class="p">])</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-3"># replace with the path of downloaded demo or another datasets.
-input_dir = '/volume3/kxu/KDD_data/'
+input_dir = '/volume3/kxu/data/'
 data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']
 
 graph = stands.read_multi(input_dir, data_name)
@@ -2528,7 +2528,7 @@ sc.pl.umap(correct, color=['batch'])</div>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 9, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 10, 2024</span>
       
     
   </small>
