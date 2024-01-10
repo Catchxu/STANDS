@@ -7,9 +7,10 @@ import torch.optim as optim
 from tqdm import tqdm
 from typing import List, Optional
 
-from .model import STNet, cluster
+from .model import STNet
 from ._read import read_multi
 from ._utils import seed_everything
+from .main import SubNet
 
 
 def pretrain(input_dir: str, data_name: List[str],
@@ -103,20 +104,31 @@ def pretrain_cluster(input_dir: str,
                      generator: nn.Module,
                      n_epochs: int = 200,
                      patch_size: Optional[int] = None,
-                     batch_size: int = 128,
                      learning_rate: float = 1e-4,
                      GPU: bool = True,
                      random_state: int = None,
                      weight_dir: Optional[str] = None,
              ):
-    if GPU:
-        if torch.cuda.is_available():
-            device = torch.device("cuda:0")
-        else:
-            print("GPU isn't available, and use CPU to train Docs.")
-            device = torch.device("cpu")
-    else:
-        device = torch.device("cpu")
+    # Initialize dataloader for train data
+    train = read_multi(input_dir, data_name, patch_size)
+    n_subtypes = len(train['adata'].obs[type_key].unique())
 
-    if random_state is not None:
-        seed_everything(random_state)
+    parameters = {
+        'generator': generator,
+        'n_subtypes': n_subtypes,
+        'learning_rate': learning_rate,
+        'GPU': GPU,
+        'random_state': random_state
+    }
+    model = SubNet(**parameters)
+    ClusterNet = model.pretrain(train, type_key, n_epochs)
+    
+    # Save both G and Fusion weights in a single file
+    save_state = {
+        'generator': ClusterNet.C.G.state_dict(),
+        'fusion': ClusterNet.C.Fusion.state_dict(),
+    }
+    if weight_dir is None:
+        weight_dir = os.path.dirname(__file__) + '/cluster.pth'
+
+    torch.save(save_state, weight_dir)

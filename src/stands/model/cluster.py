@@ -9,26 +9,36 @@ from sklearn.cluster import KMeans
 from ._block import TFBlock
 
 
-class cluster(nn.Module):
+class Cluster(nn.Module):
     def __init__(self, generator, use_image: bool = True,
                  z_dim=256, n_subtypes=2, alpha=1, **kwargs):
         super().__init__()
-        self.G = generator
         self.subtypes = n_subtypes
         self.alpha = alpha
         self.z_dim = z_dim * 2 if use_image else z_dim
         self.Fusion = TFBlock(self.z_dim, num_heads=2)
+        self.G = generator
 
         self.mu = Parameter(torch.Tensor(self.subtypes, self.z_dim*2))
 
-    def forward(self, g_block, z, res_g, res_p=None):
-        res_z, _, _ = self.G(g_block, res_g, res_g)
+        # classifer for supervised pre-training
+        self.classifer = nn.Linear(self.z_dim*2, n_subtypes)
+
+    def forward(self, g_block, feat_g, res_g, feat_p=None, res_p=None):
+        z, _, _ = self.G(g_block, feat_g, feat_p)
+        res_z, _, _ = self.G(g_block, res_g, res_p)
         x = self.Fusion(z, res_z)
         q = 1.0 / ((1.0 + torch.sum((x.unsqueeze(1) - self.mu)**2, dim=2) / self.alpha) + 1e-8)
         q = q**(self.alpha+1.0)/2.0
         q = q / torch.sum(q, dim=1, keepdim=True)
         self.mu_update(x, q)
         return x, q
+    
+    def pretrain(self, g_block, feat_g, res_g, feat_p=None, res_p=None):
+        z, _, _ = self.G(g_block, feat_g, feat_p)
+        res_z, _, _ = self.G(g_block, res_g, res_p)
+        x = self.Fusion(z, res_z)
+        return self.classifer(x)
 
     def loss_function(self, p, q):
         def kld(target, pred):

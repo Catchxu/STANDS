@@ -11,8 +11,7 @@ from typing import Optional, Dict, Any
 from sklearn.preprocessing import LabelEncoder
 
 from .model import GeneratorAD, GeneratorPair, GeneratorBC
-from .model import Discriminator
-from .model import GMMWithPrior
+from .model import Discriminator, GMMWithPrior, Cluster
 from ._utils import seed_everything, calculate_gradient_penalty
 
 
@@ -532,9 +531,10 @@ class BCNet:
 
 
 class SubNet:
-    def __init__(self, generator, n_epochs: int = 10, update_interval=3,
+    def __init__(self, generator: nn.Module, n_subtypes: int = 2,
+                 n_epochs: int = 10, update_interval=3,
                  learning_rate: float = 1e-4, GPU: bool = True, 
-                 random_state: Optional[int] = None, 
+                 random_state: Optional[int] = None
             ):
         if GPU:
             if torch.cuda.is_available():
@@ -548,14 +548,16 @@ class SubNet:
         self.n_epochs = n_epochs
         self.interval = update_interval
         self.lr = learning_rate
+        self.n_subtypes = n_subtypes
 
         if random_state is not None:
             self.seed = random_state
             seed_everything(random_state)
 
         self.G = generator.to(self.device)
-    
-    def pretrain(self, tgt: Dict[str, Any], type_key: str, generator: nn.Module):
+
+    def pretrain(self, tgt: Dict[str, Any], type_key: str,
+                 pretrain_epochs: int = 100):
         graph = tgt['graph'].to(self.device)
         label_encoder = LabelEncoder()
         df = tgt['adata'].obs
@@ -564,16 +566,46 @@ class SubNet:
         node_type = torch.FloatTensor(node_type.values).to(self.device)
         graph.ndata['type'] = node_type
 
-        self.G = generator.to(self.device)
+        res_g, res_p = self.gen_res(self, graph)
+        graph.ndata['res_gene'] = res_g
+        graph.ndata['res_patch'] = res_p        
+        self.C = Cluster(self.G, tgt['use_image'])
 
+        opt = optim.Adam(self.C.parameters(), lr=self.lr, betas=(0.5, 0.999))
+        sch = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer = self.opt, T_max = pretrain_epochs)
+        Loss = nn.CrossEntropyLoss().to(self.device)
+
+        self.C.train()
+        with tqdm(total=pretrain_epochs) as t:
+            for _ in range(self.n_epochs):
+                t.set_description(f'Pretrain Epochs')
+                
+                opt.zero_grad()
+                pred = self.C.pretrain(
+                    [graph, graph], graph.ndata['gene'], graph.ndata['res_gene'],
+                    graph.ndata['patch'], graph.ndata['res_patch']
+                )
+                loss = Loss(pred, graph.ndata['type'])
+                loss.backward()
+                opt.step()
+                sch.step()
+
+                t.set_postfix(Loss =  loss.item())
+                t.update(1)
+        
+        return self.C
 
     @torch.no_grad()
-    def gen_fake(self, graph: dgl.DGLGraph):
+    def gen_res(self, graph: dgl.DGLGraph):
         '''Generate reconstructed data'''
         self.G.eval()
         _, fake_g, fake_p = self.G(
             [graph, graph], graph.ndata['gene'], graph.ndata['patch']
             )
+        res_g = graph.ndata['gene'] - fake_g.detach()
+        res_p = graph.ndata['patch'] - fake_p.detach()
+        return res_g, res_p
 
 
 
