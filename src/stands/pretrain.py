@@ -1,13 +1,15 @@
 import os
 import dgl
+import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
 from tqdm import tqdm
 from typing import List, Optional
+from sklearn.preprocessing import LabelEncoder
 
-from .model import STNet
+from .model import STNet, cluster
 from ._read import read_multi
 from ._utils import seed_everything
 
@@ -22,7 +24,7 @@ def pretrain(input_dir: str, data_name: List[str],
              weight_dir: Optional[str] = None,
              ):
     """
-    Pretrain STNet model using spatial data.
+    Pretrain STANDS basic networks using spatial data.
     After the completion of pre-training, the weights will be automatically saved.
 
     Parameters:
@@ -93,3 +95,45 @@ def pretrain(input_dir: str, data_name: List[str],
     net.save_weights(weight_dir, save_module)
     
     tqdm.write(f'The pretrained weights for STANDS have been automatically saved at {weight_dir}!')
+
+
+
+
+def pretrain_cluster(input_dir: str,
+                     data_name: List[str],
+                     type_key: str,
+                     n_epochs: int = 200,
+                     patch_size: Optional[int] = None,
+                     batch_size: int = 128,
+                     learning_rate: float = 1e-4,
+                     GPU: bool = True,
+                     random_state: int = None,
+                     weight_dir: Optional[str] = None,
+             ):
+    if GPU:
+        if torch.cuda.is_available():
+            device = torch.device("cuda:0")
+        else:
+            print("GPU isn't available, and use CPU to train Docs.")
+            device = torch.device("cpu")
+    else:
+        device = torch.device("cpu")
+
+    if random_state is not None:
+        seed_everything(random_state)
+    
+    # Initialize dataloader for train data
+    train = read_multi(input_dir, data_name, patch_size)
+    graph = train['graph']
+    label_encoder = LabelEncoder()
+    df = train['adata'].obs
+    df['type_encoded'] = label_encoder.fit_transform(df[type_key])
+    node_type = pd.get_dummies(df['type_encoded'], prefix='category')
+    node_type = torch.FloatTensor(node_type.values)
+    graph.ndata['type'] = node_type
+
+    sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
+    dataset = dgl.dataloading.DataLoader(
+        graph, graph.nodes(), sampler,
+        batch_size=batch_size, shuffle=True,
+        drop_last=False, num_workers=0, device=device)
