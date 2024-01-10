@@ -1,13 +1,11 @@
 import os
 import dgl
-import pandas as pd
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
 from tqdm import tqdm
 from typing import List, Optional
-from sklearn.preprocessing import LabelEncoder
 
 from .model import STNet, cluster
 from ._read import read_multi
@@ -102,6 +100,7 @@ def pretrain(input_dir: str, data_name: List[str],
 def pretrain_cluster(input_dir: str,
                      data_name: List[str],
                      type_key: str,
+                     generator: nn.Module,
                      n_epochs: int = 200,
                      patch_size: Optional[int] = None,
                      batch_size: int = 128,
@@ -121,19 +120,3 @@ def pretrain_cluster(input_dir: str,
 
     if random_state is not None:
         seed_everything(random_state)
-    
-    # Initialize dataloader for train data
-    train = read_multi(input_dir, data_name, patch_size)
-    graph = train['graph']
-    label_encoder = LabelEncoder()
-    df = train['adata'].obs
-    df['type_encoded'] = label_encoder.fit_transform(df[type_key])
-    node_type = pd.get_dummies(df['type_encoded'], prefix='category')
-    node_type = torch.FloatTensor(node_type.values)
-    graph.ndata['type'] = node_type
-
-    sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
-    dataset = dgl.dataloading.DataLoader(
-        graph, graph.nodes(), sampler,
-        batch_size=batch_size, shuffle=True,
-        drop_last=False, num_workers=0, device=device)

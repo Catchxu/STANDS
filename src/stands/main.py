@@ -1,12 +1,14 @@
 import os
 import dgl
 import numpy as np
+import pandas as pd
 import anndata as ad
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from typing import Optional, Dict, Any
+from sklearn.preprocessing import LabelEncoder
 
 from .model import GeneratorAD, GeneratorPair, GeneratorBC
 from .model import Discriminator
@@ -552,6 +554,27 @@ class SubNet:
             seed_everything(random_state)
 
         self.G = generator.to(self.device)
+    
+    def pretrain(self, tgt: Dict[str, Any], type_key: str, generator: nn.Module):
+        graph = tgt['graph'].to(self.device)
+        label_encoder = LabelEncoder()
+        df = tgt['adata'].obs
+        df['type_encoded'] = label_encoder.fit_transform(df[type_key])
+        node_type = pd.get_dummies(df['type_encoded'], prefix='category')
+        node_type = torch.FloatTensor(node_type.values).to(self.device)
+        graph.ndata['type'] = node_type
+
+        self.G = generator.to(self.device)
+
+
+    @torch.no_grad()
+    def gen_fake(self, graph: dgl.DGLGraph):
+        '''Generate reconstructed data'''
+        self.G.eval()
+        _, fake_g, fake_p = self.G(
+            [graph, graph], graph.ndata['gene'], graph.ndata['patch']
+            )
+
 
 
 
