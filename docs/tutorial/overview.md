@@ -9,3 +9,4 @@ Before starting the tutorial, we need to make some preparations, including: inst
 - [Tutorial 1: Pretrain the basic networks](./pretrain.ipynb)
 - [Tutorial 2: Detect anomalous regions with multimodal data](./detection.ipynb)
 - [Tutorial 3: Align multi-batch ST datasets](./alignment.ipynb)
+- [Tutorial 4: Detect anomalous subdomains with multimodal data](./subtype.ipynb)
