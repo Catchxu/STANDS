@@ -604,6 +604,8 @@
         
           
         
+          
+        
       
       
         
@@ -624,6 +626,20 @@
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/stands/model/cluster/" class="md-nav__link">
+        <code class="doc-symbol doc-symbol-nav doc-symbol-module"></code> cluster
+      </a>
+    </li>
+  
+
             
           
             
@@ -720,6 +736,8 @@
       <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
       
       
+        
+          
         
           
         
@@ -862,6 +880,20 @@
     <li class="md-nav__item">
       <a href="../alignment/" class="md-nav__link">
         Tutorial 3: Align multi-batch ST datasets
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../subtype/" class="md-nav__link">
+        Tutorial 4: Detect anomalous subdomains with multimodal data
       </a>
     </li>
   
@@ -2102,7 +2134,7 @@ sc.set_figure_params(figsize=(4, 4))</div>
 </clipboard-copy>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># replace with the path of downloaded demo or another datasets.</span>
-<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/KDD_data/'</span>
+<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/data/'</span>
 <span class="n">ref_name</span> <span class="o">=</span> <span class="s1">'Breast_full_ref1'</span>
 <span class="n">tgt_name</span> <span class="o">=</span> <span class="s1">'Breast_full_tumor1'</span>
 
@@ -2112,7 +2144,7 @@ sc.set_figure_params(figsize=(4, 4))</div>
 <span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">'Cancer in situ'</span><span class="p">,</span> <span class="s1">'Invasive cancer'</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tgt</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">'domain.type'</span><span class="p">]]</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-3"># replace with the path of downloaded demo or another datasets.
-input_dir = '/volume3/kxu/KDD_data/'
+input_dir = '/volume3/kxu/data/'
 ref_name = 'Breast_full_ref1'
 tgt_name = 'Breast_full_tumor1'
 
@@ -2838,7 +2870,7 @@ sc.pl.umap(tgt, color=['score'])</div>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 9, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 11, 2024</span>
       
     
   </small>

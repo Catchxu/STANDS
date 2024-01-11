@@ -10,20 +10,18 @@
         <meta name="author" content="Kaichen Xu">
       
       
-        <link rel="canonical" href="https://Catchxu.github.io/STANDS/tutorial/pretrain/">
+        <link rel="canonical" href="https://Catchxu.github.io/STANDS/tutorial/subtype/">
       
       
-        <link rel="prev" href="../overview/">
+        <link rel="prev" href="../alignment/">
       
-      
-        <link rel="next" href="../detection/">
       
       <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.5.1, mkdocs-material-9.1.21">
     
     
       
-        <title>Tutorial 1: Pretrain the basic networks - STANDS</title>
+        <title>Tutorial 4: Detect anomalous subdomains with multimodal data - STANDS</title>
       
     
     
@@ -85,7 +83,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial-1-pretrain-the-basic-networks" class="md-skip">
+        <a href="#tutorial-4-detect-anomalous-subdomains-with-multimodal-data" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Tutorial 1: Pretrain the basic networks
+              Tutorial 4: Detect anomalous subdomains with multimodal data
             
           </span>
         </div>
@@ -779,59 +777,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Tutorial 1: Pretrain the basic networks
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../pretrain/" class="md-nav__link">
         Tutorial 1: Pretrain the basic networks
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#preparation" class="md-nav__link">
-    Preparation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#pretrain-stands-automatically" class="md-nav__link">
-    Pretrain STANDS automatically
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -869,11 +819,73 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../subtype/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Tutorial 4: Detect anomalous subdomains with multimodal data
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Tutorial 4: Detect anomalous subdomains with multimodal data
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#preparation" class="md-nav__link">
+    Preparation
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detect-anomalous-regions" class="md-nav__link">
+    Detect anomalous regions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detect-anomalous-subdomains" class="md-nav__link">
+    Detect anomalous subdomains
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluate-anomalous-subdomains-detection-results" class="md-nav__link">
+    Evaluate anomalous subdomains detection results
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -919,8 +931,22 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#pretrain-stands-automatically" class="md-nav__link">
-    Pretrain STANDS automatically
+  <a href="#detect-anomalous-regions" class="md-nav__link">
+    Detect anomalous regions
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#detect-anomalous-subdomains" class="md-nav__link">
+    Detect anomalous subdomains
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluate-anomalous-subdomains-detection-results" class="md-nav__link">
+    Evaluate anomalous subdomains detection results
   </a>
   
 </li>
@@ -940,7 +966,7 @@
                   
 
   
-    <a href="https://github.com/Catchxu/STANDS/edit/master/docs/tutorial/pretrain.ipynb" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/Catchxu/STANDS/edit/master/docs/tutorial/subtype.ipynb" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4v-2m10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1 2.1 2.1Z"/></svg>
     </a>
@@ -949,7 +975,7 @@
     
       
     
-    <a href="https://github.com/Catchxu/STANDS/raw/master/docs/tutorial/pretrain.ipynb" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/Catchxu/STANDS/raw/master/docs/tutorial/subtype.ipynb" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.15 8.15 0 0 1-1.23-2Z"/></svg>
     </a>
@@ -1983,7 +2009,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="tutorial-1-pretrain-the-basic-networks">Tutorial 1: Pretrain the basic networks<a class="anchor-link" href="#tutorial-1-pretrain-the-basic-networks">¶</a></h1>
+<h1 id="tutorial-4-detect-anomalous-subdomains-with-multimodal-data">Tutorial 4: Detect anomalous subdomains with multimodal data<a class="anchor-link" href="#tutorial-4-detect-anomalous-subdomains-with-multimodal-data">¶</a></h1>
 </div>
 </div>
 </div>
@@ -1994,7 +2020,8 @@ Licensed under the Apache License, Version 2.0.
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>For a more accurate performance in subsequent tasks, we encourage you to pretrain STANDS on large-scale public spatial transcriptomics datasets. This is to ensure better performance in modules related to image feature extraction and feature fusion. This tutorial will guide you through the pretraining steps and automatically save the pretrained weights.</p>
+<p>Building upon completed anomaly detection, STANDS also supports further recognition of anomalous subtypes for heterogeneous analysis of carcinogenic regions. Similarly, this section also involves multimodal learning of H&amp;E images and spatial gene expression.</p>
+<p>This tutorial will guide you through the process step by step. The dataset used here is exactly the same as in Tutorial 2. The reference dataset consists of healthy human breast tissue, while the target dataset consists of human breast cancer tissue, including two types of anomalous regions: cancer in situ and invasive cancer.</p>
 </div>
 </div>
 </div>
@@ -2010,7 +2037,7 @@ Licensed under the Apache License, Version 2.0.
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3d4f14e2-653d-41f2-af8f-af1ac7884e5f">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=e267697c-7fbd-4f9d-92fd-3abb075bddf2">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2028,16 +2055,18 @@ Licensed under the Apache License, Version 2.0.
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">stands</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-1">import stands</div>
+<div class="clipboard-copy-txt" id="cell-1">import warnings
+warnings.filterwarnings("ignore")</div>
 </div>
 </div>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8a713ecc-a04b-4702-8828-6b3eb5c9f877">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3d4f14e2-653d-41f2-af8f-af1ac7884e5f">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2055,31 +2084,22 @@ Licensed under the Apache License, Version 2.0.
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># replace with the path of downloaded demo or another datasets.</span>
-<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/stdata/'</span>
-<span class="n">data_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Breast_full_ref1'</span><span class="p">,</span> <span class="s1">'Breast_full_ref2'</span><span class="p">,</span> <span class="s1">'Breast_full_ref3'</span><span class="p">]</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">stands</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
+<span class="kn">import</span> <span class="nn">squidpy</span> <span class="k">as</span> <span class="nn">sq</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">set_figure_params</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-2"># replace with the path of downloaded demo or another datasets.
-input_dir = '/volume3/kxu/stdata/'
-data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
+<div class="clipboard-copy-txt" id="cell-2">import stands
+import scanpy as sc
+import squidpy as sq
+sc.set_figure_params(figsize=(4, 4))</div>
 </div>
 </div>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ca0a9f8b-ae45-430c-b089-242447364d16">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="pretrain-stands-automatically">Pretrain STANDS automatically<a class="anchor-link" href="#pretrain-stands-automatically">¶</a></h2>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fed0fb69-b357-4529-91fa-1e0147999eda">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8a713ecc-a04b-4702-8828-6b3eb5c9f877">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2097,9 +2117,82 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">stands</span><span class="o">.</span><span class="n">pretrain</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">data_name</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># replace with the path of downloaded demo or another datasets.</span>
+<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/data/'</span>
+<span class="n">ref_name</span> <span class="o">=</span> <span class="s1">'Breast_full_ref1'</span>
+<span class="n">tgt_name</span> <span class="o">=</span> <span class="s1">'Breast_full_tumor1'</span>
+
+<span class="n">ref</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">input_dir</span> <span class="o">+</span> <span class="n">ref_name</span> <span class="o">+</span> <span class="s1">'.h5ad'</span><span class="p">)</span>
+<span class="n">tgt</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">input_dir</span> <span class="o">+</span> <span class="n">tgt_name</span> <span class="o">+</span> <span class="s1">'.h5ad'</span><span class="p">)</span>
+<span class="n">ref_g</span><span class="p">,</span> <span class="n">tgt_g</span> <span class="o">=</span> <span class="n">stands</span><span class="o">.</span><span class="n">read_cross</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">input_dir</span><span class="p">,</span> <span class="n">ref_name</span><span class="p">,</span> <span class="n">tgt_name</span><span class="p">,</span> <span class="n">train_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">label</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'Cancer in situ'</span> <span class="k">else</span> <span class="mi">2</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'Invasive cancer'</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tgt</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">'domain.type'</span><span class="p">]]</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-3">stands.pretrain(input_dir, data_name)</div>
+<div class="clipboard-copy-txt" id="cell-3"># replace with the path of downloaded demo or another datasets.
+input_dir = '/volume3/kxu/data/'
+ref_name = 'Breast_full_ref1'
+tgt_name = 'Breast_full_tumor1'
+
+ref = sc.read_h5ad(input_dir + ref_name + '.h5ad')
+tgt = sc.read_h5ad(input_dir + tgt_name + '.h5ad')
+ref_g, tgt_g = stands.read_cross(input_dir, input_dir, ref_name, tgt_name, train_mode=False)
+label = [1 if i == 'Cancer in situ' else 2 if i == 'Invasive cancer' else 0 for i in tgt.obs['domain.type']]</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ca0a9f8b-ae45-430c-b089-242447364d16">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="detect-anomalous-regions">Detect anomalous regions<a class="anchor-link" href="#detect-anomalous-regions">¶</a></h2>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=e8e5bcba-3aa4-4599-973f-fadbe35eebcd">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>The first step is to identify anomalous regions using the exact same approach as in Tutorial 2.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fed0fb69-b357-4529-91fa-1e0147999eda">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-4">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">stands</span><span class="o">.</span><span class="n">ADNet</span><span class="p">(</span><span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">ref_g</span><span class="p">)</span>
+
+<span class="c1"># obtain anomaly scores and predicted labels</span>
+<span class="n">score</span><span class="p">,</span> <span class="n">pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">tgt_g</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-4">model = stands.ADNet(n_epochs = 10)
+model.fit(ref_g)
+
+# obtain anomaly scores and predicted labels
+score, pred = model.predict(tgt_g)</div>
 </div>
 </div>
 </div>
@@ -2111,22 +2204,234 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>Begin to pretrain STANDS...
+<pre>Begin to fine-tune the model on reference datasets...
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>Pretrain STNet: 100%|██████████| 200/200 [34:18&lt;00:00, 10.29s/it, Loss=0.0501]
+<pre>Train Epochs: 100%|██████████| 10/10 [01:42&lt;00:00,  9.33s/it, D_Loss=-.221, G_Loss=0.472]</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Fine-tuning has been finished.
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>The pretrained weights for STANDS have been automatically saved at /volume1/home/kxu/STANDS/stands/model.pth!
+<pre>Detect anomalous spots on target dataset...
 </pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>Inference Epochs:  19%|██        | 19/100 [00:00&lt;00:00, 368.01it/s]</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>GMM-based thresholder has converged.
+Anomalous spots have been detected.
+
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=08c5c865">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-5">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">tgt</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">'pseudo.label'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pred</span>
+<span class="n">train</span> <span class="o">=</span> <span class="n">tgt</span><span class="p">[</span><span class="n">tgt</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">'pseudo.label'</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+<span class="n">train_g</span> <span class="o">=</span> <span class="n">stands</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">train_mode</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-5">tgt.obs['pseudo.label'] = pred
+train = tgt[tgt.obs['pseudo.label'] == 1, :]
+train_g = stands.read(train, train_mode=False)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=2b8db105">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="detect-anomalous-subdomains">Detect anomalous subdomains<a class="anchor-link" href="#detect-anomalous-subdomains">¶</a></h2>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ea022d34">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>STANDS requires feeding the generator trained in the previous <code>stands.ADNet</code> into the <code>stands.SubNet</code> to ensure consistency in feature extraction.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a36f0b3b">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-6">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">sub_model</span> <span class="o">=</span> <span class="n">stands</span><span class="o">.</span><span class="n">SubNet</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">G</span><span class="p">,</span> <span class="n">n_epochs</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">sub_pred</span> <span class="o">=</span> <span class="n">sub_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">train_g</span><span class="p">)</span>
+
+<span class="n">train</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">'subpred'</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub_pred</span>
+<span class="n">train</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">'subpred'</span><span class="p">]</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">obs</span><span class="p">[</span><span class="s1">'subpred'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">sub_pred</span> <span class="o">=</span> <span class="p">[</span><span class="n">train</span><span class="o">.</span><span class="n">obs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">'subpred'</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">train</span><span class="o">.</span><span class="n">obs_names</span> <span class="k">else</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tgt</span><span class="o">.</span><span class="n">obs_names</span><span class="p">]</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-6">sub_model = stands.SubNet(model.G, n_epochs=50)
+sub_pred = sub_model.fit(train_g)
+
+train.obs['subpred'] = sub_pred
+train.obs['subpred'] = train.obs['subpred'].astype(int)
+sub_pred = [train.obs.loc[i, 'subpred'] if i in train.obs_names else 0 for i in tgt.obs_names]</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Begin to detect anomalous subdomains...
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
+<pre>Train Epochs: 100%|██████████| 50/50 [01:32&lt;00:00,  1.62s/it, Loss=1e-15]</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
+<pre>Anomalous subdomains have been detected.
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=22713f8b-cdd2-440b-95a0-2755d206074b">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="evaluate-anomalous-subdomains-detection-results">Evaluate anomalous subdomains detection results<a class="anchor-link" href="#evaluate-anomalous-subdomains-detection-results">¶</a></h2>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=b64b6324-ffa4-4b1d-8846-8678064e8b00">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>STANDS also provides an evaluation function to compute evaluation metric <code>FI*NMI</code> for the subtyping performance.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ff4518f6-f9fc-478b-a7c5-90e7edb39416">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-7">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">stands</span><span class="o">.</span><span class="n">evaluate</span><span class="p">([</span><span class="s1">'F1*NMI'</span><span class="p">],</span> <span class="n">y_true</span><span class="o">=</span><span class="n">label</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="n">sub_pred</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-7">stands.evaluate(['F1*NMI'], y_true=label, y_pred=sub_pred)</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain">
+<pre>0.42</pre>
 </div>
 </div>
 </div>
@@ -2139,7 +2444,7 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>For further details on the <code>stands.pretrain</code>, including various parameters, please refer to the API reference documentation.</p>
+<p>For further details on the <code>stands.SubNet</code>, including various parameters, please refer to the API reference documentation.</p>
 </div>
 </div>
 </div>
@@ -2152,7 +2457,7 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 9, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 11, 2024</span>
       
     
   </small>
@@ -2183,7 +2488,7 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../overview/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview" rel="prev">
+          <a href="../alignment/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Tutorial 3: Align multi-batch ST datasets" rel="prev">
             <div class="md-footer__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
             </div>
@@ -2192,26 +2497,11 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
                 Previous
               </span>
               <div class="md-ellipsis">
-                Overview
+                Tutorial 3: Align multi-batch ST datasets
               </div>
             </div>
           </a>
         
-        
-          
-          <a href="../detection/" class="md-footer__link md-footer__link--next" aria-label="Next: Tutorial 2: Detect anomalous regions with multimodal data" rel="next">
-            <div class="md-footer__title">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              <div class="md-ellipsis">
-                Tutorial 2: Detect anomalous regions with multimodal data
-              </div>
-            </div>
-            <div class="md-footer__button md-icon">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-            </div>
-          </a>
         
       </nav>
     
