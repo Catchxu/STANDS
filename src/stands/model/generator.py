@@ -270,17 +270,6 @@ class STNet(nn.Module):
         feat_g, feat_p = self.decode(z_g, z_p)
         return feat_g, feat_p
 
-    def save_weights(self, weight_dir: str, save_module: List[str]):
-        state_dict = self.state_dict()
-        save_state = {}
-
-        for param in state_dict:
-            for module in save_module:
-                if module in param:
-                    save_state.update({param: state_dict[param]})
-
-        torch.save(save_state, weight_dir)
-
 
 class GeneratorAD(STNet):
     def __init__(self, patch_size, in_dim, z_dim=256, use_image=True,
