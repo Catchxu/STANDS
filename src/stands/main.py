@@ -15,7 +15,7 @@ from .model import Discriminator, GMMWithPrior, Cluster
 from ._utils import seed_everything, calculate_gradient_penalty
 
 
-class AnomalyDetection:
+class AnomalyDetect:
     def __init__(self, n_epochs: int = 10, batch_size: int = 128,
                  learning_rate: float = 2e-5, mem_dim: int = 1024,
                  n_critic: int = 2, GPU: bool = True,
@@ -44,30 +44,60 @@ class AnomalyDetection:
         else:
             self.weight = weight
 
-    def fit(self, ref: Dict[str, Any], weight_dir: Optional[str] = None,
-            save: bool = False, **kwargs):
-        '''Fine-tune STand on reference graph'''
+    def fit(self, ref: Dict[str, Any], weight_dir: Optional[str] = None, **kwargs):
+        '''Fine-tune STands on reference graph'''
         tqdm.write('Begin to fine-tune the model on reference datasets...')
 
         # dataset provides subgraph for training
         ref_g = ref['graph']
         self.use_img = ref['use_image']
         self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
+
         self.dataset = dgl.dataloading.DataLoader(
-            ref_g, ref_g.nodes(), self.sampler,
-            batch_size=self.batch_size, shuffle=True,
-            drop_last=True, num_workers=0, device=self.device)
+            ref_g, 
+            ref_g.nodes(), 
+            self.sampler,
+            batch_size=self.batch_size, 
+            shuffle=True,
+            drop_last=True, 
+            num_workers=0, 
+            device=self.device
+        )
 
-        self.D = Discriminator(ref['patch_size'], ref['gene_dim']).to(self.device)
-        self.G = GeneratorAD(ref['patch_size'], ref['gene_dim'], mem_dim=self.mem_dim, 
-                             use_image=self.use_img, **kwargs).to(self.device)
+        self.D = Discriminator(
+            ref['patch_size'], 
+            ref['gene_dim']
+        ).to(self.device)
 
-        self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
-        self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr*self.n_critic, betas=(0.5, 0.999))
-        self.D_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_D,
-                                                          T_max = self.n_epochs)
-        self.G_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_G,
-                                                          T_max = self.n_epochs)
+        self.G = GeneratorAD(
+            ref['patch_size'], 
+            ref['gene_dim'], 
+            mem_dim=self.mem_dim, 
+            use_image=self.use_img, 
+            **kwargs
+        ).to(self.device)
+
+        self.opt_D = optim.Adam(
+            self.D.parameters(), 
+            lr=self.lr, 
+            betas=(0.5, 0.999)
+        )
+
+        self.opt_G = optim.Adam(
+            self.G.parameters(), 
+            lr=self.lr*self.n_critic, 
+            betas=(0.5, 0.999)
+        )
+
+        self.D_sch = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer = self.opt_D,
+            T_max = self.n_epochs
+        )
+
+        self.G_sch = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer = self.opt_G,
+            T_max = self.n_epochs
+        )
 
         self.L1 = nn.L1Loss().to(self.device)
 
@@ -96,20 +126,9 @@ class AnomalyDetection:
                 t.update(1)
 
         tqdm.write('Fine-tuning has been finished.')
-
-        # if save:
-        #     if 'patch' in ref_g.ndata.keys():
-        #         save_module = ['GeneEncoder', 'GeneDecoder',
-        #                        'ImageEncoder', 'ImageDecoder',
-        #                        'Fusion']
-        #     else:
-        #         save_module = ['GeneEncoder', 'GeneDecoder']
-
-        #     weight_dir = os.path.dirname(__file__) + '/temp.pth'
-        #     self.G.save_weights(weight_dir, save_module)  # save the trained STNet weights
     
     @torch.no_grad()
-    def predict(self, tgt: Dict[str, Any]):
+    def predict(self, tgt: Dict[str, Any], run_gmm: bool = True):
         '''Detect anomalous spots on target graph'''
         if (self.G is None or self.D is None):
             raise RuntimeError('Please fine-tune the model first.')
@@ -117,9 +136,15 @@ class AnomalyDetection:
         tgt_g = tgt['graph']
 
         dataset = dgl.dataloading.DataLoader(
-            tgt_g, tgt_g.nodes(), self.sampler,
-            batch_size=self.batch_size, shuffle=False,
-            drop_last=False, num_workers=0, device=self.device)
+            tgt_g, 
+            tgt_g.nodes(), 
+            self.sampler,
+            batch_size=self.batch_size, 
+            shuffle=False,
+            drop_last=False, 
+            num_workers=0, 
+            device=self.device
+        )
 
         self.G.eval()
         self.D.eval()
@@ -127,12 +152,16 @@ class AnomalyDetection:
     
         ref_score = self.score(self.dataset)
         tgt_score = self.score(dataset)
-        gmm = GMMWithPrior(ref_score, tol=0.00001)
-        threshold = gmm.fit(tgt_score=tgt_score)
-        tgt_label = [1 if s >= threshold else 0 for s in tgt_score]
 
         tqdm.write('Anomalous spots have been detected.\n')
-        return tgt_score, tgt_label
+
+        if run_gmm:
+            gmm = GMMWithPrior(ref_score, tol=0.00001)
+            threshold = gmm.fit(tgt_score=tgt_score)
+            tgt_label = [1 if s >= threshold else 0 for s in tgt_score]
+            return tgt_score, tgt_label
+        else:
+            return tgt_score
 
     @torch.no_grad()
     def prepare(self, weight_dir: Optional[str]):
@@ -164,8 +193,10 @@ class AnomalyDetection:
         self.opt_D.zero_grad()
 
         # generate fake data
-        _, fake_g, fake_p = self.G(blocks, blocks[0].srcdata['gene'],
-                                   blocks[1].srcdata['patch'] if self.use_img else None)
+        _, fake_g, fake_p = self.G(
+            blocks, 
+            blocks[0].srcdata['gene'],
+            blocks[1].srcdata['patch'] if self.use_img else None)
 
         # get real data from blocks
         real_g = blocks[1].dstdata['gene']
@@ -269,15 +300,35 @@ class KinPair:
         ref_g, tgt_g = self.split(raw_g)
 
         self.D = Discriminator(raw['patch_size'], 256).to(self.device)
-        self.G = GeneratorPair(raw['patch_size'], raw['gene_dim'],
-                               ref_g.num_nodes(), tgt_g.num_nodes(), **kwargs).to(self.device)
+        self.G = GeneratorPair(
+            raw['patch_size'], 
+            raw['gene_dim'],
+            ref_g.num_nodes(), 
+            tgt_g.num_nodes(), 
+            **kwargs
+        ).to(self.device)
 
-        self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
-        self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr, betas=(0.5, 0.999))
-        self.D_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_D,
-                                                          T_max = self.n_epochs)
-        self.G_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_G,
-                                                          T_max = self.n_epochs)
+        self.opt_D = optim.Adam(
+            self.D.parameters(), 
+            lr=self.lr, 
+            betas=(0.5, 0.999)
+        )
+
+        self.opt_G = optim.Adam(
+            self.G.parameters(), 
+            lr=self.lr, 
+            betas=(0.5, 0.999)
+        )
+        
+        self.D_sch = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer = self.opt_D,
+            T_max = self.n_epochs
+        )
+
+        self.G_sch = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer = self.opt_G,
+            T_max = self.n_epochs
+        )
 
         self.Loss = nn.MSELoss().to(self.device)
 
@@ -289,8 +340,8 @@ class KinPair:
             for _ in range(self.n_epochs):
                 t.set_description(f'Train Epochs')
 
-                self.update_D(ref_g, tgt_g)
-                self.update_G(ref_g, tgt_g)
+                self.UpdateD(ref_g, tgt_g)
+                self.UpdateG(ref_g, tgt_g)
 
                 # Update learning rate for G and D
                 self.D_sch.step()
@@ -323,10 +374,7 @@ class KinPair:
         if weight_dir:
             pre_weights = torch.load(weight_dir)
         else:
-            if os.path.exists(os.path.dirname(__file__) + '/temp.pth'):
-                pre_weights = torch.load(os.path.dirname(__file__) + '/temp.pth')
-            else:
-                pre_weights = torch.load(os.path.dirname(__file__) + '/model.pth')
+            pre_weights = torch.load(os.path.dirname(__file__) + '/model.pth')
 
         # Load the pre-trained weights for Encoder and Decoder
         model_dict = self.G.state_dict()
@@ -340,7 +388,7 @@ class KinPair:
         for _, value in self.G.ImageEncoder.named_parameters():
             value.requires_grad = False
 
-    def update_D(self, ref_g, tgt_g):
+    def UpdateD(self, ref_g, tgt_g):
         '''Updating discriminator'''
         self.opt_D.zero_grad()
 
@@ -354,7 +402,7 @@ class KinPair:
         self.D_loss.backward()
         self.opt_D.step()
     
-    def update_G(self, ref_g, tgt_g):
+    def UpdateG(self, ref_g, tgt_g):
         '''Updating generator'''
         self.opt_G.zero_grad()
 
@@ -373,7 +421,7 @@ class KinPair:
 
 
 
-class BCNet:
+class BatchAlign:
     def __init__(self, n_epochs: int = 10, batch_size: int = 128,
                  learning_rate: float = 2e-5, n_critic: int = 2,
                  GPU: bool = True, random_state: Optional[int] = None,
@@ -412,20 +460,44 @@ class BCNet:
 
         self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
         self.dataset = dgl.dataloading.DataLoader(
-            tgt_g, tgt_g.nodes(), self.sampler,
-            batch_size=self.batch_size, shuffle=True,
-            drop_last=False, num_workers=0, device=self.device)
+            tgt_g, 
+            tgt_g.nodes(), 
+            self.sampler,
+            batch_size=self.batch_size, 
+            shuffle=True,
+            drop_last=False, 
+            num_workers=0, 
+            device=self.device
+        )
 
         self.D = Discriminator(raw['patch_size'], raw['gene_dim']).to(self.device)
-        self.G = GeneratorBC(raw['data_n'], raw['patch_size'],
-                             raw['gene_dim']).to(self.device)
+        self.G = GeneratorBC(
+            raw['data_n'], 
+            raw['patch_size'],
+            raw['gene_dim']
+        ).to(self.device)
 
-        self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
-        self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr, betas=(0.5, 0.999))
-        self.D_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_D,
-                                                          T_max = self.n_epochs)
-        self.G_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer = self.opt_G,
-                                                          T_max = self.n_epochs)
+        self.opt_D = optim.Adam(
+            self.D.parameters(), 
+            lr=self.lr, 
+            betas=(0.5, 0.999)
+        )
+
+        self.opt_G = optim.Adam(
+            self.G.parameters(), 
+            lr=self.lr, 
+            betas=(0.5, 0.999)
+        )
+    
+        self.D_sch = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer = self.opt_D,
+            T_max = self.n_epochs
+        )
+
+        self.G_sch = optim.lr_scheduler.CosineAnnealingLR(
+            optimizer = self.opt_G,
+            T_max = self.n_epochs
+        )
         
         self.L1 = nn.L1Loss().to(self.device)
 
@@ -442,10 +514,10 @@ class BCNet:
 
                     # Update discriminator for n_critic times
                     for _ in range(self.n_critic):
-                        self.update_D(blocks)
+                        self.UpdateD(blocks)
 
                     # Update generator for one time
-                    self.update_G(blocks)
+                    self.UpdateG(blocks)
 
                 # Update learning rate for G and D
                 self.D_sch.step()
@@ -455,16 +527,25 @@ class BCNet:
                 t.update(1)
 
         self.dataset = dgl.dataloading.DataLoader(
-            tgt_g, tgt_g.nodes(), self.sampler,
-            batch_size=self.batch_size, shuffle=False,
-            drop_last=False, num_workers=0, device=self.device)
+            tgt_g, 
+            tgt_g.nodes(), 
+            self.sampler,
+            batch_size=self.batch_size, 
+            shuffle=False,
+            drop_last=False, 
+            num_workers=0, 
+            device=self.device
+        )
 
         self.G.eval()
         corrected = []
         with torch.no_grad():
             for _, _, blocks in self.dataset:
-                fake_g = self.G(blocks, blocks[0].srcdata['gene'],
-                                blocks[-1].dstdata['batch'])
+                fake_g = self.G(
+                    blocks, 
+                    blocks[0].srcdata['gene'],
+                    blocks[-1].dstdata['batch']
+                )
                 corrected.append(fake_g.cpu().detach())
 
         corrected = torch.cat(corrected, dim=0).numpy()
@@ -486,12 +567,16 @@ class BCNet:
         model_dict.update(pretrained_dict)
         self.G.load_state_dict(model_dict)
 
-    def update_D(self, blocks):
+    def UpdateD(self, blocks):
         '''Updating discriminator'''
         self.opt_D.zero_grad()
 
         # generate fake data
-        fake_g = self.G(blocks, blocks[0].srcdata['gene'], blocks[-1].dstdata['batch'])
+        fake_g = self.G(
+            blocks, 
+            blocks[0].srcdata['gene'], 
+            blocks[-1].dstdata['batch']
+        )
 
         # get real data from blocks
         real_g = blocks[-1].dstdata['ref_gene']
@@ -505,7 +590,7 @@ class BCNet:
         self.D_loss.backward()
         self.opt_D.step()
 
-    def update_G(self, blocks):
+    def UpdateG(self, blocks):
         '''Updating generator'''
         self.opt_G.zero_grad()
 
@@ -527,7 +612,7 @@ class BCNet:
 
 
 
-class SubNet:
+class Subtype:
     def __init__(self, generator: nn.Module, n_subtypes: int = 2,
                  n_epochs: int = 10, update_interval=3,
                  learning_rate: float = 1e-4, GPU: bool = True, 

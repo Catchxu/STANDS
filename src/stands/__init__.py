@@ -34,12 +34,12 @@ Modules:
     evaluate: Calculate various metrics (including SGD).
 """
 
-from .main import AnomalyDetection, KinPair, BCNet
+from .main import AnomalyDetect, KinPair, BatchAlign, Subtype
 from .pretrain import pretrain
 from ._read import read, read_cross, read_multi
 from .evaluate import evaluate
 
 
-__all__ = ['AnomalyDetection', 'BCNet',
+__all__ = ['AnomalyDetect', 'BatchAlign', 'Subtype'
            'read', 'read_cross', 'read_multi',
            'pretrain', 'evaluate']
