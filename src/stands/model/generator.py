@@ -283,10 +283,10 @@ class STNet(nn.Module):
 
 
 class GeneratorAD(STNet):
-    def __init__(self, patch_size, in_dim, z_dim=256, 
+    def __init__(self, patch_size, in_dim, z_dim=256, use_image=True,
                  mem_dim=1024, thres=0.01, tem=1, **kwargs):
-        super().__init__(patch_size, in_dim, **kwargs)
-        if self.use_image:
+        super().__init__(patch_size, in_dim, z_dim, use_image, **kwargs)
+        if use_image:
             self.Memory = MemoryBlock(mem_dim, 2*z_dim, thres, tem)
         else:
             self.Memory = MemoryBlock(mem_dim, z_dim, thres, tem)

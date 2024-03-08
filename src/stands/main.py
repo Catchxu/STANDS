@@ -18,7 +18,6 @@ from ._utils import seed_everything, calculate_gradient_penalty
 class AnomalyDetection:
     def __init__(self, n_epochs: int = 10, batch_size: int = 128,
                  learning_rate: float = 2e-5, mem_dim: int = 1024,
-                 shrink_thres: float = 0.01, temperature: float = 1,
                  n_critic: int = 2, GPU: bool = True,
                  random_state: Optional[int] = None,
                  weight: Optional[Dict[str, float]] = None):
@@ -35,8 +34,6 @@ class AnomalyDetection:
         self.batch_size = batch_size
         self.lr = learning_rate
         self.mem_dim = mem_dim
-        self.thres = shrink_thres
-        self.tem = temperature
         self.n_critic = n_critic
 
         if random_state is not None:
@@ -62,8 +59,8 @@ class AnomalyDetection:
             drop_last=True, num_workers=0, device=self.device)
 
         self.D = Discriminator(ref['patch_size'], ref['gene_dim']).to(self.device)
-        self.G = GeneratorAD(ref['patch_size'], ref['gene_dim'], self.use_img, thres=self.thres,
-                             mem_dim=self.mem_dim, tem=self.tem, **kwargs).to(self.device)
+        self.G = GeneratorAD(ref['patch_size'], ref['gene_dim'], mem_dim=self.mem_dim, 
+                             use_image=self.use_img, **kwargs).to(self.device)
 
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
         self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr*self.n_critic, betas=(0.5, 0.999))
