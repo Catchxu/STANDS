@@ -51,62 +51,73 @@ class MemoryBlock(nn.Module):
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_model, num_heads, attention_dropout=0.1):
+    def __init__(self, d_model, nheads) -> None:
         super().__init__()
-        self.num_heads = num_heads
-        self.head_dim = d_model // num_heads
 
-        self.dropout = nn.Dropout(attention_dropout)
-        self.norm = nn.LayerNorm(d_model)
+        self.d_model = d_model
+        self.nheads = nheads
+        self.dim = d_model // nheads
 
-        self.query_projection = nn.Linear(d_model, d_model)
-        self.key_projection = nn.Linear(d_model, d_model)
-        self.value_projection = nn.Linear(d_model, d_model)
-
-        self.out_projection = nn.Linear(d_model, d_model)
+        self.proj_q = nn.Linear(self.dim, self.dim, bias=False)
+        self.proj_k = nn.Linear(self.dim, self.dim, bias=False)
+        self.proj_v = nn.Linear(self.dim, self.dim, bias=False)
+        self.fc_out = nn.Linear(self.d_model, self.d_model)
     
-    def split_heads(self, x, batch_size):
-        return x.view(batch_size, self.num_heads, self.head_dim)
-
-    def cos_score(self, q, k):
-        norm_q = torch.norm(q, dim=-1, keepdim=True)
-        norm_k = torch.norm(k, dim=-1, keepdim=True)
-        q_normalized = q / norm_q
-        k_normalized = k / norm_k
-
-        dot_product = torch.matmul(q_normalized, k_normalized.transpose(-1, -2))
-        scale = q.size(-1)
-        cosine_similarity = dot_product / scale
-        return cosine_similarity
-
     def forward(self, q, k, v):
-        batch_size = q.size(0)
+        N = q.shape[0]
 
-        out_q = q = self.query_projection(q)
-        k = self.key_projection(k)
-        v = self.value_projection(v)
+        q = self.proj_q(q.reshape(N, 1, self.nheads, self.dim))
+        k = self.proj_k(k.reshape(N, 1, self.nheads, self.dim))
+        v = self.proj_v(v.reshape(N, 1, self.nheads, self.dim))
 
-        q = self.split_heads(q, batch_size)
-        k = self.split_heads(k, batch_size)
-        v = self.split_heads(v, batch_size)
+        attn = torch.einsum("nqhd,nkhd->nhqk", [q, k])
+        
+        attn = F.softmax(attn / (self.d_model ** (1/2)), dim=3)
+        out = torch.einsum("nhql,nlhd->nqhd", [attn, v]).reshape(
+            N, self.d_model
+        )
 
-        s = self.dropout(self.cos_score(q, k))
-        out = torch.matmul(s, v)
+        return self.fc_out(out)
 
-        out = out.transpose(1, 2).contiguous().view(batch_size, self.num_heads * self.head_dim)
-        out = self.out_projection(out)
 
-        return self.norm(out_q + out)
+class TransformerLayer(nn.Module):
+    def __init__(self, d_model, nheads, hidden_dim=1024, dropout=0.3) -> None:
+        super().__init__()
+
+        self.attention = MultiHeadAttention(d_model, nheads)
+        self.norm1 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(d_model)
+
+        self.fc = nn.Sequential(
+            nn.Linear(d_model, hidden_dim),
+            nn.ReLU(),
+            nn.Linear(hidden_dim, d_model)
+        )
+
+        self.dropout = nn.Dropout(dropout)
+    
+    def forward(self, q, k, v):
+        attn = self.attention(q, k, v)
+        
+        x = self.dropout(self.norm1(attn + q))
+        f = self.fc(x)
+        x = self.dropout(self.norm2(x + f))
+        return x
 
 
 class TFBlock(nn.Module):
-    def __init__(self, d_model, num_heads=4):
+    def __init__(self, d_model, num_layers=3, nheads=4, 
+                 hidden_dim=1024, dropout=0.1):
         super().__init__()
-        self.attn = MultiHeadAttention(d_model*2, num_heads)
+        self.layers = nn.ModuleList(
+            [TransformerLayer(d_model*2, nheads, hidden_dim, dropout) for _ in range(num_layers)]
+        )
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, z_g, z_p):
-        z = torch.concat([z_g, z_p], dim=-1)
-        z = self.attn(z, z, z)
+        z = self.dropout(torch.concat([z_g, z_p], dim=-1))
+        for layer in self.layers:
+            z = layer(z, z, z)
         z_g, z_p = torch.chunk(z, 2, dim = -1)
         return z_g, z_p
 

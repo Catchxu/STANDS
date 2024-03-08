@@ -13,7 +13,9 @@ from ._utils import seed_everything
 from .main import SubNet
 
 
-def pretrain(input_dir: str, data_name: List[str],
+def pretrain(input_dir: Optional[str] = None, 
+             data_name: Optional[List[str]] = None,
+             train: Optional[dict] = None,
              n_epochs: int = 200,
              patch_size: Optional[int] = None,
              batch_size: int = 128,
@@ -27,8 +29,9 @@ def pretrain(input_dir: str, data_name: List[str],
     After the completion of pre-training, the weights will be automatically saved.
 
     Parameters:
-        input_dir (str): Directory path for the input spatial data.
-        data_name (List[str]): List of names of spatial data.
+        input_dir (Optional[str]): Directory path for the input spatial data.
+        data_name (Optional[List[str]]): List of names of spatial data.
+        train (Optional[dict]): input spatial data (to be trained).
         n_epochs (int): Number of training epochs.
         patch_size (Optional[int]): Patch size for H&E images.
         batch_size (int): Batch size for training.
@@ -50,7 +53,8 @@ def pretrain(input_dir: str, data_name: List[str],
         seed_everything(random_state)
     
     # Initialize dataloader for train data
-    train = read_multi(input_dir, data_name, patch_size)
+    if train is None:
+        train = read_multi(input_dir, data_name, patch_size)
     graph = train['graph']
     sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
     dataset = dgl.dataloading.DataLoader(
@@ -86,13 +90,9 @@ def pretrain(input_dir: str, data_name: List[str],
             t.set_postfix(Loss = Loss.item())
             t.update(1)
 
-    # return net.state_dict()
-    save_module = ['GeneEncoder', 'GeneDecoder',
-                   'ImageEncoder', 'ImageDecoder', 'Fusion']
     if weight_dir is None:
         weight_dir = os.path.dirname(__file__) + '/model.pth'
-    net.save_weights(weight_dir, save_module)
-    
+    torch.save(net.state_dict(), weight_dir)
     tqdm.write(f'The pretrained weights for STANDS have been automatically saved at {weight_dir}!')
 
 

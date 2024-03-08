@@ -15,7 +15,7 @@ from .model import Discriminator, GMMWithPrior, Cluster
 from ._utils import seed_everything, calculate_gradient_penalty
 
 
-class ADNet:
+class AnomalyDetection:
     def __init__(self, n_epochs: int = 10, batch_size: int = 128,
                  learning_rate: float = 2e-5, mem_dim: int = 1024,
                  shrink_thres: float = 0.01, temperature: float = 1,
@@ -86,10 +86,10 @@ class ADNet:
 
                     # Update discriminator for 'n_critic' times
                     for _ in range(self.n_critic):
-                        self.update_D(blocks)
+                        self.UpdateD(blocks)
 
                     # Update generator for one time
-                    self.update_G(blocks)
+                    self.UpdateG(blocks)
 
                 # Update learning rate for G and D
                 self.D_sch.step()
@@ -100,16 +100,16 @@ class ADNet:
 
         tqdm.write('Fine-tuning has been finished.')
 
-        if save:
-            if 'patch' in ref_g.ndata.keys():
-                save_module = ['GeneEncoder', 'GeneDecoder',
-                               'ImageEncoder', 'ImageDecoder',
-                               'Fusion']
-            else:
-                save_module = ['GeneEncoder', 'GeneDecoder']
+        # if save:
+        #     if 'patch' in ref_g.ndata.keys():
+        #         save_module = ['GeneEncoder', 'GeneDecoder',
+        #                        'ImageEncoder', 'ImageDecoder',
+        #                        'Fusion']
+        #     else:
+        #         save_module = ['GeneEncoder', 'GeneDecoder']
 
-            weight_dir = os.path.dirname(__file__) + '/temp.pth'
-            self.G.save_weights(weight_dir, save_module)  # save the trained STNet weights
+        #     weight_dir = os.path.dirname(__file__) + '/temp.pth'
+        #     self.G.save_weights(weight_dir, save_module)  # save the trained STNet weights
     
     @torch.no_grad()
     def predict(self, tgt: Dict[str, Any]):
@@ -162,7 +162,7 @@ class ADNet:
                 self.G.Memory.update_mem(z)
                 t += 1
 
-    def update_D(self, blocks):
+    def UpdateD(self, blocks):
         '''Updating discriminator'''
         self.opt_D.zero_grad()
 
@@ -189,7 +189,7 @@ class ADNet:
         self.D_loss.backward()
         self.opt_D.step()
 
-    def update_G(self, blocks):
+    def UpdateG(self, blocks):
         '''Updating generator'''
         self.opt_G.zero_grad()
 
@@ -240,7 +240,7 @@ class ADNet:
 
 
 
-class AlignNet:
+class KinPair:
     def __init__(self, n_epochs: int = 500, learning_rate: float = 2e-4,
                  GPU: bool = True, random_state: Optional[int] = None,
                  weight: Optional[Dict[str, float]] = None):
@@ -410,7 +410,7 @@ class BCNet:
         adata_ref = adatas[0]
         adata_tgt = ad.concat(adatas[1:])
         
-        Aligner = AlignNet(random_state=self.seed, **kwargs)
+        Aligner = KinPair(random_state=self.seed, **kwargs)
         _, tgt_g = Aligner.fit(raw)
 
         self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)

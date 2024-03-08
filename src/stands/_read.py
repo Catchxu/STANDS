@@ -88,18 +88,14 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
         sc.pp.highly_variable_genes(adata, n_top_genes=n_genes, subset=True)
 
     if return_type == 'anndata':
-
         return adata
 
     elif return_type == 'tuple':
-
         return adata, image, position
 
     elif return_type == 'graph':
-
         if patch_size is None:
             patch_size = set_patch(adata)
-
         builder = BuildGraph(adata, image, position, n_neighbors,
                              patch_size, **kwargs)
         return builder.pack()
@@ -158,11 +154,9 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
             tgt = tgt[:, ref.var_names]
     
     if return_type == 'anndata':
-
         return ref, tgt
 
     elif return_type == 'graph':
-    
         if patch_size is None:
             patch_size = set_patch(ref)
 
@@ -231,14 +225,11 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
         adatas = [d[:, list(ref.var_names)] for d in adatas]
 
     if return_type == 'anndata':
-
         return adatas
 
     elif return_type == 'graph':
-
         if patch_size is None:
             patch_size = set_patch(adatas[0])
-
         builder = BuildMultiGraph(adatas, images, positions, n_neighbors=n_neighbors,
                                   patch_size=patch_size, **kwargs)
         return builder.pack()

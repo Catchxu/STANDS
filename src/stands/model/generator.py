@@ -41,6 +41,7 @@ class LinearBlock(nn.Module):
         x = self.linear(x)
         return x
 
+
 class GeneEncoder(nn.Module):
     def __init__(self, in_dim, out_dim=[512, 256], nheads=[4, 1]):
         super().__init__()
@@ -233,7 +234,8 @@ class ImageDecoder(nn.Module):
 
 
 class STNet(nn.Module):
-    def __init__(self, patch_size, in_dim, out_dim=[512, 256], z_dim=256):
+    def __init__(self, patch_size, in_dim, out_dim=[512, 256], 
+                 z_dim=256, use_image=True):
         super().__init__()
         self.GeneEncoder = GeneEncoder(in_dim, out_dim, nheads=[4, 1])
         self.GeneDecoder = GeneDecoder(in_dim, out_dim)
@@ -243,21 +245,24 @@ class STNet(nn.Module):
 
         self.Fusion = TFBlock(d_model=z_dim)
 
+        self.use_image = use_image
+
     def encode(self, g_block, feat_g, feat_p=None):
         z_g = self.GeneEncoder(g_block, feat_g)
-        if feat_p is None:
-            return z_g, None
-        else:
+        if self.use_image:
             z_p = self.ImageEncoder(g_block[1], feat_p)
             return z_g, z_p
 
+        else:
+            return z_g, None
+
     def decode(self, z_g, z_p=None):
         feat_g = self.GeneDecoder(z_g)
-        if z_p is None:
-            return feat_g, None
-        else:
+        if self.use_image:
             feat_p = self.ImageDecoder(z_p)
             return feat_g, feat_p
+        else:
+            return feat_g, None
 
     def pretrain(self, g_block, feat_g, feat_p):
         z_g, z_p = self.encode(g_block, feat_g, feat_p)
@@ -278,10 +283,10 @@ class STNet(nn.Module):
 
 
 class GeneratorAD(STNet):
-    def __init__(self, patch_size, in_dim, use_image: bool = True,
-                 z_dim=256, mem_dim=1024, thres=0.01, tem=1, **kwargs):
+    def __init__(self, patch_size, in_dim, z_dim=256, 
+                 mem_dim=1024, thres=0.01, tem=1, **kwargs):
         super().__init__(patch_size, in_dim, **kwargs)
-        if use_image:
+        if self.use_image:
             self.Memory = MemoryBlock(mem_dim, 2*z_dim, thres, tem)
         else:
             self.Memory = MemoryBlock(mem_dim, z_dim, thres, tem)
@@ -289,7 +294,7 @@ class GeneratorAD(STNet):
     def forward(self, g_block, feat_g, feat_p=None):
         z_g, z_p = self.encode(g_block, feat_g, feat_p)
 
-        if z_p is not None:
+        if self.use_image:
             z_g, z_p = self.Fusion(z_g, z_p)
             z = torch.concat([z_g, z_p], dim=-1)
             mem_z = self.Memory(z)
