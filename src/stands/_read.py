@@ -3,8 +3,7 @@ import numpy as np
 import scanpy as sc
 import anndata as ad
 from math import e
-from tqdm import tqdm
-from typing import Literal, Optional, List, Dict, Tuple, Union
+from typing import Literal, Optional, List
 
 from ._utils import seed_everything, clear_warnings
 from ._graph import BuildGraph, BuildMultiGraph
@@ -170,8 +169,10 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
 @clear_warnings
 def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] = None,
                adata: Optional[List[ad.AnnData]] = None, patch_size: Optional[int] = None,
-               preprocess: bool = True, n_genes: int = 3000, n_neighbors: int = 4,
-               return_type: Literal['anndata', 'graph'] = 'graph', spa_key: str = 'spatial', **kwargs):
+               gene_list: Optional[List[str]] = None, preprocess: bool = True, 
+               n_genes: int = 3000, n_neighbors: int = 4,
+               return_type: Literal['anndata', 'graph'] = 'graph', 
+               spa_key: str = 'spatial', **kwargs):
     """
     Read multiple spatial datasets and preprocess if required.
     All the datasets are transformed to only one graph.
@@ -181,6 +182,7 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
         data_name (Optional[List[str]]): List of names for spatial datasets.
         adata (Optional[List[ad.AnnData]]): List of AnnData objects.
         patch_size (Optional[int]): Patch size for H&E images.
+        gene_list (Optional[List[str]]): Selected gene list.
         preprocess (bool): Perform data preprocessing.
         n_genes (int): Number of genes for feature selection.
         n_neighbors (int): Number of neighbors for spatial data reading.
@@ -219,10 +221,13 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
 
     if preprocess:
         adatas = [preprocess_data(d) for d in adatas]
-        ref = adatas[0]
-        sc.pp.filter_genes(ref, min_cells=10)
-        sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
-        adatas = [d[:, list(ref.var_names)] for d in adatas]
+        if gene_list is None:
+            ref = adatas[0]
+            sc.pp.filter_genes(ref, min_cells=10)
+            sc.pp.highly_variable_genes(ref, n_top_genes=n_genes, subset=True)
+            adatas = [d[:, list(ref.var_names)] for d in adatas]
+        else:
+            adatas = [d[:, list(gene_list)] for d in adatas]
 
     if return_type == 'anndata':
         return adatas
