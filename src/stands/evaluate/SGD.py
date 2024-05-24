@@ -5,6 +5,7 @@ import networkx as nx
 import pyemd
 from scipy.linalg import toeplitz
 from sklearn.neighbors import NearestNeighbors
+from scipy.stats import wasserstein_distance
 import itertools
 import math
 import pulp
@@ -15,23 +16,24 @@ from typing import Dict, Tuple, Optional, List, Literal
 def disc(samples1, samples2, kernel, *args, **kwargs):
     samples1 = np.array(samples1)
     samples2 = np.array(samples2)
-    d = np.sum(kernel(samples1[:, np.newaxis], samples2[np.newaxis, :], *args, **kwargs))
+    d = np.mean(kernel(samples1, samples2, *args, **kwargs))
     return d
 
 def gaussian_emd(x, y, sigma=1.0, distance_scaling=1.0):
-    support_size = max(len(x), len(y))
+    support_size = x.shape[1]
     d_mat = toeplitz(range(support_size)).astype(float)
     distance_mat = d_mat / distance_scaling
-    
-    x = x.astype(float)
-    y = y.astype(float)
+    emd = np.zeros((x.shape[0], y.shape[0]))
+
     if len(x) < len(y):
         x = np.hstack((x, [0.0] * (support_size - len(x))))
     elif len(y) < len(x):
         y = np.hstack((y, [0.0] * (support_size - len(y))))
 
-    emd = pyemd.emd(x, y, distance_mat)
-    return np.exp(-emd * emd / (2 * sigma * sigma))
+    for i in range(x.shape[0]):
+        for j in range(y.shape[0]):
+            emd[i, j] = pyemd.emd(x[i], y[j], distance_mat) * 2
+    return np.exp(-emd / (2 * sigma * sigma))
 
 def compute_mmd(samples1, samples2, kernel, is_hist=True, *args, **kwargs):
     # normalize histograms into pmf
@@ -170,10 +172,10 @@ class Build_SGD_graph:
             data (Dict): Dictionary containing spatial data and labels.
             n_neighbors (int): Number of neighbors to consider for edge creation (default is 6).
         """
-        self.data = data['data']
+        self.data = data
         self.position = data['spatial']
         self.n_neighbors = n_neighbors
-        self.truth_list = np.unique(data['y_true'])
+        self.truth_list = np.delete(np.unique(data['y_true']), 0)
         self.pred_list = np.unique(data['y_pred'])
 
     def get_edge(self):
@@ -214,7 +216,7 @@ class Build_SGD_graph:
             else:
                 anomaly_data = np.array(self.data['y_pred'] == binary_typeid).astype(int)
             
-        return torch.tensor(anomaly_data.values, dtype=torch.float32)
+        return torch.tensor(anomaly_data, dtype=torch.float32)
 
     def classify_cells(self, pred: int, truth: int):
         """
@@ -336,8 +338,8 @@ class Build_SGD_graph:
                     self.remove_edges(g_pred)                        
                     g_pred_list.append(g_pred)
                     
-                g_truth_list = list(itertools.chain.from_iterable(itertools.repeat(g_truth,len(set(self.clustid_list))-1) for g_truth in g_truth_list))
-                    
+                g_truth_list = list(itertools.chain.from_iterable(itertools.repeat(g_truth,len(set(self.pred_list))-1) for g_truth in g_truth_list))
+        
         return g_pred_list, g_truth_list
 
 
@@ -354,7 +356,7 @@ class SGDEvaluator:
         >>> evaluator.evaluate_sgd(g_pred_list, g_truth_list, metric = 'cc')
         0.34
     """
-    def __init__(self, bins: int = 10, num_bootstrap_samples: int = 50, sigma: int = 1):
+    def __init__(self, bins: int = 10, num_bootstrap_samples: int = 10, sigma: int = 1):
         """
         Initialize the SGDEvaluator.
 

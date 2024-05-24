@@ -68,15 +68,17 @@ def evaluate(metrics: Sequence[metrics_list],
 
     Returns:
         (Union[Tuple[float], float]): Depending on the number of specified metrics, returns a tuple of metric values or a single metric value.
-    
+
     Raises:
         RuntimeError: In the anomaly detection, it doesn't specify `y_score` or `y_pred`.
-    
+
     Note:
         SGD_degree & SGD_cc are available for both anomaly detection and subtyping tasks. 
         They will automatically determine the category based on the types of anomalies in y_true
         eliminating the need for additional parameters to specify whether it is the subtyping task.
     """
+    data = {}
+    
     if  y_true is not None:
         y_true = pd.Series(y_true)
 
@@ -91,7 +93,7 @@ def evaluate(metrics: Sequence[metrics_list],
         else:
             raise RuntimeError('Please input y_score or y_pred!')
 
-        data = {'y_true': y_true, 'y_score': y_score, 'y_pred': y_pred}
+        data.update({'y_true': y_true, 'y_score': y_score, 'y_pred': y_pred})
 
         # for SGD_degree and SGD_cc metrics
         if (adata is not None) and (spaid is not None):
@@ -100,11 +102,11 @@ def evaluate(metrics: Sequence[metrics_list],
     if adata is not None:
         if emb is not None:
             correct = adata.obsm[emb]
+            data.update({'correct': correct})
         elif ['ASW_type', '1-ASW_batch', 'BatchKL', 'iLISI', 'cLISI'] in metrics:
             sc.tl.tsne(adata, random_state=0, use_fast_tsne=False)
             correct = adata.obsm['X_tsne']
-
-        data = {'correct': correct}
+            data.update({'correct': correct})
 
         if batchid is not None:
             _, idx = np.unique(adata.obs[batchid].values, return_inverse=True)

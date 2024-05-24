@@ -10,7 +10,7 @@ from typing import List, Optional
 from .model import STNet
 from ._read import read_multi
 from ._utils import seed_everything
-from .main import SubNet
+from .main import Subtype
 
 
 def pretrain(input_dir: Optional[str] = None, 
@@ -120,7 +120,7 @@ def pretrain_cluster(input_dir: str,
         'GPU': GPU,
         'random_state': random_state
     }
-    model = SubNet(**parameters)
+    model = Subtype(**parameters)
     ClusterNet = model.pretrain(train, type_key, n_epochs)
     
     # Save both G and Fusion weights in a single file
