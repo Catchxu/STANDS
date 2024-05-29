@@ -18,7 +18,7 @@ from ._utils import seed_everything, calculate_gradient_penalty
 class AnomalyDetect:
     def __init__(self, n_epochs: int = 10, batch_size: int = 128,
                  learning_rate: float = 2e-5, mem_dim: int = 1024,
-                 n_critic: int = 2, GPU: bool = True,
+                 n_critic: int = 1, GPU: bool = True,
                  random_state: Optional[int] = None,
                  weight: Optional[Dict[str, float]] = None):
         if GPU:

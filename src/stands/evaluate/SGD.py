@@ -430,15 +430,15 @@ class SGDEvaluator:
             row = idx // matrix_size
             col = idx % matrix_size
             sgd_matrix[row][col] = sgd
-            
-        
+
+
         if matrix_size == 1:
             return sgd
         else:
             assignment_matrix = self.solve_assignment_problems(sgd_matrix)
             SGD_list = self.get_assigned_values(sgd_matrix, assignment_matrix)
             return np.average(SGD_list)
-    
+
     def solve_assignment_problems(self, distance_matrix: List[List[float]]):
         """
         Solve the Assignment Problem using the CBC solver.
