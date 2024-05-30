@@ -17,6 +17,8 @@ class GATEncoder(nn.Module):
         return z
 
 
+
+
 class MLPEncoder(nn.Module):
     def __init__(self, in_dim, out_dim=[512, 256]):
         super().__init__()
@@ -29,6 +31,8 @@ class MLPEncoder(nn.Module):
     def forward(self, z):
         feat = self.fc(z)
         return self.act(feat)   
+
+
 
 
 class MLPDecoder(nn.Module):

@@ -24,6 +24,8 @@ class GAT(nn.Module):
         return z
 
 
+
+
 class LinearBlock(nn.Module):
     def __init__(self, in_dim, out_dim, norm: bool = True,
                  act: bool = True, dropout: bool = True):
@@ -38,6 +40,8 @@ class LinearBlock(nn.Module):
     def forward(self, x):
         x = self.linear(x)
         return x
+
+
 
 
 class MemoryBlock(nn.Module):
@@ -85,6 +89,8 @@ class MemoryBlock(nn.Module):
         return output
 
 
+
+
 class MultiHeadAttention(nn.Module):
     def __init__(self, d_model, nheads, dropout=0.1) -> None:
         super().__init__()
@@ -122,6 +128,8 @@ class MultiHeadAttention(nn.Module):
         return self.linears[-1](x)
 
 
+
+
 class TransformerLayer(nn.Module):
     def __init__(self, d_model, nheads, hidden_dim=1024, dropout=0.3) -> None:
         super().__init__()
@@ -149,6 +157,8 @@ class TransformerLayer(nn.Module):
         return x
 
 
+
+
 class TFBlock(nn.Module):
     def __init__(self, p_dim, g_dim, num_layers=3, nheads=4, 
                  hidden_dim=1024, dropout=0.1):
@@ -166,6 +176,8 @@ class TFBlock(nn.Module):
             z = layer(z, z, z)
         z_g, z_p = torch.chunk(z, 2, dim = -1)
         return z_g, z_p
+
+
 
 
 class CrossTFBlock(nn.Module):
@@ -203,6 +215,8 @@ class CrossTFBlock(nn.Module):
             z_p = p_layer(z_p, z_g, z_g)
         
         return z_g, z_p
+
+
 
 
 class StyleBlock(nn.Module):

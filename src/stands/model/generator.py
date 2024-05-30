@@ -4,85 +4,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 from typing import List
 
-from .backbone import GATEncoder, MLPEncoder, MLPDecoder
-from .backbone import ResNetEncoder, ResNetDecoder
-from .backbone import MemoryBlock, TFBlock, CrossTFBlock, StyleBlock
+from .backbone import Extractor, ExtractorOnlyST, ExtractorOnlySC
+from .backbone import MemoryBlock, StyleBlock
 
 
-class Extractor(nn.Module):
-    def __init__(self, patch_size, gene_dim, out_dim=[512, 256], cross_attn=True):
+
+class GeneratorAD(nn.Module):
+    def __init__(self, gene_dim, out_dim=[512, 256], patch_size=None,
+                 only_ST=False, only_SC=False, cross_attn=True, config=None):
         super().__init__()
-        z_dim = out_dim[-1]
-        self.GeneEncoder = GATEncoder(gene_dim, out_dim, nheads=[4, 1])
-        self.GeneDecoder = MLPDecoder(gene_dim, out_dim)
-        self.ImageEncoder = ResNetEncoder(patch_size, z_dim=z_dim)
-        self.ImageDecoder = ResNetDecoder(patch_size, z_dim=z_dim)
-
-        self.fusion = CrossTFBlock(z_dim, z_dim) if cross_attn else TFBlock(z_dim, z_dim)
+        assert only_ST and only_SC == False
     
-    def encode(self, g_block, feat_g, feat_p):
-        z_g = self.GeneEncoder(g_block, feat_g)
-        z_p = self.ImageEncoder(g_block[1], feat_p)
-        return z_g, z_p
-
-    def decode(self, z_g, z_p):
-        feat_g = self.GeneDecoder(z_g)
-        feat_p = self.ImageDecoder(z_p)
-        return feat_g, feat_p
-
-    def pretrain(self, g_block, feat_g, feat_p):
-        z_g, z_p = self.encode(g_block, feat_g, feat_p)
-        z_g, z_p = self.fusion(z_g, z_p)
-        feat_g, feat_p = self.decode(z_g, z_p)
-        return feat_g, feat_p
+        if only_ST:
+            self.extract = ExtractorOnlyST(gene_dim, out_dim)
 
 
-class ExtractorOnlyST(nn.Module):
-    def __init__(self, gene_dim, out_dim=[512, 256]):
-        super().__init__()
-        self.GeneEncoder = GATEncoder(gene_dim, out_dim, nheads=[4, 1])
-        self.GeneDecoder = MLPDecoder(gene_dim, out_dim)
-    
-    def encode(self, g_block, feat_g):
-        z_g = self.GeneEncoder(g_block, feat_g)
-        return z_g
-
-    def decode(self, z_g):
-        feat_g = self.GeneDecoder(z_g)
-        return feat_g
-    
-    def pretrain(self, g_block, feat_g):
-        return self.decode(self.encode(g_block, feat_g))
-
-
-class ExtractorOnlySC(nn.Module):
-    def __init__(self, gene_dim, out_dim=[512, 256]):
-        super().__init__()
-        self.GeneEncoder = MLPEncoder(gene_dim, out_dim)
-        self.GeneDecoder = MLPDecoder(gene_dim, out_dim)
-    
-    def encode(self, feat_g):
-        z_g = self.GeneEncoder(feat_g)
-        return z_g
-
-    def decode(self, z_g):
-        feat_g = self.GeneDecoder(z_g)
-        return feat_g
-    
-    def pretrain(self, feat_g):
-        return self.decode(self.encode(feat_g))
-
-
-
-
-class GeneratorAD(STNet):
-    def __init__(self, patch_size, in_dim, out_dim=[512, 256], z_dim=256, 
-                 use_image=True, mem_dim=1024, thres=0.01, tem=1, **kwargs):
-        super().__init__(patch_size, in_dim, out_dim, z_dim, use_image, **kwargs)
-        if use_image:
-            self.Memory = MemoryBlock(mem_dim, 2*z_dim, thres, tem)
-        else:
-            self.Memory = MemoryBlock(mem_dim, z_dim, thres, tem)
 
     def forward(self, g_block, feat_g, feat_p=None):
         z_g, z_p = self.encode(g_block, feat_g, feat_p)

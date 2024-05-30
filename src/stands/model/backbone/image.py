@@ -22,6 +22,8 @@ class ResidualBlock(nn.Module):
         return x + self.residual_block(x)
 
 
+
+
 class ResNetEncoder(nn.Module):
     def __init__(self, patch_size, n_ResidualBlock=8, n_levels=2,
                  input_channels=3, z_dim=256, MultiResSkips=True):
@@ -95,6 +97,8 @@ class ResNetEncoder(nn.Module):
         feat = self.output_conv(feat)
         z = self.GAT(g, feat.flatten(1))
         return z
+
+
 
 
 class ResNetDecoder(nn.Module):
