@@ -16,7 +16,7 @@ ST datasets.
 
 STANDS is built on state-of-the-art generative models for de novo DDATD from multi-sample ST by 
 integrating multimodal information including spatial gene expression, histology image, and single cell 
-gene expression. STANDS concurrently fulfills DDATD’s three sequential core tasks: detecting, aligning, 
+gene expression. STANDS concurrently fulfills DDATD's three sequential core tasks: detecting, aligning, 
 and subtyping anomalous tissue domains across multiple samples. STANDS first integrates and harnesses 
 multimodal information from spatial transcriptomics and associated histology images to pinpoint 
 anomalous tissue regions across multiple target datasets. Next, STANDS aligns anomalies identified 

@@ -92,3 +92,9 @@ class ClusterConfigs(object):
         self.n_epochs = 20000,
         self.update_interval = 10
         self.weight_decay = 1e-4
+
+
+class GraphConfigs(object):
+    def __init__(self):
+        self.n_neighbors = 4
+        self.patch_size = 48
