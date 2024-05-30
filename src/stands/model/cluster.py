@@ -1,3 +1,4 @@
+import tqdm
 import pandas as pd
 import numpy as np
 import torch
@@ -25,8 +26,6 @@ class Cluster(nn.Module):
         self.n_epochs = configs.n_epochs
         self.update_interval = configs.update_interval
         self.weight_decay = configs.weight_decay
-        self.verbose = configs.verbose
-        self.log_interval = configs.log_interval
 
         if configs.cross_attn:
             self.fusion = CrossTFBlock(**configs.TFBlock)
@@ -38,19 +37,20 @@ class Cluster(nn.Module):
         # classifer for supervised pre-training
         self.classifer = nn.Linear(self.z_dim, n_subtypes)
 
-    def fullforward(self, g_block, feat_g, res_g, feat_p, res_p):
-        z, _, _ = self.G.fullforward(g_block, feat_g, feat_p)
-        res_z, _, _ = self.G.fullforward(g_block, res_g, res_p)
+    def fullforward(self, g_block, z_g, res_g, z_p, res_p):
+        z = torch.cat([z_g, z_p], dim=1)
+        res_g, res_p = self.G.extract.encode(g_block, res_g, res_p)
+        res_z = torch.cat([res_g, res_p], dim=1)
         return z, res_z
     
-    def STforward(self, g_block, feat_g, res_g):
-        z, _ = self.G.STforward(g_block, feat_g)
-        res_z, _ = self.G.STforward(g_block, res_g)
+    def STforward(self, g_block, z_g, res_g):
+        z = z_g
+        res_z = self.G.extract.encode(g_block, res_g)
         return z, res_z
     
-    def SCforward(self, feat_g, res_g):
-        z, _ = self.G.SCforward(feat_g)
-        res_z, _ = self.G.SCforward(res_g)
+    def STforward(self, z_g, res_g):
+        z = z_g
+        res_z = self.G.extract.encode(res_g)
         return z, res_z
 
     def forward(self, z, res_z):
@@ -88,38 +88,37 @@ class Cluster(nn.Module):
     def mu_update(self, feat, q):
         y_pred = torch.argmax(q, axis=1).cpu().numpy()
         feat = pd.DataFrame(feat.cpu().detach().numpy(), index=np.arange(0, feat.shape[0]))
-        Group = pd.Series(y_pred, index=np.arange(0, feat.shape[0]), name="Group")
+        Group = pd.Series(y_pred, index=np.arange(0, feat.shape[0]), name='Group')
         Mergefeat = pd.concat([feat, Group], axis=1)
-        centroid = np.asarray(Mergefeat.groupby("Group").mean())
+        centroid = np.asarray(Mergefeat.groupby('Group').mean())
 
         self.mu.data.copy_(torch.Tensor(centroid))
 
-    def fit(self, g, z_x, res_x, z_img, res_img):
-        optimizer = optim.Adam(self.parameters(), lr=learning_rate, weight_decay=weight_decay)
-        scaler = torch.cuda.amp.GradScaler()
+    def fit(self, z, res_z):
+        # z and res_z are obtained by fullforward, SCforward, or STforward
+        optimizer = optim.Adam(self.parameters(), 
+                               lr=self.learning_rate, 
+                               weight_decay=self.weight_decay)
 
-        res_x = self.Gene_net.encode(g, feat=res_x)
-        res_img = self.Image_net.encode(g, feat=res_img)
-        new_z = torch.cat([z_x, z_img, res_x, res_img], dim=1)
-        self.mu_init(self.Trans(new_z).cpu().detach().numpy())
+        self.mu_init(self.fusion(z, res_z).cpu().detach().numpy())
 
         self.train()
-        for epoch in range(n_epochs):
-            if epoch % update_interval == 0:
-                _, q = self.forward(new_z)
-                p = self.target_distribution(q).data
+        with tqdm(total=self.n_epochs) as t:
+            for epoch in range(self.n_epochs):
+                t.set_description(f'Train Epochs')
 
-            optimizer.zero_grad()
-            _, q = self.forward(new_z)
-            loss = self.loss_function(p, q)
-            scaler.scale(loss).backward()
-            scaler.step(optimizer)
-            scaler.update()
+                if epoch % self.update_interval == 0:
+                    _, q = self.forward(z, res_z)
+                    p = self.target_distribution(q).data
 
-            if ((epoch+1) % log_interval == 0) and (verbose):
-                txt = 'Train Epoch: [{:^4}/{:^4}({:^3.0f}%)]    Loss: {:.6f}'
-                txt = txt.format(epoch+1, n_epochs, 100.*(epoch+1)/n_epochs, loss)
-                print(txt)
+                optimizer.zero_grad()
+                _, q = self.forward(z, res_z)
+                loss = self.loss_function(p, q)
+                loss.backward()
+                optimizer.step()
+            
+                t.set_postfix(Loss = loss.item())
+                t.update(1)
 
         with torch.no_grad():
             self.eval()

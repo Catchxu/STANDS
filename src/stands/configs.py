@@ -104,5 +104,3 @@ class ClusterConfigs(object):
         self.n_epochs = 20000,
         self.update_interval = 10
         self.weight_decay = 1e-4
-        self.verbose = True 
-        self.log_interval = 200
