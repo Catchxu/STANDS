@@ -93,40 +93,36 @@ class MemoryBlock(nn.Module):
 
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, d_model, nheads, dropout=0.1) -> None:
+    def __init__(self, d_model, nheads, dropout=0.1):
         super().__init__()
         assert d_model % nheads == 0
 
         self.d_k = d_model // nheads
         self.h = nheads
-        self.dropout = dropout
+        self.dropout = nn.Dropout(dropout)
 
         # Produce N identical layers
         self.linears = nn.ModuleList([
             copy.deepcopy(nn.Linear(d_model, d_model)) for _ in range(4)
         ])
-    
-    def attention(query, key, value, dropout=None):
+
+    def attention(self, query, key, value):
         d_k = query.size(-1)
         scores = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(d_k)
         attn = F.softmax(scores, dim = -1)
-        if dropout is not None:
-            attn = dropout(attn)
-        return torch.matmul(attn, value), attn        
+        attn = self.dropout(attn)
+        return torch.matmul(attn, value), attn
 
     def forward(self, q, k, v):
         N = q.shape[0]
 
-        q, k, v = [
-            l(x).view(N, -1, self.h, self.d_k).transpose(1, 2)
-            for l, x in zip(self.linears, (q, k, v))
-        ]
+        q, k, v = [l(x) for l, x in zip(self.linears[:-1], (q, k, v))] # (batch_size, d_model)
+        q, k, v = [x.view(N, -1, self.h, self.d_k).transpose(1, 2) for x in (q, k, v)] # (batch_size, h, 1, d_k)
 
-        x, self.attn = self.attention(q, k, v, dropout=self.dropout)
-
+        x, self.attn = self.attention(q, k, v)
         x = x.transpose(1, 2).contiguous().view(N, self.h*self.d_k)
 
-        return self.linears[-1](x)
+        return self.linears[-1](x).squeeze(1)
 
 
 
@@ -185,11 +181,9 @@ class CrossTFBlock(nn.Module):
     def __init__(self, g_dim, p_dim, num_layers=3, nheads=4, 
                  hidden_dim=1024, dropout=0.1):
         super().__init__()
-        dim = min(g_dim, p_dim)
-        if p_dim != g_dim:
-            self.linear_p = nn.Linear(p_dim, dim)
-            self.linear_g = nn.Linear(g_dim, dim)
-            self.map_flag = True
+        assert g_dim == p_dim
+
+        dim = g_dim
 
         self.p_layers = nn.ModuleList([
             TransformerLayer(dim, nheads, hidden_dim, dropout) 
@@ -204,12 +198,8 @@ class CrossTFBlock(nn.Module):
         self.dropout = nn.Dropout(dropout)
     
     def forward(self, z_g, z_p):
-        if self.map_flag:
-            z_g = self.dropout(self.linear_g(z_g))
-            z_p = self.dropout(self.linear_p(z_p))
-        else:
-            z_g = self.dropout(z_g)
-            z_p = self.dropout(z_p)
+        z_g = self.dropout(z_g)
+        z_p = self.dropout(z_p)
 
         for g_layer, p_layer in zip(self.g_layers, self.p_layers):
             z_g = g_layer(z_g, z_p, z_p)

@@ -10,7 +10,7 @@ from tqdm import tqdm
 from typing import Optional, Dict, Any
 from sklearn.preprocessing import LabelEncoder
 
-from .model import GeneratorAD, GeneratorPair, GeneratorBC
+from .model import GeneratorAD, KinPair, GeneratorBC
 from .model import Discriminator, GMMWithPrior, Cluster
 from ._utils import seed_everything, calculate_gradient_penalty
 
@@ -268,7 +268,7 @@ class AnomalyDetect:
 
 
 
-class KinPair:
+class KinPairs:
     def __init__(self, n_epochs: int = 500, learning_rate: float = 2e-4,
                  GPU: bool = True, random_state: Optional[int] = None,
                  weight: Optional[Dict[str, float]] = None):

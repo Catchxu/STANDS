@@ -9,20 +9,18 @@ from typing import Optional, List
 import torchvision.transforms as transforms
 from sklearn.neighbors import NearestNeighbors
 
-from .configs import GraphConfigs
-
 
 class BuildGraph:
     def __init__(self, adata: ad.AnnData, image: Optional[np.ndarray],
-                 position: np.ndarray, train_mode: bool = True):
+                 position: np.ndarray, train_mode: bool = True, 
+                 n_neighbors: int = 4, patch_size: int = 48):
         self.adata = adata
         self.image = image
         self.position = position
         self.train_mode = train_mode
 
-        configs = GraphConfigs()
-        self.n_neighbors = configs.n_neighbors
-        self.patch_size = configs.patch_size
+        self.n_neighbors = n_neighbors
+        self.patch_size = patch_size
 
         u, v = self.get_edge()
         self.g = dgl.to_bidirected(dgl.graph((u, v)))
@@ -86,7 +84,8 @@ class BuildGraph:
 
 class BuildMultiGraph:
     def __init__(self, adata: List[ad.AnnData], image: Optional[List[np.ndarray]],
-                 position: List[np.ndarray], train_mode: bool = True):
+                 position: List[np.ndarray], train_mode: bool = True,
+                 n_neighbors: int = 4, patch_size: int = 48):
         warnings.filterwarnings("ignore")
         self.adata = adata
         self.adata_raw = adata
@@ -95,9 +94,8 @@ class BuildMultiGraph:
         self.n_dataset = len(adata)
         self.train_mode = train_mode
 
-        configs = GraphConfigs()
-        self.n_neighbors = configs.n_neighbors
-        self.patch_size = configs.patch_size
+        self.n_neighbors = n_neighbors
+        self.patch_size = patch_size
 
         self.batch = self.get_batch()
         u, v = self.get_edge()

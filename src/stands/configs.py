@@ -41,7 +41,7 @@ class FullConfigs(object):
         self.TFBlock = {
             'num_layers': 3,
             'nheads': 4,
-            'hidden_dim': 1024, 
+            'hidden_dim': 512,
             'dropout': 0.1
         }
 
@@ -83,7 +83,7 @@ class ClusterConfigs(object):
             'p_dim': z_dim,
             'num_layers': 3,
             'nheads': 8,
-            'hidden_dim': 1024, 
+            'hidden_dim': 512, 
             'dropout': 0.1
         } 
 
@@ -92,9 +92,3 @@ class ClusterConfigs(object):
         self.n_epochs = 20000,
         self.update_interval = 10
         self.weight_decay = 1e-4
-
-
-class GraphConfigs(object):
-    def __init__(self):
-        self.n_neighbors = 4
-        self.patch_size = 48

@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from tqdm import tqdm
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from .model import Extractor
 from .configs import FullConfigs
@@ -15,11 +15,11 @@ from ._utils import seed_everything
 
 
 def pretrain(adata_list: List[ad.AnnData],
-             n_epochs: int = 200,
+             n_epochs: int = 100,
              patch_size: Optional[int] = None,
-             batch_size: int = 128,
+             batch_size: int = 64,
              learning_rate: float = 1e-4,
-             GPU: bool = True,
+             GPU: Union[bool, str] = True,
              random_state: int = None,
              weight_dir: Optional[str] = None
              ):
@@ -33,13 +33,16 @@ def pretrain(adata_list: List[ad.AnnData],
         patch_size (Optional[int]): Patch size for H&E images.
         batch_size (int): Batch size for training.
         learning_rate (float): Learning rate for the optimizer.
-        GPU (bool): Whether to use GPU for training.
+        GPU (Union[bool, str]): Whether to use GPU for training, and GPU ID (i.e., cuda:0)
         random_state (int): Random seed for reproducibility.
         weight_dir (Optional[str]): Directory path to save the pretrained model weights.
     """
     if GPU:
         if torch.cuda.is_available():
-            device = torch.device("cuda:0")
+            if isinstance(GPU, str):
+                device = torch.device(GPU)
+            else:
+                device = torch.device('cuda:0')
         else:
             print("GPU isn't available, and use CPU to train Docs.")
             device = torch.device("cpu")
