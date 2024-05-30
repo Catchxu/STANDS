@@ -128,3 +128,31 @@ class ExtractorOnlySC(nn.Module):
         pretrained_dict = {k: v for k, v in pre_weights.items()}
         model_dict.update(pretrained_dict)
         self.load_state_dict(model_dict)
+
+
+
+
+class ExtractorDis(nn.Module):
+    def __init__(self, configs):
+        super().__init__()
+        self.z_dim = z_dim = configs.out_dim[-1]
+        self.GeneEncoder = MLPEncoder(configs.gene_dim, configs.out_dim)
+        self.ImageEncoder = ResNetEncoder(configs.patch_size, z_dim=z_dim, **configs.ImageEncoder)
+    
+    def encode(self, feat_g, feat_p):
+        z_g = self.GeneEncoder(feat_g)
+        z_p = self.ImageEncoder.woGAT_forward(feat_p)
+        return z_g, z_p
+
+
+
+
+class ExtractorDisOnlySC(nn.Module):
+    def __init__(self, configs):
+        super().__init__()
+        self.z_dim = configs.out_dim[-1]
+        self.GeneEncoder = MLPEncoder(configs.gene_dim, configs.out_dim)
+    
+    def encode(self, feat_g):
+        z_g = self.GeneEncoder(feat_g)
+        return z_g

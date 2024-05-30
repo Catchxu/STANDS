@@ -46,6 +46,29 @@ class FullConfigs(object):
         }
 
 
+class DisSCConfigs(object):
+    def __init__(self, gene_dim):
+        self.gene_dim = gene_dim
+        self.out_dim = [512, 256]
+        self.z_dim = self.out_dim[-1]
+
+
+class DisFullConfigs(object):
+    def __init__(self, gene_dim, patch_size):
+        self.gene_dim = gene_dim
+        self.out_dim = [512, 256]
+        self.z_dim = self.out_dim[-1] * 2
+
+        self.patch_size = patch_size
+        self.ImageEncoder = {
+            'n_ResidualBlock': 8, 
+            'n_levels': 2,
+            'input_channels': 3, 
+            'MultiResSkips': True,
+            'GAT_nhead': 4
+        }
+
+
 class MBConfigs(object):
     def __init__(self, z_dim):
         self.MBBlock = {

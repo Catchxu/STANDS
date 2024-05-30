@@ -97,6 +97,22 @@ class ResNetEncoder(nn.Module):
         feat = self.output_conv(feat)
         z = self.GAT(g, feat.flatten(1))
         return z
+    
+    def woGAT_forward(self, feat):
+        feat = self.input_conv(feat)
+        skips = []
+
+        for i in range(self.n_levels):
+            feat = self.res_blk_list[i](feat)
+            if self.MultiResSkips:
+                skips.append(self.multi_res_skip_list[i](feat))
+            feat = self.conv_list[i](feat)
+
+        if self.MultiResSkips:
+            feat = sum([feat] + skips)
+
+        z = self.output_conv(feat)
+        return z
 
 
 

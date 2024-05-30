@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.autograd as autograd
 from torch.autograd import Variable
+from typing import Union
 
 
 def seed_everything(seed):
@@ -68,3 +69,19 @@ def calculate_gradient_penalty(D, real_g, fake_g, real_p=None, fake_p=None):
 
     grad_penalty = ((gradients.norm(2, dim=1) - 1) ** 2).mean()
     return grad_penalty
+
+
+def select_device(GPU: Union[bool, str] = True,):
+    if GPU:
+        if torch.cuda.is_available():
+            if isinstance(GPU, str):
+                device = torch.device(GPU)
+            else:
+                device = torch.device('cuda:0')
+        else:
+            print("GPU isn't available, and use CPU to train Docs.")
+            device = torch.device("cpu")
+    else:
+        device = torch.device("cpu")
+
+    return device

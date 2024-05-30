@@ -34,7 +34,8 @@ Modules:
     evaluate: Calculate various metrics (including SGD).
 """
 
-from .main import AnomalyDetect, KinPairs, BatchAlign, Subtype
+from .anomaly import AnomalyDetect
+from .main import KinPairs, BatchAlign, Subtype
 from .pretrain import pretrain
 from ._read import read, read_cross, read_multi
 from .evaluate import evaluate

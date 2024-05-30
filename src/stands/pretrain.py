@@ -11,7 +11,7 @@ from typing import List, Optional, Union
 from .model import Extractor
 from .configs import FullConfigs
 from ._read import read_multi
-from ._utils import seed_everything
+from ._utils import seed_everything, select_device
 
 
 def pretrain(adata_list: List[ad.AnnData],
@@ -37,17 +37,7 @@ def pretrain(adata_list: List[ad.AnnData],
         random_state (int): Random seed for reproducibility.
         weight_dir (Optional[str]): Directory path to save the pretrained model weights.
     """
-    if GPU:
-        if torch.cuda.is_available():
-            if isinstance(GPU, str):
-                device = torch.device(GPU)
-            else:
-                device = torch.device('cuda:0')
-        else:
-            print("GPU isn't available, and use CPU to train Docs.")
-            device = torch.device("cpu")
-    else:
-        device = torch.device("cpu")
+    device = select_device(GPU)
 
     if random_state is not None:
         seed_everything(random_state)

@@ -28,9 +28,9 @@ class MLPEncoder(nn.Module):
         )
         self.act = nn.ReLU()
 
-    def forward(self, z):
-        feat = self.fc(z)
-        return self.act(feat)   
+    def forward(self, feat):
+        z = self.fc(feat)
+        return self.act(z)
 
 
 
