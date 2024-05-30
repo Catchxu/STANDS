@@ -5,7 +5,7 @@ from scipy.stats import beta ,invgamma, norm
 
 
 class GMMWithPrior(object):
-    def __init__(self, ref_score, random_state=None, max_iter=100, tol=1e-3, prior_beta=[1,10]):
+    def __init__(self, ref_score, random_state=None, max_iter=100, tol=1e-5, prior_beta=[1,10]):
         self.ref_score = ref_score
         self.max_iter = max_iter
         self.tol = tol

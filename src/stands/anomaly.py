@@ -1,16 +1,12 @@
-import os
 import dgl
-import numpy as np
-import pandas as pd
-import anndata as ad
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from typing import Optional, Dict, Union, Any
-from sklearn.preprocessing import LabelEncoder
 
 from .model import GeneratorAD, Discriminator
+from .model import GMMWithPrior
 from ._utils import select_device, seed_everything, calculate_gradient_penalty
 
 
@@ -69,6 +65,33 @@ class AnomalyDetect:
                 t.update(1)
         
         tqdm.write('Training has been finished.')
+    
+    @torch.no_grad()
+    def predict(self, tgt: Dict[str, Any], run_gmm: bool = True):
+        '''Detect anomalous spots on target graph'''
+
+        tgt_g = tgt['graph']
+        dataset = dgl.dataloading.DataLoader(
+            tgt_g, tgt_g.nodes(), self.sampler, batch_size=self.batch_size, 
+            shuffle=False, drop_last=False, num_workers=0, device=self.device
+        )
+
+        self.G.eval()
+        self.D.eval()
+        tqdm.write('Detect anomalous spots on target dataset...')
+
+        ref_score = self.score(self.dataset)
+        tgt_score = self.score(dataset)
+
+        tqdm.write('Anomalous spots have been detected.\n')
+
+        if run_gmm:
+            gmm = GMMWithPrior(ref_score)
+            threshold = gmm.fit(tgt_score=tgt_score)
+            tgt_label = [1 if s >= threshold else 0 for s in tgt_score]
+            return tgt_score, tgt_label
+        else:
+            return tgt_score
 
     def init_model(self, ref, weight_dir):
         self.G = GeneratorAD(ref['gene_dim'], ref['patch_size'], self.only_ST).to(self.device)
@@ -119,7 +142,7 @@ class AnomalyDetect:
             d1 = torch.mean(self.D.SCforward(real_g))
             d2 = torch.mean(self.D.SCforward(fake_g.detach()))
             gp = calculate_gradient_penalty(self.D, real_g, fake_g.detach())
-        
+
         else:
             _, fake_g, fake_p = self.G.fullforward(
                 blocks, blocks[0].srcdata['gene'], blocks[1].srcdata['patch']
@@ -179,3 +202,28 @@ class AnomalyDetect:
 
         # updating memory block with generated embeddings, fake_z
         self.G.Memory.update_mem(z)
+
+    def score(self, dataset):
+        # calucate anomaly score
+        dis = []
+        for _, _, blocks in dataset:
+            if self.only_ST:
+                # generate fake data
+                _, fake_g = self.G.STforward(blocks, blocks[0].srcdata['gene'])
+                d = self.D.SCforward(fake_g.detach())
+
+            else:
+                _, fake_g, fake_p = self.G.fullforward(
+                    blocks, blocks[0].srcdata['gene'], blocks[1].srcdata['patch']
+                )
+
+                d = self.D.fullforward(fake_g.detach(), fake_p.detach())
+
+            dis.append(d.cpu().detach())
+
+        # Normalize anomaly scores
+        dis = torch.mean(torch.cat(dis, dim=0), dim=1).numpy()
+        score = (dis.max() - dis)/(dis.max() - dis.min())
+
+        score = list(score.reshape(-1))
+        return score
