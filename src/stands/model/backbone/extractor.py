@@ -8,6 +8,7 @@ class Extractor(nn.Module):
     def __init__(self, configs):
         super().__init__()
         z_dim = configs.out_dim[-1]
+        self.z_dim = z_dim*2
         self.GeneEncoder = GATEncoder(configs.gene_dim, configs.out_dim, **configs.GATEncoder)
         self.GeneDecoder = MLPDecoder(configs.gene_dim, configs.out_dim)
         self.ImageEncoder = ResNetEncoder(configs.patch_size, z_dim=z_dim, **configs.ImageEncoder)
@@ -17,7 +18,7 @@ class Extractor(nn.Module):
             self.fusion = CrossTFBlock(z_dim, z_dim, **configs.TFBlock)
         else:
             self.fusion = TFBlock(z_dim, z_dim, **configs.TFBlock)
-    
+
     def encode(self, g_block, feat_g, feat_p):
         z_g = self.GeneEncoder(g_block, feat_g)
         z_p = self.ImageEncoder(g_block[1], feat_p)
@@ -40,6 +41,7 @@ class Extractor(nn.Module):
 class ExtractorOnlyST(nn.Module):
     def __init__(self, configs):
         super().__init__()
+        self.z_dim = configs.out_dim[-1]
         self.GeneEncoder = GATEncoder(configs.gene_dim, configs.out_dim, **configs.GATEncoder)
         self.GeneDecoder = MLPDecoder(configs.gene_dim, configs.out_dim)
     
@@ -60,6 +62,7 @@ class ExtractorOnlyST(nn.Module):
 class ExtractorOnlySC(nn.Module):
     def __init__(self, configs):
         super().__init__()
+        self.z_dim = configs.out_dim[-1]
         self.GeneEncoder = MLPEncoder(configs.gene_dim, configs.out_dim)
         self.GeneDecoder = MLPDecoder(configs.gene_dim, configs.out_dim)
     

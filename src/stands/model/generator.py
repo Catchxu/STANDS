@@ -31,7 +31,7 @@ class GeneratorAD(nn.Module):
             }
             self.extract = Extractor(FullConfigs(**paras))
             self.Memory = MemoryBlock(out_dim[-1]*2, **MBConfigs().MBBlock)
-    
+
     def fullforward(self, g_block, feat_g, feat_p):
         z_g, z_p = self.extract.encode(g_block, feat_g, feat_p)
         z_g, z_p = self.extract.fusion(z_g, z_p)
@@ -56,9 +56,9 @@ class GeneratorAD(nn.Module):
 
 
 
-class GeneratorPair(STNet):
-    def __init__(self, patch_size, in_dim, n_ref, n_tgt, **kwargs):
-        super().__init__(patch_size, in_dim, **kwargs)
+class KinPair(nn.Module):
+    def __init__(self, n_ref, n_tgt):
+        super().__init__()
         self.mapping = nn.Parameter(torch.Tensor(n_tgt, n_ref))
         self.reset_parameters()
 
@@ -66,20 +66,27 @@ class GeneratorPair(STNet):
         stdv = 1. / math.sqrt(self.mapping.size(1))
         self.mapping.data.uniform_(-stdv, stdv)
 
-    def forward(self, ref, tgt):
-        z_ref, _ = self.encode([ref, ref], ref.ndata['gene'])
-        z_tgt, _ = self.encode([tgt, tgt], tgt.ndata['gene'])
+    def forward(self, z_ref, z_tgt):
         z_ref = torch.mm(F.relu(self.mapping), z_ref)
         return z_ref, z_tgt, F.relu(self.mapping).detach().cpu().numpy()
 
 
-class GeneratorBC(STNet):
-    def __init__(self, data_n, patch_size, in_dim, out_dim=[512, 256], **kwargs):
-        super().__init__(patch_size, in_dim, out_dim, **kwargs)
-        self.Style = StyleBlock(data_n, out_dim[-1])
 
-    def forward(self, g_block, feat_g, batchid):
-        z = self.GeneEncoder(g_block, feat_g)
+
+class GeneratorBC(nn.Module):
+    def __init__(self, extractor, n_batch, z_dim):
+        super().__init__()
+        self.extractor = extractor
+        self.Style = StyleBlock(n_batch, z_dim)
+
+    def STforward(self, g_block, feat_g, batchid):
+        z = self.extractor.GeneEncoder(g_block, feat_g)
         z = self.Style(z, batchid)
-        feat_g = self.GeneDecoder(z)
+        feat_g = self.extractor.GeneDecoder(z)
+        return feat_g
+    
+    def SCforward(self, feat_g, batchid):
+        z = self.extractor.GeneEncoder(feat_g)
+        z = self.Style(z, batchid)
+        feat_g = self.extractor.GeneDecoder(z)
         return feat_g
