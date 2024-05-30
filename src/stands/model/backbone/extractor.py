@@ -1,4 +1,8 @@
+import os
+import torch
 import torch.nn as nn
+from typing import Optional
+
 from .gene import GATEncoder, MLPEncoder, MLPDecoder
 from .image import ResNetEncoder, ResNetDecoder
 from .layer import TFBlock, CrossTFBlock
@@ -38,6 +42,18 @@ class Extractor(nn.Module):
         z_g, z_p = self.fusion(z_g, z_p)
         feat_g, feat_p = self.decode(z_g, z_p)
         return feat_g, feat_p
+    
+    def load_weight(self, weight_dir: Optional[str]):
+        if weight_dir:
+            pre_weights = torch.load(weight_dir)
+        else:
+            pre_weights = torch.load(os.path.dirname(__file__) + '/model.pth')
+        
+        # Load the pre-trained weights for extractor
+        model_dict = self.state_dict()
+        pretrained_dict = {k: v for k, v in pre_weights.items()}
+        model_dict.update(pretrained_dict)
+        self.load_state_dict(model_dict)
 
 
 
@@ -64,6 +80,18 @@ class ExtractorOnlyST(nn.Module):
     def pretrain(self, g_block, feat_g):
         return self.decode(self.encode(g_block, feat_g))
 
+    def load_weight(self, weight_dir: Optional[str]):
+        if weight_dir:
+            pre_weights = torch.load(weight_dir)
+        else:
+            pre_weights = torch.load(os.path.dirname(__file__) + '/model.pth')
+        
+        # Load the pre-trained weights for extractor
+        model_dict = self.state_dict()
+        pretrained_dict = {k: v for k, v in pre_weights.items()}
+        model_dict.update(pretrained_dict)
+        self.load_state_dict(model_dict)
+
 
 
 
@@ -88,3 +116,15 @@ class ExtractorOnlySC(nn.Module):
     
     def pretrain(self, feat_g):
         return self.decode(self.encode(feat_g))
+
+    def load_weight(self, weight_dir: Optional[str]):
+        if weight_dir:
+            pre_weights = torch.load(weight_dir)
+        else:
+            pre_weights = torch.load(os.path.dirname(__file__) + '/model.pth')
+        
+        # Load the pre-trained weights for extractor
+        model_dict = self.state_dict()
+        pretrained_dict = {k: v for k, v in pre_weights.items()}
+        model_dict.update(pretrained_dict)
+        self.load_state_dict(model_dict)
