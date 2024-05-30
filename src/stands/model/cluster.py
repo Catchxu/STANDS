@@ -1,10 +1,10 @@
-import tqdm
 import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn.parameter import Parameter
+from tqdm import tqdm
 from sklearn.cluster import KMeans
 
 from .backbone.layer import TFBlock, CrossTFBlock
