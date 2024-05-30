@@ -5,8 +5,6 @@ class SCConfigs(object):
         self.z_dim = self.out_dim[-1]
 
 
-
-
 class STConfigs(object):
     def __init__(self, gene_dim):
         self.gene_dim = gene_dim
@@ -14,8 +12,6 @@ class STConfigs(object):
         self.z_dim = self.out_dim[-1]
 
         self.GATEncoder = {'nheads': [4, 1]}
-
-
 
 
 class FullConfigs(object):
@@ -50,8 +46,6 @@ class FullConfigs(object):
         }
 
 
-
-
 class MBConfigs(object):
     def __init__(self, z_dim):
         self.MBBlock = {
@@ -62,16 +56,12 @@ class MBConfigs(object):
         }
 
 
-
-
 class DisConfigs(object):
     def __init__(self, g_dim, p_dim=None, only_ST=False, only_SC=False):
         self.only_gene = only_SC or only_ST
         self.in_dim = g_dim if self.only_gene else g_dim + p_dim
         self.out_dim = [256, 256, 256, 16]
         self.dim_list = [self.in_dim] + self.out_dim
-
-
 
 
 class GMMConfigs(object):
@@ -81,8 +71,6 @@ class GMMConfigs(object):
             'tol': 1e-3,
             'prior_beta': [1,10]
         }
-
-
 
 
 class ClusterConfigs(object):
