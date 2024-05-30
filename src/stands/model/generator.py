@@ -6,9 +6,12 @@ from typing import List
 
 from .backbone import GATEncoder, MLPEncoder, MLPDecoder
 from .backbone import ResNetEncoder, ResNetDecoder
-from ._block import MemoryBlock, TFBlock, StyleBlock
+from .backbone import MemoryBlock, TFBlock, StyleBlock
 
 
+class Extractor(nn.Module):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
 
 class STNet(nn.Module):
