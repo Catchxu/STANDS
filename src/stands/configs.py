@@ -81,3 +81,28 @@ class GMMConfigs(object):
             'tol': 1e-3,
             'prior_beta': [1,10]
         }
+
+
+
+
+class ClusterConfigs(object):
+    def __init__(self, z_dim):
+        self.alpha = 1
+        self.KMeans_n_init = 20
+        self.cross_attn = True
+        self.TFBlock = {
+            'g_dim': z_dim,
+            'p_dim': z_dim,
+            'num_layers': 3,
+            'nheads': 8,
+            'hidden_dim': 1024, 
+            'dropout': 0.1
+        } 
+
+        # training process
+        self.learning_rate = 1e-4
+        self.n_epochs = 20000,
+        self.update_interval = 10
+        self.weight_decay = 1e-4
+        self.verbose = True 
+        self.log_interval = 200

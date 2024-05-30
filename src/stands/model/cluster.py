@@ -6,38 +6,62 @@ import torch.optim as optim
 from torch.nn.parameter import Parameter
 from sklearn.cluster import KMeans
 
-from ._block import TFBlock
+from .backbone.layer import TFBlock, CrossTFBlock
+from ..configs import ClusterConfigs
 
 
 class Cluster(nn.Module):
-    def __init__(self, generator, use_image: bool = True,
-                 z_dim=256, n_subtypes=2, alpha=1, **kwargs):
+    def __init__(self, generator, n_subtypes):
         super().__init__()
-        self.subtypes = n_subtypes
-        self.alpha = alpha
-        self.z_dim = z_dim * 2 if use_image else z_dim
-        self.Fusion = TFBlock(self.z_dim, num_heads=2)
-        self.G = generator
 
-        self.mu = Parameter(torch.Tensor(self.subtypes, self.z_dim*2))
+        self.G = generator
+        self.z_dim = self.G.z_dim
+        self.subtypes = n_subtypes
+
+        configs = ClusterConfigs(self.z_dim)
+        self.alpha = configs.alpha
+        self.KMeans_n_init = configs.KMeans_n_init
+        self.learning_rate = configs.learning_rate
+        self.n_epochs = configs.n_epochs
+        self.update_interval = configs.update_interval
+        self.weight_decay = configs.weight_decay
+        self.verbose = configs.verbose
+        self.log_interval = configs.log_interval
+
+        if configs.cross_attn:
+            self.fusion = CrossTFBlock(**configs.TFBlock)
+        else:
+            self.fusion = TFBlock(**configs.TFBlock)
+
+        self.mu = Parameter(torch.Tensor(self.subtypes, self.z_dim))
 
         # classifer for supervised pre-training
-        self.classifer = nn.Linear(self.z_dim*2, n_subtypes)
+        self.classifer = nn.Linear(self.z_dim, n_subtypes)
 
-    def forward(self, g_block, feat_g, res_g, feat_p=None, res_p=None):
-        z, _, _ = self.G(g_block, feat_g, feat_p)
-        res_z, _, _ = self.G(g_block, res_g, res_p)
-        x = self.Fusion(z, res_z)
+    def fullforward(self, g_block, feat_g, res_g, feat_p, res_p):
+        z, _, _ = self.G.fullforward(g_block, feat_g, feat_p)
+        res_z, _, _ = self.G.fullforward(g_block, res_g, res_p)
+        return z, res_z
+    
+    def STforward(self, g_block, feat_g, res_g):
+        z, _ = self.G.STforward(g_block, feat_g)
+        res_z, _ = self.G.STforward(g_block, res_g)
+        return z, res_z
+    
+    def SCforward(self, feat_g, res_g):
+        z, _ = self.G.SCforward(feat_g)
+        res_z, _ = self.G.SCforward(res_g)
+        return z, res_z
+
+    def forward(self, z, res_z):
+        x = self.fusion(z, res_z)
         q = 1.0 / ((1.0 + torch.sum((x.unsqueeze(1) - self.mu)**2, dim=2) / self.alpha) + 1e-8)
         q = q**(self.alpha+1.0)/2.0
         q = q / torch.sum(q, dim=1, keepdim=True)
         self.mu_update(x, q)
-        return x, q
     
-    def pretrain(self, g_block, feat_g, res_g, feat_p=None, res_p=None):
-        z, _, _ = self.G(g_block, feat_g, feat_p)
-        res_z, _, _ = self.G(g_block, res_g, res_p)
-        x = self.Fusion(z, res_z)
+    def pretrain(self, z, res_z):
+        x = self.fusion(z, res_z)
         return self.classifer(x)
 
     def loss_function(self, p, q):
@@ -52,7 +76,7 @@ class Cluster(nn.Module):
         return p
 
     def mu_init(self, feat):
-        kmeans = KMeans(self.subtypes, n_init=20)
+        kmeans = KMeans(self.subtypes, n_init=self.KMeans_n_init)
         y_pred = kmeans.fit_predict(feat)
         feat = pd.DataFrame(feat, index=np.arange(0, feat.shape[0]))
         Group = pd.Series(y_pred, index=np.arange(0, feat.shape[0]), name="Group")
@@ -70,8 +94,7 @@ class Cluster(nn.Module):
 
         self.mu.data.copy_(torch.Tensor(centroid))
 
-    def fit(self, g, z_x, res_x, z_img, res_img, learning_rate=1e-4, n_epochs=10,
-            update_interval=3, weight_decay=1e-4, verbose=True, log_interval=1):
+    def fit(self, g, z_x, res_x, z_img, res_img):
         optimizer = optim.Adam(self.parameters(), lr=learning_rate, weight_decay=weight_decay)
         scaler = torch.cuda.amp.GradScaler()
 

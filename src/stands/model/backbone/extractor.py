@@ -19,6 +19,10 @@ class Extractor(nn.Module):
         else:
             self.fusion = TFBlock(z_dim, z_dim, **configs.TFBlock)
 
+        # Version ID
+        self.only_SC = False
+        self.only_ST = False
+
     def encode(self, g_block, feat_g, feat_p):
         z_g = self.GeneEncoder(g_block, feat_g)
         z_p = self.ImageEncoder(g_block[1], feat_p)
@@ -44,6 +48,10 @@ class ExtractorOnlyST(nn.Module):
         self.z_dim = configs.out_dim[-1]
         self.GeneEncoder = GATEncoder(configs.gene_dim, configs.out_dim, **configs.GATEncoder)
         self.GeneDecoder = MLPDecoder(configs.gene_dim, configs.out_dim)
+
+        # Version ID
+        self.only_SC = False
+        self.only_ST = True
     
     def encode(self, g_block, feat_g):
         z_g = self.GeneEncoder(g_block, feat_g)
@@ -65,6 +73,10 @@ class ExtractorOnlySC(nn.Module):
         self.z_dim = configs.out_dim[-1]
         self.GeneEncoder = MLPEncoder(configs.gene_dim, configs.out_dim)
         self.GeneDecoder = MLPDecoder(configs.gene_dim, configs.out_dim)
+
+        # Version ID
+        self.only_SC = True
+        self.only_ST = False
     
     def encode(self, feat_g):
         z_g = self.GeneEncoder(feat_g)

@@ -26,6 +26,7 @@ class GeneratorAD(nn.Module):
             self.extract = Extractor(configs)
         
         self.Memory = MemoryBlock(**MBConfigs(configs.z_dim).MBBlock)
+        self.z_dim = configs.z_dim
 
     def fullforward(self, g_block, feat_g, feat_p):
         z_g, z_p = self.extract.encode(g_block, feat_g, feat_p)
