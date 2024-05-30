@@ -9,28 +9,23 @@ from ..configs import SCConfigs, STConfigs, FullConfigs, MBConfigs
 
 
 class GeneratorAD(nn.Module):
-    def __init__(self, gene_dim, out_dim=[512, 256], patch_size=None,
-                 cross_attn=True, only_ST=False, only_SC=False):
+    def __init__(self, gene_dim, patch_size=None, only_ST=False, only_SC=False):
         super().__init__()
         assert only_ST and only_SC == False
 
         if only_ST:
-            self.extract = ExtractorOnlyST(STConfigs(gene_dim, out_dim))
-            self.Memory = MemoryBlock(out_dim[-1], **MBConfigs().MBBlock)
-        
+            configs = STConfigs(gene_dim)
+            self.extract = ExtractorOnlyST(configs)
+
         elif only_SC:
-            self.extract = ExtractorOnlySC(SCConfigs(gene_dim, out_dim))
-            self.Memory = MemoryBlock(out_dim[-1], **MBConfigs().MBBlock)
+            configs = SCConfigs(gene_dim)
+            self.extract = ExtractorOnlySC(configs)
         
         else:
-            paras = {
-                'gene_dim': gene_dim,
-                'out_dim': out_dim,
-                'patch_size': patch_size,
-                'cross_attn': cross_attn
-            }
-            self.extract = Extractor(FullConfigs(**paras))
-            self.Memory = MemoryBlock(out_dim[-1]*2, **MBConfigs().MBBlock)
+            configs = FullConfigs(gene_dim, patch_size)
+            self.extract = Extractor(configs)
+        
+        self.Memory = MemoryBlock(**MBConfigs(configs.z_dim).MBBlock)
 
     def fullforward(self, g_block, feat_g, feat_p):
         z_g, z_p = self.extract.encode(g_block, feat_g, feat_p)

@@ -1,15 +1,17 @@
 class SCConfigs(object):
-    def __init__(self, gene_dim, out_dim):
+    def __init__(self, gene_dim):
         self.gene_dim = gene_dim
-        self.out_dim = out_dim
+        self.out_dim = [512, 256]
+        self.z_dim = self.out_dim[-1]
 
 
 
 
 class STConfigs(object):
-    def __init__(self, gene_dim, out_dim):
+    def __init__(self, gene_dim):
         self.gene_dim = gene_dim
-        self.out_dim = out_dim
+        self.out_dim = [512, 256]
+        self.z_dim = self.out_dim[-1]
 
         self.GATEncoder = {'nheads': [4, 1]}
 
@@ -17,9 +19,10 @@ class STConfigs(object):
 
 
 class FullConfigs(object):
-    def __init__(self, gene_dim, out_dim, patch_size, cross_attn):
+    def __init__(self, gene_dim, patch_size):
         self.gene_dim = gene_dim
-        self.out_dim = out_dim
+        self.out_dim = [512, 256]
+        self.z_dim = self.out_dim[-1] * 2
 
         self.GATEncoder = {'nheads': [4, 1]}
 
@@ -38,7 +41,7 @@ class FullConfigs(object):
             'MultiResSkips': True
         }
 
-        self.cross_attn = cross_attn
+        self.cross_attn = True
         self.TFBlock = {
             'num_layers': 3,
             'nheads': 4,
@@ -50,9 +53,31 @@ class FullConfigs(object):
 
 
 class MBConfigs(object):
-    def __init__(self):
+    def __init__(self, z_dim):
         self.MBBlock = {
+            'z_dim': z_dim,
             'mem_dim': 512,
             'shrink_threshold': 0.005,
             'temperature': 0.5
+        }
+
+
+
+
+class DisConfigs(object):
+    def __init__(self, g_dim, p_dim=None, only_ST=False, only_SC=False):
+        self.only_gene = only_SC or only_ST
+        self.in_dim = g_dim if self.only_gene else g_dim + p_dim
+        self.out_dim = [256, 256, 256, 16]
+        self.dim_list = [self.in_dim] + self.out_dim
+
+
+
+
+class GMMConfigs(object):
+    def __init__(self):
+        self.GMM = {
+            'max_iter': 100,
+            'tol': 1e-3,
+            'prior_beta': [1,10]
         }

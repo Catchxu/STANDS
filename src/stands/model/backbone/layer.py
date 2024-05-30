@@ -3,6 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import torch.nn.utils.spectral_norm as SNorm
 from dgl.nn import GATv2Conv
 
 
@@ -160,11 +161,11 @@ class TransformerLayer(nn.Module):
 
 
 class TFBlock(nn.Module):
-    def __init__(self, p_dim, g_dim, num_layers=3, nheads=4, 
+    def __init__(self, g_dim, p_dim, num_layers=3, nheads=4, 
                  hidden_dim=1024, dropout=0.1):
         super().__init__()
         self.layers = nn.ModuleList([
-            TransformerLayer(p_dim + g_dim, nheads, hidden_dim, dropout) 
+            TransformerLayer(g_dim + p_dim, nheads, hidden_dim, dropout) 
             for _ in range(num_layers)
         ])
 
@@ -181,10 +182,10 @@ class TFBlock(nn.Module):
 
 
 class CrossTFBlock(nn.Module):
-    def __init__(self, p_dim, g_dim, num_layers=3, nheads=4, 
+    def __init__(self, g_dim, p_dim, num_layers=3, nheads=4, 
                  hidden_dim=1024, dropout=0.1):
         super().__init__()
-        dim = min(p_dim, g_dim)
+        dim = min(g_dim, p_dim)
         if p_dim != g_dim:
             self.linear_p = nn.Linear(p_dim, dim)
             self.linear_g = nn.Linear(g_dim, dim)
@@ -236,3 +237,39 @@ class StyleBlock(nn.Module):
         else:
             s = torch.mm(batchid, self.style)
             return z - s
+
+
+
+
+class SNLinearBlock(nn.Module):
+    def __init__(self, in_dim, out_dim, act: bool = True, dropout: bool = True):
+        super().__init__()
+        self.linear = nn.Sequential(
+            SNorm(nn.Linear(in_dim, out_dim)),
+            nn.LeakyReLU(0.2, inplace=True) if act else nn.Identity(),
+            nn.Dropout(0.3) if dropout else nn.Identity(),
+        )
+
+    def forward(self, x):
+        x = self.linear(x)
+        return x
+
+
+
+
+class CriticNet(nn.Module):
+    def __init__(self, configs):
+        super().__init__()
+
+        dim_list = configs.dim_list
+        self.layers = nn.ModuleList()
+        dim_1 = dim_list[0]
+        for dim_2 in dim_list[1:-1]:
+            self.layers.append(SNLinearBlock(dim_1, dim_2))
+            dim_1 = dim_2
+        self.layers.append(SNLinearBlock(dim_1, dim_list[-1], False, False))
+    
+    def forward(self, z):
+        for layer in self.layers:
+            z = layer(z)
+        return z
