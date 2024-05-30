@@ -300,7 +300,7 @@ class KinPairs:
         ref_g, tgt_g = self.split(raw_g)
 
         self.D = Discriminator(raw['patch_size'], 256).to(self.device)
-        self.G = GeneratorPair(
+        self.G = KinPair(
             raw['patch_size'], 
             raw['gene_dim'],
             ref_g.num_nodes(), 

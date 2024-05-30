@@ -15,15 +15,17 @@ class Discriminator(nn.Module):
             self.extract = ExtractorDisOnlySC(configs)
         
         else:
+            configs = DisFullConfigs(gene_dim, patch_size)
+            self.extract = ExtractorDis(configs)
 
-
-
-        self.discriminator = CriticNet(DisConfigs(g_dim, p_dim, only_ST, only_SC))
+        self.discriminator = CriticNet(DisConfigs(configs.z_dim, only_ST, only_SC))
     
-    def fullforward(self, z_g, z_p):
+    def fullforward(self, feat_g, feat_p):
+        z_g, z_p = self.extract.encode(feat_g, feat_p)
         z = torch.cat([z_g, z_p], dim=1)
         return self.discriminator(z)
 
-    def geneforward(self, z_g):
+    def SCforward(self, feat_g):
+        z_g = self.extract.encode(feat_g)
         return self.discriminator(z_g)
 

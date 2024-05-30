@@ -11,7 +11,7 @@ from typing import Optional, Dict, Union, Any
 from sklearn.preprocessing import LabelEncoder
 
 from .model import GeneratorAD, Discriminator
-from ._utils import select_device, seed_everything
+from ._utils import select_device, seed_everything, calculate_gradient_penalty
 
 
 class AnomalyDetect:
@@ -72,7 +72,7 @@ class AnomalyDetect:
 
     def init_model(self, ref, weight_dir):
         self.G = GeneratorAD(ref['gene_dim'], ref['patch_size'], self.only_ST).to(self.device)
-        self.D = Discriminator(self.G.z_dim, self.G.z_dim, self.only_ST).to(self.device)
+        self.D = Discriminator(ref['gene_dim'], ref['patch_size'], self.only_ST).to(self.device)
 
         self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr, betas=(0.5, 0.999))
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
@@ -111,14 +111,71 @@ class AnomalyDetect:
 
         if self.only_ST:
             # generate fake data
-            real_z_g, fake_g = self.G.STforward(blocks, blocks[0].srcdata['gene'])
+            _, fake_g = self.G.STforward(blocks, blocks[0].srcdata['gene'])
                     
             # get real data from blocks
             real_g = blocks[1].dstdata['gene']
 
-            d1 = torch.mean(self.D.geneforward(real_g, real_p))
-            d2 = torch.mean(self.D(fake_g.detach(), fake_p.detach()))
+            d1 = torch.mean(self.D.SCforward(real_g))
+            d2 = torch.mean(self.D.SCforward(fake_g.detach()))
+            gp = calculate_gradient_penalty(self.D, real_g, fake_g.detach())
+        
+        else:
+            _, fake_g, fake_p = self.G.fullforward(
+                blocks, blocks[0].srcdata['gene'], blocks[1].srcdata['patch']
+            )
 
+            # get real data from blocks
+            real_g = blocks[1].dstdata['gene']
+            real_p = blocks[1].dstdata['patch']
 
+            d1 = torch.mean(self.D.fullforward(real_g, real_p))
+            d2 = torch.mean(self.D.fullforward(fake_g.detach(), fake_p.detach()))
+            gp = calculate_gradient_penalty(
+                self.D, real_g, fake_g.detach(), real_p, fake_p.detach()
+            )            
+
+        # store discriminator loss for printing training information
+        self.D_loss = - d1 + d2 + gp * self.weight['w_gp']
+        self.D_loss.backward()
+        self.opt_D.step()
 
     def UpdateG(self, blocks):
+        '''Updating generator'''
+        self.opt_G.zero_grad()
+
+        if self.only_ST:
+            # generate fake data
+            z, fake_g = self.G.STforward(blocks, blocks[0].srcdata['gene'])
+                    
+            # get real data from blocks
+            real_g = blocks[1].dstdata['gene']
+
+            # discriminator provides feedback
+            d = self.D.SCforward(fake_g)
+
+            Loss_rec = self.L1(real_g, fake_g)
+            Loss_adv = - torch.mean(d)
+
+        else:
+            z, fake_g, fake_p = self.G.fullforward(
+                blocks, blocks[0].srcdata['gene'], blocks[1].srcdata['patch']
+            )
+
+            # get real data from blocks
+            real_g = blocks[1].dstdata['gene']
+            real_p = blocks[1].dstdata['patch']
+
+            # discriminator provides feedback
+            d = self.D.fullforward(fake_g, fake_p)
+
+            Loss_rec = (self.L1(real_g, fake_g)+self.L1(real_p, fake_p))/2
+            Loss_adv = - torch.mean(d)
+        
+        # store generator loss for printing training information and backward
+        self.G_loss = self.weight['w_rec'] * Loss_rec + self.weight['w_adv'] * Loss_adv
+        self.G_loss.backward()
+        self.opt_G.step()
+
+        # updating memory block with generated embeddings, fake_z
+        self.G.Memory.update_mem(z)
