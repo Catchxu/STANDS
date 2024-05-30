@@ -2,38 +2,58 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import List
 
 from .backbone import Extractor, ExtractorOnlyST, ExtractorOnlySC
 from .backbone import MemoryBlock, StyleBlock
-
+from ..configs import SCConfigs, STConfigs, FullConfigs, MBConfigs
 
 
 class GeneratorAD(nn.Module):
     def __init__(self, gene_dim, out_dim=[512, 256], patch_size=None,
-                 only_ST=False, only_SC=False, cross_attn=True, config=None):
+                 cross_attn=True, only_ST=False, only_SC=False):
         super().__init__()
         assert only_ST and only_SC == False
-    
+
         if only_ST:
-            self.extract = ExtractorOnlyST(gene_dim, out_dim)
-
-
-
-    def forward(self, g_block, feat_g, feat_p=None):
-        z_g, z_p = self.encode(g_block, feat_g, feat_p)
-
-        if self.use_image:
-            z_g, z_p = self.Fusion(z_g, z_p)
-            z = torch.concat([z_g, z_p], dim=-1)
-            mem_z = self.Memory(z)
-            z_g, z_p = torch.chunk(mem_z, 2, dim = -1)
+            self.extract = ExtractorOnlyST(STConfigs(gene_dim, out_dim))
+            self.Memory = MemoryBlock(out_dim[-1], **MBConfigs().MBBlock)
+        
+        elif only_SC:
+            self.extract = ExtractorOnlySC(SCConfigs(gene_dim, out_dim))
+            self.Memory = MemoryBlock(out_dim[-1], **MBConfigs().MBBlock)
+        
         else:
-            z = z_g
-            z_g = self.Memory(z_g)
-
-        feat_g, feat_p = self.decode(z_g, z_p)
+            paras = {
+                'gene_dim': gene_dim,
+                'out_dim': out_dim,
+                'patch_size': patch_size,
+                'cross_attn': cross_attn
+            }
+            self.extract = Extractor(FullConfigs(**paras))
+            self.Memory = MemoryBlock(out_dim[-1]*2, **MBConfigs().MBBlock)
+    
+    def fullforward(self, g_block, feat_g, feat_p):
+        z_g, z_p = self.extract.encode(g_block, feat_g, feat_p)
+        z_g, z_p = self.extract.fusion(z_g, z_p)
+        z = torch.concat([z_g, z_p], dim=-1)
+        mem_z = self.Memory(z)
+        z_g, z_p = torch.chunk(mem_z, 2, dim = -1)
+        feat_g, feat_p = self.extract.decode(z_g, z_p)
         return z, feat_g, feat_p
+    
+    def STforward(self, g_block, feat_g):
+        z = self.extract.encode(g_block, feat_g)
+        mem_z = self.Memory(z)
+        feat_g = self.extract.decode(mem_z)
+        return z, feat_g
+
+    def SCforward(self, feat_g):
+        z = self.extract.encode(feat_g)
+        mem_z = self.Memory(z)
+        feat_g = self.extract.decode(mem_z)
+        return z, feat_g
+
+
 
 
 class GeneratorPair(STNet):

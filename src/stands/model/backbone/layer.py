@@ -45,12 +45,12 @@ class LinearBlock(nn.Module):
 
 
 class MemoryBlock(nn.Module):
-    def __init__(self, mem_dim, z_dim, shrink_thres=0.005, tem=0.5):
+    def __init__(self, z_dim, mem_dim=512, shrink_threshold=0.005, temperature=0.5):
         super().__init__()
         self.mem_dim = mem_dim
         self.z_dim = z_dim
-        self.shrink_thres = shrink_thres
-        self.tem = tem
+        self.shrink_thres = shrink_threshold
+        self.tem = temperature
         self.register_buffer("mem", torch.randn(self.mem_dim, self.z_dim))
         self.register_buffer("mem_ptr", torch.zeros(1, dtype=torch.long))
 

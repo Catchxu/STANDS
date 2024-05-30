@@ -26,7 +26,7 @@ class ResidualBlock(nn.Module):
 
 class ResNetEncoder(nn.Module):
     def __init__(self, patch_size, n_ResidualBlock=8, n_levels=2,
-                 input_channels=3, z_dim=256, MultiResSkips=True):
+                 input_channels=3, z_dim=256, MultiResSkips=True, GAT_nhead=4):
         super().__init__()
 
         self.max_filters = 2**(n_levels+3)
@@ -79,7 +79,7 @@ class ResNetEncoder(nn.Module):
         self.z_dim = z_dim
         self.img_latent_dim = patch_size // (2**n_levels)
         self.feat_dim = self.z_dim*self.img_latent_dim**2
-        self.GAT = GAT(self.feat_dim, self.z_dim, 4)
+        self.GAT = GAT(self.feat_dim, self.z_dim, GAT_nhead)
 
     def forward(self, g, feat):
         feat = self.input_conv(feat)
