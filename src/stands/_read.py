@@ -40,8 +40,7 @@ def set_patch(adata: ad.AnnData):
 
 
 @clear_warnings
-def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
-         adata: Optional[ad.AnnData] = None, preprocess: bool = True,
+def read(adata: ad.AnnData, preprocess: bool = True,
          return_type: Literal['anndata', 'graph', 'tuple'] = 'graph',
          n_genes: int = 3000, n_neighbors: int = 4, spa_key: str = 'spatial',
          patch_size: Optional[int] = None, **kwargs):
@@ -50,9 +49,7 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
     The read data are transformed to one graph.
 
     Parameters:
-        data_dir (Optional[str]): Directory path for the spatial data.
-        data_name (Optional[str]): Name of the spatial data.
-        adata (Optional[ad.AnnData]): AnnData object.
+        adata (ad.AnnData): AnnData object.
         spa_key (str): Key for spatial information in AnnData objects.
         preprocess (bool): Perform data preprocessing.
         n_genes (int): Number of genes for feature selection.
@@ -67,12 +64,6 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
         (Union[ad.AnnData, Tuple, Dict]): Depending on the 'return_type', returns either a tuple of AnnData objects or a dictionary of graph-related data.
     """
     seed_everything(0)
-
-    if adata is None:
-        if (data_dir is None) or (data_name is None):
-            RuntimeError('Please set the read file/path.')
-        input_dir = data_dir + data_name + '.h5ad'
-        adata = sc.read_h5ad(input_dir)
 
     position = adata.obsm[spa_key]
 
@@ -101,9 +92,7 @@ def read(data_dir: Optional[str] = None, data_name: Optional[str] = None,
 
 
 @clear_warnings
-def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
-               ref_name: Optional[str] = None, tgt_name: Optional[str] = None,
-               ref: Optional[ad.AnnData] = None, tgt: Optional[ad.AnnData] = None, spa_key: str = 'spatial',
+def read_cross(ref: ad.AnnData, tgt: ad.AnnData, spa_key: str = 'spatial',
                preprocess: bool = True, n_genes: int = 3000, patch_size: Optional[int] = None,
                n_neighbors: int = 4, return_type: Literal['anndata', 'graph'] = 'graph', **kwargs):
     """
@@ -111,12 +100,8 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
     The read data are transformed to reference and target graph.
 
     Parameters:
-        ref_dir (Optional[str]): Directory path for the reference spatial data.
-        tgt_dir (Optional[str]): Directory path for the target spatial data.
-        ref_name (Optional[str]): Name of the reference spatial data.
-        tgt_name (Optional[str]): Name of the target spatial data.
-        ref (Optional[ad.AnnData]): Reference AnnData object.
-        tgt (Optional[ad.AnnData]): Target AnnData object.
+        ref (ad.AnnData): Reference AnnData object.
+        tgt (ad.AnnData): Target AnnData object.
         spa_key (str): Key for spatial information in AnnData objects.
         preprocess (bool): Perform data preprocessing.
         n_genes (int): Number of genes for feature selection.
@@ -132,10 +117,8 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
     """
     seed_everything(0)
 
-    ref, ref_img, ref_pos = read(ref_dir, ref_name, ref, False, 'tuple',
-                                 spa_key=spa_key, n_neighbors=n_neighbors)
-    tgt, tgt_img, tgt_pos = read(tgt_dir, tgt_name, tgt, False, 'tuple',
-                                 spa_key=spa_key, n_neighbors=n_neighbors)
+    ref, ref_img, ref_pos = read(ref, False, 'tuple', spa_key=spa_key, n_neighbors=n_neighbors)
+    tgt, tgt_img, tgt_pos = read(tgt, False, 'tuple', spa_key=spa_key, n_neighbors=n_neighbors)
     overlap_gene = list(set(ref.var_names) & set(tgt.var_names))
     ref = ref[:, overlap_gene]
     tgt = tgt[:, overlap_gene]
@@ -167,8 +150,7 @@ def read_cross(ref_dir: Optional[str] = None, tgt_dir: Optional[str] = None,
 
 
 @clear_warnings
-def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] = None,
-               adata: Optional[List[ad.AnnData]] = None, patch_size: Optional[int] = None,
+def read_multi(adata_list: List[ad.AnnData], patch_size: Optional[int] = None,
                gene_list: Optional[List[str]] = None, preprocess: bool = True, 
                n_genes: int = 3000, n_neighbors: int = 4,
                return_type: Literal['anndata', 'graph'] = 'graph', 
@@ -178,9 +160,7 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
     All the datasets are transformed to only one graph.
 
     Parameters:
-        input_dir (Optional[str]): Directory path for spatial data.
-        data_name (Optional[List[str]]): List of names for spatial datasets.
-        adata (Optional[List[ad.AnnData]]): List of AnnData objects.
+        adata_list (List[ad.AnnData]): List of AnnData objects.
         patch_size (Optional[int]): Patch size for H&E images.
         gene_list (Optional[List[str]]): Selected gene list.
         preprocess (bool): Perform data preprocessing.
@@ -197,19 +177,9 @@ def read_multi(input_dir: Optional[str] = None, data_name: Optional[List[str]] =
     """
     seed_everything(0)
 
-    # initialize dataname when 'data_name = None'
-    if data_name is None:
-        if adata is None:
-            RuntimeError('Please set the read file/path.')
-        else:
-            data_name = [None] * len(adata)
-    else:
-        adata = [None] * len(data_name)
-
     adatas, images, positions = [], [], []
-    for i in range(len(data_name)):
-        d, img, pos = read(input_dir, data_name[i], adata[i], False, 'tuple',
-                           spa_key=spa_key, n_neighbors=n_neighbors)
+    for i in range(len(adata_list)):
+        d, img, pos = read(adata_list[i], False, 'tuple', spa_key=spa_key, n_neighbors=n_neighbors)
         adatas.append(d)
         images.append(img)
         positions.append(pos)
