@@ -11,13 +11,13 @@ from typing import List, Optional, Union
 from .model import Extractor
 from .configs import FullConfigs
 from ._read import read_multi
-from ._utils import seed_everything, select_device
+from ._utils import seed_everything
 
 
 def pretrain(adata_list: List[ad.AnnData],
              n_epochs: int = 100,
              patch_size: Optional[int] = None,
-             batch_size: int = 64,
+             batch_size: int = 128,
              learning_rate: float = 1e-4,
              GPU: Union[bool, str] = True,
              random_state: int = None,
@@ -37,7 +37,17 @@ def pretrain(adata_list: List[ad.AnnData],
         random_state (int): Random seed for reproducibility.
         weight_dir (Optional[str]): Directory path to save the pretrained model weights.
     """
-    device = select_device(GPU)
+    if GPU:
+        if torch.cuda.is_available():
+            if isinstance(GPU, str):
+                device = torch.device(GPU)
+            else:
+                device = torch.device('cuda:0')
+        else:
+            print("GPU isn't available, and use CPU to train Docs.")
+            device = torch.device("cpu")
+    else:
+        device = torch.device("cpu")
 
     if random_state is not None:
         seed_everything(random_state)
@@ -81,6 +91,6 @@ def pretrain(adata_list: List[ad.AnnData],
             t.update(1)
 
     if weight_dir is None:
-        weight_dir = os.path.dirname(__file__) + '/model.pth'
+        weight_dir = os.path.dirname(__file__) + '/model/backbone/model.pth'
     torch.save(net.state_dict(), weight_dir)
     tqdm.write(f'The pretrained weights for STANDS have been automatically saved at {weight_dir}!')

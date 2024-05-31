@@ -87,7 +87,7 @@ def read(adata: ad.AnnData, preprocess: bool = True,
         if patch_size is None:
             patch_size = set_patch(adata)
         builder = BuildGraph(adata, image, position,
-                             n_neighbors=n_neighbors, patch_size=patch_size)
+                             n_neighbors=n_neighbors, patch_size=patch_size, **kwargs)
         return builder.pack()
 
 
@@ -143,9 +143,9 @@ def read_cross(ref: ad.AnnData, tgt: ad.AnnData, spa_key: str = 'spatial',
             patch_size = set_patch(ref)
 
         ref_b = BuildGraph(ref, ref_img, ref_pos,
-                           n_neighbors=n_neighbors, patch_size=patch_size)
+                           n_neighbors=n_neighbors, patch_size=patch_size, **kwargs)
         tgt_b = BuildGraph(tgt, tgt_img, tgt_pos,
-                           n_neighbors=n_neighbors, patch_size=patch_size)
+                           n_neighbors=n_neighbors, patch_size=patch_size, **kwargs)
         return ref_b.pack(), tgt_b.pack()
 
 
@@ -206,7 +206,7 @@ def read_multi(adata_list: List[ad.AnnData], patch_size: Optional[int] = None,
         if patch_size is None:
             patch_size = set_patch(adatas[0])
         builder = BuildMultiGraph(adatas, images, positions, 
-                                  n_neighbors=n_neighbors, patch_size=patch_size)
+                                  n_neighbors=n_neighbors, patch_size=patch_size, **kwargs)
         return builder.pack()
 
 

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from .layer import GAT
+from .layer import GAT, LinearBlock
 
 
 class ResidualBlock(nn.Module):
@@ -80,6 +80,7 @@ class ResNetEncoder(nn.Module):
         self.img_latent_dim = patch_size // (2**n_levels)
         self.feat_dim = self.z_dim*self.img_latent_dim**2
         self.GAT = GAT(self.feat_dim, self.z_dim, GAT_nhead)
+        self.FFN = LinearBlock(self.feat_dim, self.z_dim)
 
     def forward(self, g, feat):
         feat = self.input_conv(feat)
@@ -111,7 +112,8 @@ class ResNetEncoder(nn.Module):
         if self.MultiResSkips:
             feat = sum([feat] + skips)
 
-        z = self.output_conv(feat)
+        feat = self.output_conv(feat)
+        z = self.FFN(feat.flatten(1))
         return z
 
 

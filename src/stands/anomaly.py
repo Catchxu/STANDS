@@ -123,7 +123,7 @@ class AnomalyDetect:
                 else:
                     real_g = blocks[0].srcdata['gene']
                     real_p = blocks[1].srcdata['patch']
-                    z, _, _ = self.G(blocks, real_g, real_p)
+                    z, _, _ = self.G.fullforward(blocks, real_g, real_p)
 
                 self.G.Memory.update_mem(z)
                 t += 1

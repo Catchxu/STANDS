@@ -11,7 +11,7 @@ from ..configs import SCConfigs, STConfigs, FullConfigs, MBConfigs
 class GeneratorAD(nn.Module):
     def __init__(self, gene_dim, patch_size=None, only_ST=False, only_SC=False):
         super().__init__()
-        assert only_ST and only_SC == False
+        assert (only_ST and only_SC) == False
 
         if only_ST:
             configs = STConfigs(gene_dim)

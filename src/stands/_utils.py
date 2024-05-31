@@ -48,18 +48,19 @@ def interpolate(real_data, fake_data, cuda):
 
 
 def calculate_gradient_penalty(D, real_g, fake_g, real_p=None, fake_p=None):
-    '''calculate gradient penalty for training discriminator'''
+    '''Calculate gradient penalty for training discriminator'''
     cuda = True if torch.cuda.is_available() else False
+
     inter_g = interpolate(real_g, fake_g, cuda)
     if real_p is None or fake_p is None:
-        inter_p = None
         inputs = (inter_g) 
+        # calculate probability of interpolated examples
+        prob_interpolated = D.SCforward(inter_g)
     else:
         inter_p = interpolate(real_p, fake_p, cuda)
         inputs = (inter_g, inter_p)
-
-    # calculate probability of interpolated examples
-    prob_interpolated = D(inter_g, inter_p)
+        # calculate probability of interpolated examples
+        prob_interpolated = D.fullforward(inter_g, inter_p)
 
     # calculate gradients of probabilities with respect to examples
     gradients = autograd.grad(outputs=prob_interpolated, inputs=inputs,

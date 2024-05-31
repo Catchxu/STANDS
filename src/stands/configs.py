@@ -81,8 +81,7 @@ class MBConfigs(object):
 
 class DisConfigs(object):
     def __init__(self, z_dim, only_ST=False, only_SC=False):
-        self.only_gene = only_SC or only_ST
-        self.in_dim = z_dim if self.only_gene else z_dim*2
+        self.in_dim = z_dim
         self.out_dim = [256, 256, 256, 16]
         self.dim_list = [self.in_dim] + self.out_dim
 
