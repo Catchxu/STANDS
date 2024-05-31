@@ -12,12 +12,12 @@ from sklearn.neighbors import NearestNeighbors
 
 class BuildGraph:
     def __init__(self, adata: ad.AnnData, image: Optional[np.ndarray],
-                 position: np.ndarray, train_mode: bool = True, 
+                 position: np.ndarray, augment: bool = True, 
                  n_neighbors: int = 4, patch_size: int = 48):
         self.adata = adata
         self.image = image
         self.position = position
-        self.train_mode = train_mode
+        self.augment = augment
 
         self.n_neighbors = n_neighbors
         self.patch_size = patch_size
@@ -60,7 +60,7 @@ class BuildGraph:
         for i in range(len(self.position)):
             x, y = self.position[i, :]
             p = img.crop((x - r, y - r, x + r, y + r))
-            if self.train_mode:
+            if self.augment:
                 p = trans(p)
             p = preprocess(p)
             p_list.append(p.reshape(3, 2*r, 2*r))
@@ -84,7 +84,7 @@ class BuildGraph:
 
 class BuildMultiGraph:
     def __init__(self, adata: List[ad.AnnData], image: Optional[List[np.ndarray]],
-                 position: List[np.ndarray], train_mode: bool = True,
+                 position: List[np.ndarray], augment: bool = True,
                  n_neighbors: int = 4, patch_size: int = 48):
         warnings.filterwarnings("ignore")
         self.adata = adata
@@ -92,7 +92,7 @@ class BuildMultiGraph:
         self.image = image
         self.position = position
         self.n_dataset = len(adata)
-        self.train_mode = train_mode
+        self.augment = augment
 
         self.n_neighbors = n_neighbors
         self.patch_size = patch_size
@@ -158,7 +158,7 @@ class BuildMultiGraph:
             for i in range(len(position)):
                 x, y = position[i, :]
                 p = img.crop((x - r, y - r, x + r, y + r))
-                if self.train_mode:
+                if self.augment:
                     p = trans(p)
                 p = preprocess(p)
                 p_list.append(p.reshape(3, 2*r, 2*r))

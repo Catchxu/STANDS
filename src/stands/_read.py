@@ -43,7 +43,7 @@ def set_patch(adata: ad.AnnData):
 def read(adata: ad.AnnData, preprocess: bool = True,
          return_type: Literal['anndata', 'graph', 'tuple'] = 'graph',
          n_genes: int = 3000, n_neighbors: int = 4, spa_key: str = 'spatial',
-         patch_size: Optional[int] = None, **kwargs):
+         patch_size: Optional[int] = None, augment: bool = True):
     """
     Read single spatial data and preprocess if required.
     The read data are transformed to one graph.
@@ -56,9 +56,7 @@ def read(adata: ad.AnnData, preprocess: bool = True,
         patch_size (Optional[int]): Patch size for H&E images.
         n_neighbors (int): Number of neighbors for spatial data reading.
         return_type (Literal['anndata', 'graph', 'tuple']): Type of data to return.
-
-    Other Parameters:
-        train_mode (bool): Whether to use train mode with data augmentation.
+        augment (bool): Whether to use the data augmentation.
 
     Returns:
         (Union[ad.AnnData, Tuple, Dict]): Depending on the 'return_type', returns either a tuple of AnnData objects or a dictionary of graph-related data.
@@ -86,15 +84,15 @@ def read(adata: ad.AnnData, preprocess: bool = True,
     elif return_type == 'graph':
         if patch_size is None:
             patch_size = set_patch(adata)
-        builder = BuildGraph(adata, image, position,
-                             n_neighbors=n_neighbors, patch_size=patch_size, **kwargs)
+        builder = BuildGraph(adata, image, position, augment, n_neighbors, patch_size)
         return builder.pack()
 
 
 @clear_warnings
 def read_cross(ref: ad.AnnData, tgt: ad.AnnData, spa_key: str = 'spatial',
                preprocess: bool = True, n_genes: int = 3000, patch_size: Optional[int] = None,
-               n_neighbors: int = 4, return_type: Literal['anndata', 'graph'] = 'graph', **kwargs):
+               n_neighbors: int = 4, augment: bool = True, 
+               return_type: Literal['anndata', 'graph'] = 'graph'):
     """
     Read spatial data from two sources and preprocess if required.
     The read data are transformed to reference and target graph.
@@ -107,10 +105,8 @@ def read_cross(ref: ad.AnnData, tgt: ad.AnnData, spa_key: str = 'spatial',
         n_genes (int): Number of genes for feature selection.
         patch_size (Optional[int]): Patch size for H&E images.
         n_neighbors (int): Number of neighbors for spatial data reading.
+        augment (bool): Whether to use the data augmentation.
         return_type (Literal['anndata', 'graph']): Type of data to return.
-
-    Other Parameters:
-        train_mode (bool): Whether to use train mode with data augmentation.
 
     Returns:
         (Union[Tuple, Dict]): Depending on the 'return_type', returns either a tuple of AnnData objects or a dictionary of graph-related data.
@@ -142,17 +138,15 @@ def read_cross(ref: ad.AnnData, tgt: ad.AnnData, spa_key: str = 'spatial',
         if patch_size is None:
             patch_size = set_patch(ref)
 
-        ref_b = BuildGraph(ref, ref_img, ref_pos,
-                           n_neighbors=n_neighbors, patch_size=patch_size, **kwargs)
-        tgt_b = BuildGraph(tgt, tgt_img, tgt_pos,
-                           n_neighbors=n_neighbors, patch_size=patch_size, **kwargs)
+        ref_b = BuildGraph(ref, ref_img, ref_pos, augment, n_neighbors, patch_size)
+        tgt_b = BuildGraph(tgt, tgt_img, tgt_pos, augment, n_neighbors, patch_size)
         return ref_b.pack(), tgt_b.pack()
 
 
 @clear_warnings
 def read_multi(adata_list: List[ad.AnnData], patch_size: Optional[int] = None,
                gene_list: Optional[List[str]] = None, preprocess: bool = True, 
-               n_genes: int = 3000, n_neighbors: int = 4,
+               n_genes: int = 3000, n_neighbors: int = 4, augment: bool = True,
                return_type: Literal['anndata', 'graph'] = 'graph', 
                spa_key: str = 'spatial', **kwargs):
     """
@@ -166,11 +160,9 @@ def read_multi(adata_list: List[ad.AnnData], patch_size: Optional[int] = None,
         preprocess (bool): Perform data preprocessing.
         n_genes (int): Number of genes for feature selection.
         n_neighbors (int): Number of neighbors for spatial data reading.
+        augment (bool): Whether to use the data augmentation.
         return_type (Literal['anndata', 'graph']): Type of data to return.
         spa_key (str): Key for spatial information in AnnData objects.
-    
-    Other Parameters:
-        train_mode (bool): Whether to use train mode with data augmentation.
 
     Returns:
         (Union[List, Dict]): Depending on the 'return_type', returns either a list of AnnData objects or a dictionary of graph-related data.
@@ -205,8 +197,7 @@ def read_multi(adata_list: List[ad.AnnData], patch_size: Optional[int] = None,
     elif return_type == 'graph':
         if patch_size is None:
             patch_size = set_patch(adatas[0])
-        builder = BuildMultiGraph(adatas, images, positions, 
-                                  n_neighbors=n_neighbors, patch_size=patch_size, **kwargs)
+        builder = BuildMultiGraph(adatas, images, positions, augment, n_neighbors, patch_size)
         return builder.pack()
 
 
