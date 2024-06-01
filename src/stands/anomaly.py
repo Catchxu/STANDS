@@ -14,7 +14,8 @@ class AnomalyDetect:
     def __init__(self, 
                  n_epochs: int = 10, 
                  batch_size: int = 128,
-                 learning_rate: float = 3e-4, 
+                 learning_rate: float = 3e-4,
+                 n_dis: int = 2,
                  GPU: Union[bool, str] = True,
                  random_state: Optional[int] = None,
                  weight: Optional[Dict[str, float]] = None):
@@ -22,6 +23,7 @@ class AnomalyDetect:
         self.n_epochs = n_epochs
         self.batch_size = batch_size
         self.lr = learning_rate
+        self.n_dis = n_dis
         self.device = select_device(GPU)
 
         if random_state is not None:
@@ -53,9 +55,10 @@ class AnomalyDetect:
                 t.set_description(f'Train Epochs')
 
                 for _, _, blocks in self.dataset:
-                    self.UpdateD(blocks)
+                    for _ in range(self.n_dis):
+                        self.UpdateD(blocks)
                     self.UpdateG(blocks)
-                
+
                 # Update learning rate for G and D
                 self.D_sch.step()
                 self.G_sch.step()

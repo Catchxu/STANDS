@@ -1,12 +1,14 @@
 import dgl
+import copy
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
+import anndata as ad
 from tqdm import tqdm
 from typing import Optional, Dict, Union, Any
 
-from .model import Discriminator, KinPair
+from .model import Discriminator, KinPair, GeneratorBC, GeneratorAD
 from ._utils import select_device, seed_everything, calculate_gradient_penalty
 
 
@@ -29,13 +31,13 @@ class FindPairs:
             weight = {'w_rec': 30, 'w_adv': 1, 'w_gp': 10}
         self.weight = weight
 
-    def fit(self, generator: nn.Module,  raw: Dict[str, Any]):
+    def fit(self, generator: GeneratorAD,  raw: Dict[str, Any]):
         '''Find kin pairs'''
         tqdm.write('Begin to find kin pairs between datasets...')
 
         raw_g = raw['graph']
         ref_g, tgt_g = self.split(raw_g)
-        self.G = generator
+        self.G = copy.deepcopy(generator)
 
         self.init_model(raw, ref_g.num_nodes(), tgt_g.num_nodes())
 
@@ -58,10 +60,12 @@ class FindPairs:
                 t.set_postfix(G_Loss = self.G_loss.item(),
                               D_Loss = self.D_loss.item())
                 t.update(1)
-        
-        self.G.eval()
+
+        self.M.eval()
         with torch.no_grad():
-            _, _, m = self.G(ref_g, tgt_g)
+            z_ref = self.G.extract.encode(ref_g, ref_g[0].srcdata['gene'])
+            z_tgt = self.G.extract.encode(tgt_g, tgt_g[0].srcdata['gene'])
+            _, _, m = self.M(z_ref, z_tgt)
             pair_id = list(ref_g.nodes().cpu().numpy()[m.argmax(axis=1)])
             ref_g = dgl.node_subgraph(ref_g, pair_id)
             tgt_g.ndata['ref_gene'] = ref_g.ndata['gene']
@@ -124,3 +128,62 @@ class FindPairs:
         self.M_loss.backward()
         self.opt_M.step()
 
+
+
+
+class BatchAlign:
+    def __init__(self, 
+                 n_epochs: int = 10, 
+                 batch_size: int = 128,
+                 learning_rate: float = 3e-4, 
+                 n_dis: int = 2,
+                 GPU: Union[bool, str] = True, 
+                 random_state: Optional[int] = None,
+                 weight: Optional[Dict[str, float]] = None):
+
+        self.n_epochs = n_epochs
+        self.batch_size = batch_size
+        self.lr = learning_rate
+        self.n_dis = n_dis
+        self.device = select_device(GPU)
+
+        self.seed = random_state
+        if random_state is not None:
+            seed_everything(random_state)
+
+        if weight is None:
+            weight = {'w_rec': 30, 'w_adv': 1, 'w_gp': 10}
+        self.weight = weight
+
+    def fit(self, raw: Dict[str, Any], generator: GeneratorAD,
+            Aligner: Optional[FindPairs] = None, weight_dir: Optional[str] = None):
+        '''Remove batch effects'''
+        adatas = raw['adata']
+        adata_ref = adatas[0]
+        adata_tgt = ad.concat(adatas[1:])
+
+        # find kin pairs
+        if Aligner is None:
+            Aligner = FindPairs(random_state=self.seed)
+        _, tgt_g = Aligner.fit(generator, raw)
+
+        self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
+        self.dataset = dgl.dataloading.DataLoader(
+            tgt_g, tgt_g.nodes(), self.sampler, batch_size=self.batch_size, 
+            shuffle=True, drop_last=False, num_workers=0, device=self.device
+        )
+
+        self.init_model(generator, raw, weight_dir)
+
+    def init_model(self, generator: GeneratorAD, raw, weight_dir):
+        z_dim = generator.extract.z_dim
+        self.G = GeneratorBC(generator.extract, raw['data_n'], z_dim).to(self.device)
+        self.D = Discriminator(raw['gene_dim'], raw['patch_size']).to(self.device)
+
+        self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr, betas=(0.5, 0.999))
+        self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
+
+        self.G_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer=self.opt_G, T_max=self.n_epochs)
+        self.D_sch = optim.lr_scheduler.CosineAnnealingLR(optimizer=self.opt_D, T_max=self.n_epochs)
+
+        self.L1 = nn.L1Loss().to(self.device)

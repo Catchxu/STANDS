@@ -49,7 +49,7 @@ class Extractor(nn.Module):
         else:
             pre_weights = torch.load(os.path.dirname(__file__) + '/model.pth')
         
-        # Load the pre-trained weights for extractor
+        # load the pre-trained weights for extractor
         model_dict = self.state_dict()
         pretrained_dict = {k: v for k, v in pre_weights.items()}
         model_dict.update(pretrained_dict)

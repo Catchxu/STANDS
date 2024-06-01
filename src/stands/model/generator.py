@@ -1,3 +1,4 @@
+import copy
 import math
 import torch
 import torch.nn as nn
@@ -72,7 +73,7 @@ class KinPair(nn.Module):
 class GeneratorBC(nn.Module):
     def __init__(self, extractor, n_batch, z_dim):
         super().__init__()
-        self.extractor = extractor
+        self.extractor = copy.deepcopy(extractor)
         self.Style = StyleBlock(n_batch, z_dim)
 
     def STforward(self, g_block, feat_g, batchid):

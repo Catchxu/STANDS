@@ -35,7 +35,7 @@ def set_patch(adata: ad.AnnData):
         n = np.ceil(np.log(patch_size)/np.log(2)).astype(int)
         patch_size = 2**n
     except:
-        patch_size = 32
+        patch_size = 64
     return patch_size
 
 
@@ -147,8 +147,7 @@ def read_cross(ref: ad.AnnData, tgt: ad.AnnData, spa_key: str = 'spatial',
 def read_multi(adata_list: List[ad.AnnData], patch_size: Optional[int] = None,
                gene_list: Optional[List[str]] = None, preprocess: bool = True, 
                n_genes: int = 3000, n_neighbors: int = 4, augment: bool = True,
-               return_type: Literal['anndata', 'graph'] = 'graph', 
-               spa_key: str = 'spatial', **kwargs):
+               spa_key: str = 'spatial', return_type: Literal['anndata', 'graph'] = 'graph'):
     """
     Read multiple spatial datasets and preprocess if required.
     All the datasets are transformed to only one graph.
@@ -161,8 +160,8 @@ def read_multi(adata_list: List[ad.AnnData], patch_size: Optional[int] = None,
         n_genes (int): Number of genes for feature selection.
         n_neighbors (int): Number of neighbors for spatial data reading.
         augment (bool): Whether to use the data augmentation.
-        return_type (Literal['anndata', 'graph']): Type of data to return.
         spa_key (str): Key for spatial information in AnnData objects.
+        return_type (Literal['anndata', 'graph']): Type of data to return.
 
     Returns:
         (Union[List, Dict]): Depending on the 'return_type', returns either a list of AnnData objects or a dictionary of graph-related data.
