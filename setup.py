@@ -5,7 +5,7 @@ with open('README.md') as f:
     LONG_DESCRIPTION = f.read()
 
 setup(
-    name='STANDS',
+    name='stands',
     version='1.0.0',
     description='Detecting and dissecting anomalous anatomic regions in spatial transcriptomics with STANDS',
     long_description=LONG_DESCRIPTION,

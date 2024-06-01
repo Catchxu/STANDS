@@ -65,7 +65,7 @@ You can download the package from GitHub and install it locally:
 ```commandline
 git clone https://github.com/Catchxu/STANDS.git
 cd STANDS/
-python3 setup.py install --user
+python3 setup.py install
 ```
 
 
