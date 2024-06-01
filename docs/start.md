@@ -35,25 +35,34 @@ For questions or comments, please use the [GitHub issues](https://github.com/Cat
 
 
 ## Tested environment
+### Environment 1
 - CPU: Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz
-- CPU Memory: 256 GB
-- GPU: NVIDIA GeForce RTX 3090 
-- GPU Memory: 24 GB
+- Memory: 256 GB
 - System: Ubuntu 20.04.5 LTS
 - Python: 3.9.15
 
+### Environment 2
+- CPU: Intel(R) Xeon(R) Gold 6240R CPU @ 2.40GHz
+- Memory: 256 GB
+- System: Ubuntu 22.04.3 LTS
+- Python: 3.9.18
 
 
 
-## Main dependencies
-- torch==1.13.0
-- dgl==1.1.1
-- torchvision==0.14.1
-- anndata==0.10.3
-- numpy==1.19.2
-- scanpy==1.9.6
-- scipy==1.9.3
-- sklearn==0.0.post2
-- pandas==1.5.2
-- squidpy==1.2.2
-- setuptools==59.5.0
+
+## Dependencies
+- anndata>=0.10.7
+- dgl>=2.1.0
+- networkx>=3.2.1
+- numpy>=1.22.4
+- pandas>=1.5.1
+- Pillow>=9.4.0
+- PuLP>=2.7.0
+- pyemd>=1.0.0
+- rpy2>=3.5.13
+- scanpy>=1.10.1
+- scikit_learn>=1.2.0
+- scipy>=1.13.1
+- torch>=2.0.0
+- torchvision>=0.15.1
+- tqdm>=4.64.1
