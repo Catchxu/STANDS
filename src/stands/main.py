@@ -662,7 +662,7 @@ class Subtype:
         with tqdm(total=pretrain_epochs) as t:
             for _ in range(self.n_epochs):
                 t.set_description(f'Pretrain Epochs')
-                
+
                 opt.zero_grad()
                 pred = self.C.pretrain(
                     [graph, graph], graph.ndata['gene'], graph.ndata['res_gene'],
@@ -675,7 +675,7 @@ class Subtype:
 
                 t.set_postfix(Loss =  loss.item())
                 t.update(1)
-        
+
         return self.C
 
     @torch.no_grad()

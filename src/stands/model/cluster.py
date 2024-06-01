@@ -8,11 +8,12 @@ from tqdm import tqdm
 from sklearn.cluster import KMeans
 
 from .backbone.layer import TFBlock, CrossTFBlock
+from .generator import GeneratorAD
 from ..configs import ClusterConfigs
 
 
 class Cluster(nn.Module):
-    def __init__(self, generator, n_subtypes):
+    def __init__(self, generator: GeneratorAD, n_subtypes):
         super().__init__()
 
         self.G = generator
@@ -37,21 +38,18 @@ class Cluster(nn.Module):
         # classifer for supervised pre-training
         self.classifer = nn.Linear(self.z_dim, n_subtypes)
 
-    def fullforward(self, g_block, z_g, res_g, z_p, res_p):
-        z = torch.cat([z_g, z_p], dim=1)
+    def fullforward(self, g_block, res_g, res_p):
         res_g, res_p = self.G.extract.encode(g_block, res_g, res_p)
         res_z = torch.cat([res_g, res_p], dim=1)
-        return z, res_z
-    
-    def STforward(self, g_block, z_g, res_g):
-        z = z_g
+        return res_z
+
+    def STforward(self, g_block, res_g):
         res_z = self.G.extract.encode(g_block, res_g)
-        return z, res_z
-    
-    def STforward(self, z_g, res_g):
-        z = z_g
+        return res_z
+
+    def SCforward(self, res_g):
         res_z = self.G.extract.encode(res_g)
-        return z, res_z
+        return res_z
 
     def forward(self, z, res_z):
         x = self.fusion(z, res_z)
@@ -59,6 +57,7 @@ class Cluster(nn.Module):
         q = q**(self.alpha+1.0)/2.0
         q = q / torch.sum(q, dim=1, keepdim=True)
         self.mu_update(x, q)
+        return x, q
     
     def pretrain(self, z, res_z):
         x = self.fusion(z, res_z)
@@ -123,4 +122,4 @@ class Cluster(nn.Module):
         with torch.no_grad():
             self.eval()
             new_z, q = self.forward(new_z)
-            return new_z, q
+            return q

@@ -37,7 +37,7 @@ class FindPairs:
 
         raw_g = raw['graph']
         ref_g, tgt_g = self.split(raw_g)
-        self.G = copy.deepcopy(generator)
+        self.G = copy.deepcopy(generator).to(self.device)
 
         self.init_model(raw, ref_g.num_nodes(), tgt_g.num_nodes())
 
