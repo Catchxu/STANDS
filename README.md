@@ -37,8 +37,13 @@ STANDS is an innovative framework built on a suite of specialized Generative Adv
 
 
 
+## Dependencies
+
+
+
+
 ## Installation
-STANDS is developed as a Python package. You will need to install Python, and the recommended version is Python 3.9.5.
+STANDS is developed as a Python package. You will need to install Python, and the recommended version is Python 3.9.
 
 You can download the package from GitHub and install it locally:
 
@@ -53,6 +58,22 @@ python3 setup.py install --user
 
 ## Getting Started
 Please see https://Catchxu.github.io/STANDS/ for online documentation and tutorials in how to use the package.
+
+
+
+
+## Tested environment
+### Environment 1
+- CPU: Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz
+- Memory: 256 GB
+- System: Ubuntu 20.04.5 LTS
+- Python: 3.9.15
+
+### Environment 2
+- CPU: Intel(R) Xeon(R) Gold 6240R CPU @ 2.40GHz
+- Memory: 256 GB
+- System: Ubuntu 22.04.3 LTS
+- Python: 3.9.18
 
 
 
