@@ -64,14 +64,15 @@ class KinPair(nn.Module):
         self.mapping.data.uniform_(-stdv, stdv)
 
     def forward(self, z_ref, z_tgt):
-        z_ref = torch.mm(F.relu(self.mapping), z_ref)
-        return z_ref, z_tgt, F.relu(self.mapping).detach().cpu().numpy()
+        # reconstruct z_tgt with z_ref
+        fake_z_tgt = torch.mm(F.relu(self.mapping), z_ref)
+        return fake_z_tgt, z_tgt, F.relu(self.mapping).detach().cpu().numpy()
 
 
 
 
 class GeneratorBC(nn.Module):
-    def __init__(self, extractor, n_batch, z_dim):
+    def __init__(self, extractor: GeneratorAD.extract, n_batch, z_dim):
         super().__init__()
         self.extractor = copy.deepcopy(extractor)
         self.Style = StyleBlock(n_batch, z_dim)

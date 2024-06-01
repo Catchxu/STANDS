@@ -116,11 +116,11 @@ class FindPairs:
         '''Updating mapping matrix'''
         self.opt_M.zero_grad()
 
-        # reconstruct z_ref with z_tgt
-        fake_z_ref, z_tgt, _ = self.M(z_ref, z_tgt)
-        d = self.D.Zforward(fake_z_ref)
+        # reconstruct z_tgt with z_ref
+        fake_z_tgt, z_tgt, _ = self.M(z_ref, z_tgt)
+        d = self.D.Zforward(fake_z_tgt)
 
-        Loss_rec = self.Loss(z_ref, fake_z_ref)
+        Loss_rec = self.Loss(z_tgt, fake_z_tgt)
         Loss_adv = -torch.mean(d)
 
         # store generator loss for printing training information and backward
