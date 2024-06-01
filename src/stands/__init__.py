@@ -36,7 +36,7 @@ Modules:
 
 from .anomaly import AnomalyDetect
 from .align import FindPairs, BatchAlign
-from .main import Subtype
+from .subtype import Subtype
 from .pretrain import pretrain
 from ._read import read, read_cross, read_multi
 from .evaluate import evaluate

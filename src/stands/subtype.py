@@ -45,11 +45,11 @@ class Subtype:
             res_z = self.C.STforward([graph, graph], res_g)
 
         else:
-            z, fake_g, fake_p = self.G.fullforward(
+            z, fake_g, fake_p = self.G.Fullforward(
                 [graph, graph], graph.ndata['gene'], graph.ndata['patch']
             )
             res_g = graph.ndata['gene'] - fake_g.detach()
             res_p = graph.ndata['patch'] - fake_p.detach()
-            res_z = self.C.fullforward([graph, graph], res_g, res_p)
+            res_z = self.C.Fullforward([graph, graph], res_g, res_p)
 
         return z, res_z

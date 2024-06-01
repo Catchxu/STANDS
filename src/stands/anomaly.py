@@ -130,7 +130,7 @@ class AnomalyDetect:
                 else:
                     real_g = blocks[0].srcdata['gene']
                     real_p = blocks[1].srcdata['patch']
-                    z, _, _ = self.G.fullforward(blocks, real_g, real_p)
+                    z, _, _ = self.G.Fullforward(blocks, real_g, real_p)
 
                 self.G.Memory.update_mem(z)
                 t += 1
@@ -151,7 +151,7 @@ class AnomalyDetect:
             gp = calculate_gradient_penalty(self.D, real_g, fake_g.detach())
 
         else:
-            _, fake_g, fake_p = self.G.fullforward(
+            _, fake_g, fake_p = self.G.Fullforward(
                 blocks, blocks[0].srcdata['gene'], blocks[1].srcdata['patch']
             )
 
@@ -159,8 +159,8 @@ class AnomalyDetect:
             real_g = blocks[1].dstdata['gene']
             real_p = blocks[1].dstdata['patch']
 
-            d1 = torch.mean(self.D.fullforward(real_g, real_p))
-            d2 = torch.mean(self.D.fullforward(fake_g.detach(), fake_p.detach()))
+            d1 = torch.mean(self.D.Fullforward(real_g, real_p))
+            d2 = torch.mean(self.D.Fullforward(fake_g.detach(), fake_p.detach()))
             gp = calculate_gradient_penalty(
                 self.D, real_g, fake_g.detach(), real_p, fake_p.detach()
             )            
@@ -188,7 +188,7 @@ class AnomalyDetect:
             Loss_adv = - torch.mean(d)
 
         else:
-            z, fake_g, fake_p = self.G.fullforward(
+            z, fake_g, fake_p = self.G.Fullforward(
                 blocks, blocks[0].srcdata['gene'], blocks[1].srcdata['patch']
             )
 
@@ -197,7 +197,7 @@ class AnomalyDetect:
             real_p = blocks[1].dstdata['patch']
 
             # discriminator provides feedback
-            d = self.D.fullforward(fake_g, fake_p)
+            d = self.D.Fullforward(fake_g, fake_p)
 
             Loss_rec = (self.L1(real_g, fake_g)+self.L1(real_p, fake_p))/2
             Loss_adv = - torch.mean(d)
@@ -220,11 +220,11 @@ class AnomalyDetect:
                 d = self.D.SCforward(fake_g.detach())
 
             else:
-                _, fake_g, fake_p = self.G.fullforward(
+                _, fake_g, fake_p = self.G.Fullforward(
                     blocks, blocks[0].srcdata['gene'], blocks[1].srcdata['patch']
                 )
 
-                d = self.D.fullforward(fake_g.detach(), fake_p.detach())
+                d = self.D.Fullforward(fake_g.detach(), fake_p.detach())
 
             dis.append(d.cpu().detach())
 

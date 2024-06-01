@@ -20,7 +20,7 @@ class Discriminator(nn.Module):
 
         self.discriminator = CriticNet(DisConfigs(configs.z_dim, only_ST, only_SC))
 
-    def fullforward(self, feat_g, feat_p):
+    def Fullforward(self, feat_g, feat_p):
         z_g, z_p = self.extract.encode(feat_g, feat_p)
         z = torch.cat([z_g, z_p], dim=1)
         return self.discriminator(z)

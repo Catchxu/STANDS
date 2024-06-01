@@ -38,7 +38,7 @@ class Cluster(nn.Module):
         # classifer for supervised pre-training
         self.classifer = nn.Linear(self.z_dim, n_subtypes)
 
-    def fullforward(self, g_block, res_g, res_p):
+    def Fullforward(self, g_block, res_g, res_p):
         res_g, res_p = self.G.extract.encode(g_block, res_g, res_p)
         res_z = torch.cat([res_g, res_p], dim=1)
         return res_z
@@ -94,7 +94,7 @@ class Cluster(nn.Module):
         self.mu.data.copy_(torch.Tensor(centroid))
 
     def fit(self, z, res_z):
-        # z and res_z are obtained by fullforward, SCforward, or STforward
+        # z and res_z are obtained by Fullforward, SCforward, or STforward
         optimizer = optim.Adam(self.parameters(), 
                                lr=self.learning_rate, 
                                weight_decay=self.weight_decay)
