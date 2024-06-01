@@ -81,7 +81,7 @@ class GeneratorBC(nn.Module):
         z = self.Style(z, batchid)
         feat_g = self.extractor.GeneDecoder(z)
         return feat_g
-    
+
     def SCforward(self, feat_g, batchid):
         z = self.extractor.GeneEncoder(feat_g)
         z = self.Style(z, batchid)

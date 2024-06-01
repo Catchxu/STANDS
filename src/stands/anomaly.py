@@ -55,8 +55,12 @@ class AnomalyDetect:
                 t.set_description(f'Train Epochs')
 
                 for _, _, blocks in self.dataset:
+
+                    # Update discriminator for n_dis times
                     for _ in range(self.n_dis):
                         self.UpdateD(blocks)
+
+                    # Update generator for one time
                     self.UpdateG(blocks)
 
                 # Update learning rate for G and D
