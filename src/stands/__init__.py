@@ -35,7 +35,8 @@ Modules:
 """
 
 from .anomaly import AnomalyDetect
-from .main import KinPairs, BatchAlign, Subtype
+from .align import FindPairs
+from .main import BatchAlign, Subtype
 from .pretrain import pretrain
 from ._read import read, read_cross, read_multi
 from .evaluate import evaluate

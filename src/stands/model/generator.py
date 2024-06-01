@@ -36,7 +36,7 @@ class GeneratorAD(nn.Module):
         z_g, z_p = torch.chunk(mem_z, 2, dim = -1)
         feat_g, feat_p = self.extract.decode(z_g, z_p)
         return z, feat_g, feat_p
-    
+
     def STforward(self, g_block, feat_g):
         z = self.extract.encode(g_block, feat_g)
         mem_z = self.Memory(z)

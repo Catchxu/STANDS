@@ -28,4 +28,7 @@ class Discriminator(nn.Module):
     def SCforward(self, feat_g):
         z_g = self.extract.encode(feat_g)
         return self.discriminator(z_g)
+    
+    def Zforward(self, z):
+        return self.discriminator(z)   
 

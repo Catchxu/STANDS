@@ -401,7 +401,7 @@ class KinPairs:
         self.D_loss = - d1 + d2 + gp * self.weight['w_gp']
         self.D_loss.backward()
         self.opt_D.step()
-    
+
     def UpdateG(self, ref_g, tgt_g):
         '''Updating generator'''
         self.opt_G.zero_grad()
