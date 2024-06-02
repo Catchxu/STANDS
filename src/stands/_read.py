@@ -3,6 +3,7 @@ import numpy as np
 import scanpy as sc
 import anndata as ad
 from math import e
+from scipy.sparse import issparse
 from typing import Literal, Optional, List
 
 from ._utils import seed_everything, clear_warnings
@@ -62,6 +63,9 @@ def read(adata: ad.AnnData, preprocess: bool = True,
         (Union[ad.AnnData, Tuple, Dict]): Depending on the 'return_type', returns either a tuple of AnnData objects or a dictionary of graph-related data.
     """
     seed_everything(0)
+
+    if issparse(adata.X):
+        adata.X = adata.X.toarray()
 
     position = adata.obsm[spa_key]
 
