@@ -57,7 +57,7 @@ See the tutorial for more complete documentation of all the functions of STANDS.
 - rpy2>=3.5.13
 - scanpy>=1.10.1
 - scikit_learn>=1.2.0
-- scipy>=1.13.1
+- scipy>=1.11.4
 - torch>=2.0.0
 - torchvision>=0.15.1
 - tqdm>=4.64.1
