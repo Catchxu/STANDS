@@ -71,7 +71,7 @@ def pretrain(adata_list: List[ad.AnnData],
 
     with tqdm(total=n_epochs) as t:
         for _ in range(n_epochs):
-            t.set_description(f'Pretrain STNet')
+            t.set_description(f'Pretrain STANDS')
 
             for _, _, blocks in dataset:
                 opt_G.zero_grad()
