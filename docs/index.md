@@ -44,11 +44,11 @@ All the source codes of STANDS are available on [STANDS](https://github.com/Catc
 
 
 ## Contributors
-- [Kaichen Xu](https://github.com/Catchxu): Lead Developer, implement STANDS and designed this website.
+- [Kaichen Xu](https://github.com/Catchxu): Lead Developer, implement STANDS and design this website.
 - [Yan Lu](https://github.com/lylyly785): Developer, implement the novel Gaussian Mixture Model.
 - [Yihang Du](https://github.com/Allinnow): Developer, implement the Spatial Grouping Discrepancy metrics.
-- [Kainan Liu](https://github.com/LucaFederer): Developer, diverse contributions.
-- Xiaobo Sun & lab: enabling guidance, support and environment.
+- [Kainan Liu](https://github.com/LucaFederer): Developer, have diverse contributions.
+- Xiaobo Sun & lab: provide guidance, support and environment.
 
 
 
