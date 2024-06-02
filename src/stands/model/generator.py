@@ -72,7 +72,7 @@ class KinPair(nn.Module):
 
 
 class GeneratorBC(nn.Module):
-    def __init__(self, extractor: GeneratorAD.extract, n_batch, z_dim):
+    def __init__(self, extractor, n_batch, z_dim):
         super().__init__()
         self.extractor = copy.deepcopy(extractor)
         self.Style = StyleBlock(n_batch, z_dim)
