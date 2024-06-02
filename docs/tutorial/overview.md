@@ -6,7 +6,7 @@ Before starting the tutorial, we need to make some preparations, including: inst
 
 
 ## Outline of tutorials
-- [Tutorial 0: Pretrain the basic networks](./pretrain.ipynb)
+- [Tutorial 0: Pretrain the basic networks](./Pretrain.ipynb)
 - [Tutorial 2: Detect anomalous regions with multimodal data](./detection.ipynb)
 - [Tutorial 3: Align multi-batch ST datasets](./alignment.ipynb)
 - [Tutorial 4: Detect anomalous subdomains with multimodal data](./subtype.ipynb)
