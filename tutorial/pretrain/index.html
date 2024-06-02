@@ -23,7 +23,7 @@
     
     
       
-        <title>Tutorial 1: Pretrain the basic networks - STANDS</title>
+        <title>Tutorial 0: Pretrain STANDS basic extractor - STANDS</title>
       
     
     
@@ -85,7 +85,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#tutorial-1-pretrain-the-basic-networks" class="md-skip">
+        <a href="#tutorial-0-pretrain-stands-basic-extractor" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Tutorial 1: Pretrain the basic networks
+              Tutorial 0: Pretrain STANDS basic extractor
             
           </span>
         </div>
@@ -953,12 +953,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Tutorial 1: Pretrain the basic networks
+          Tutorial 0: Pretrain STANDS basic extractor
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Tutorial 1: Pretrain the basic networks
+        Tutorial 0: Pretrain STANDS basic extractor
       </a>
       
         
@@ -977,15 +977,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#preparation" class="md-nav__link">
-    Preparation
+  <a href="#loading-package" class="md-nav__link">
+    Loading package
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#pretrain-stands-automatically" class="md-nav__link">
-    Pretrain STANDS automatically
+  <a href="#reading-st-data" class="md-nav__link">
+    Reading ST data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pretraining-the-model" class="md-nav__link">
+    Pretraining the model
   </a>
   
 </li>
@@ -1074,15 +1081,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#preparation" class="md-nav__link">
-    Preparation
+  <a href="#loading-package" class="md-nav__link">
+    Loading package
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#pretrain-stands-automatically" class="md-nav__link">
-    Pretrain STANDS automatically
+  <a href="#reading-st-data" class="md-nav__link">
+    Reading ST data
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#pretraining-the-model" class="md-nav__link">
+    Pretraining the model
   </a>
   
 </li>
@@ -2139,40 +2153,41 @@ Licensed under the Apache License, Version 2.0.
     init_mathjax();
     </script>
 <!-- End of mathjax configuration --><div class="jupyter-wrapper">
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=a1403d13-3869-4a87-b0e8-272e42cd0642">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="tutorial-1-pretrain-the-basic-networks">Tutorial 1: Pretrain the basic networks<a class="anchor-link" href="#tutorial-1-pretrain-the-basic-networks">¶</a></h1>
+<h1 id="tutorial-0-pretrain-stands-basic-extractor">Tutorial 0: Pretrain STANDS basic extractor<a class="anchor-link" href="#tutorial-0-pretrain-stands-basic-extractor">¶</a></h1>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=5c49a245-0e97-4edd-8ff3-69e3dff65786">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>For a more accurate performance in subsequent tasks, we encourage you to pretrain STANDS on large-scale public spatial transcriptomics datasets. This is to ensure better performance in modules related to image feature extraction and feature fusion. This tutorial will guide you through the pretraining steps and automatically save the pretrained weights.</p>
+<p>STANDS employ the pretrained image extractor (ResNet backbones) and modality fusion block (Transformer bacbones). For a more accurate performance in subsequent tasks, we encourage you to pretrain STANDS on large-scale public spatial transcriptomics datasets. This tutorial will guide you to pretrain STANDS and
+save the pretrained weights automatically.</p>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=c1cacf72-2caa-4ca9-a58d-54a80facf119">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="preparation">Preparation<a class="anchor-link" href="#preparation">¶</a></h2>
+<h2 id="loading-package">Loading package<a class="anchor-link" href="#loading-package">¶</a></h2>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=3d4f14e2-653d-41f2-af8f-af1ac7884e5f">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2190,16 +2205,18 @@ Licensed under the Apache License, Version 2.0.
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">stands</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s2">"ignore"</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-1">import stands</div>
+<div class="clipboard-copy-txt" id="cell-1">import warnings
+warnings.filterwarnings("ignore")</div>
 </div>
 </div>
 </div>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=8a713ecc-a04b-4702-8828-6b3eb5c9f877">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2217,31 +2234,42 @@ Licensed under the Apache License, Version 2.0.
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># replace with the path of downloaded demo or another datasets.</span>
-<span class="n">input_dir</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/stdata/'</span>
-<span class="n">data_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Breast_full_ref1'</span><span class="p">,</span> <span class="s1">'Breast_full_ref2'</span><span class="p">,</span> <span class="s1">'Breast_full_ref3'</span><span class="p">]</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="kn">import</span> <span class="nn">stands</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scanpy</span> <span class="k">as</span> <span class="nn">sc</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-2"># replace with the path of downloaded demo or another datasets.
-input_dir = '/volume3/kxu/stdata/'
-data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
+<div class="clipboard-copy-txt" id="cell-2">import stands
+import numpy as np
+import scanpy as sc</div>
 </div>
 </div>
 </div>
 </div>
 </div>
 </div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=ca0a9f8b-ae45-430c-b089-242447364d16">
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="pretrain-stands-automatically">Pretrain STANDS automatically<a class="anchor-link" href="#pretrain-stands-automatically">¶</a></h2>
+<h2 id="reading-st-data">Reading ST data<a class="anchor-link" href="#reading-st-data">¶</a></h2>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fed0fb69-b357-4529-91fa-1e0147999eda">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>We strongly recommend using multiple ST datasets that contain both images and spatial gene expressions to pretrain STANDS. Here, the demo dataset we provide consists of three slices taken from different donors, with spatial coordinates stored in <code>adata.obsm['spatial']</code> and images in <code>adata.uns['spatial']</code>.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -2259,9 +2287,72 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">stands</span><span class="o">.</span><span class="n">pretrain</span><span class="p">(</span><span class="n">input_dir</span><span class="p">,</span> <span class="n">data_name</span><span class="p">)</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">adata_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s1">'/volume3/kxu/HumanBreast/process/'</span>
+<span class="n">data_name</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'V05'</span><span class="p">,</span> <span class="s1">'V06'</span><span class="p">,</span> <span class="s1">'V07'</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data_name</span><span class="p">:</span>
+    <span class="n">read_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">d</span> <span class="o">+</span> <span class="s1">'.h5ad'</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">read_path</span><span class="p">)</span>
+    <span class="n">a</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    <span class="n">adata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-3">stands.pretrain(input_dir, data_name)</div>
+<div class="clipboard-copy-txt" id="cell-3">adata_list = []
+path = '/volume3/kxu/HumanBreast/process/'
+data_name = ['V05', 'V06', 'V07']
+for d in data_name:
+    read_path = path + d + '.h5ad'
+    a = sc.read_h5ad(read_path)
+    a.X = a.X.toarray()
+    adata_list.append(a)</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="pretraining-the-model">Pretraining the model<a class="anchor-link" href="#pretraining-the-model">¶</a></h2>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p>By directly inputting the data list into <code>STANDS.pretrain</code>, specifying the patch size and the GPU for pretraining, you can automatically conduct pretraining and save the weights. In this case, the pretraining task is set as unsupervised reconstruction, so there is no need for cell type annotations.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div><div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="CodeMirror cm-s-jupyter">
+<div class="zeroclipboard-container">
+<clipboard-copy for="cell-4">
+<div>
+<span class="notice" hidden="">Copied!</span>
+<svg aria-hidden="true" class="clipboard-copy-icon" data-view-component="true" height="20" version="1.1" viewbox="0 0 16 16" width="20">
+<path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+<path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+</clipboard-copy>
+</div>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">stands</span><span class="o">.</span><span class="n">pretrain</span><span class="p">(</span><span class="n">adata_list</span><span class="p">,</span> <span class="n">patch_size</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">GPU</span><span class="o">=</span><span class="s1">'cuda:0'</span><span class="p">)</span>
+</pre></div>
+<div class="clipboard-copy-txt" id="cell-4">stands.pretrain(adata_list, patch_size=64, GPU='cuda:0')</div>
 </div>
 </div>
 </div>
@@ -2280,28 +2371,17 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="application/vnd.jupyter.stderr">
-<pre>Pretrain STNet: 100%|██████████| 200/200 [34:18&lt;00:00, 10.29s/it, Loss=0.0501]
+<pre>Pretrain STANDS: 100%|██████████| 100/100 [37:29&lt;00:00, 22.49s/it, Loss=0.14]
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain">
-<pre>The pretrained weights for STANDS have been automatically saved at /volume1/home/kxu/STANDS/stands/model.pth!
+<pre>The pretrained weights for STANDS have been automatically saved at /volume1/home/kxu/STANDS/stands/model/backbone/model.pth!
 </pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=57c2310d-3259-47fa-9508-59a47b629d10">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>For further details on the <code>stands.pretrain</code>, including various parameters, please refer to the API reference documentation.</p>
 </div>
 </div>
 </div>
@@ -2314,7 +2394,7 @@ data_name = ['Breast_full_ref1', 'Breast_full_ref2', 'Breast_full_ref3']</div>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">January 9, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">June 2, 2024</span>
       
     
   </small>

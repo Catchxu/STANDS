@@ -1029,7 +1029,7 @@
   
     <li class="md-nav__item">
       <a href="../tutorial/pretrain/" class="md-nav__link">
-        Tutorial 1: Pretrain the basic networks
+        Tutorial 0: Pretrain STANDS basic extractor
       </a>
     </li>
   
@@ -1202,15 +1202,12 @@
 <p>You can download the package from GitHub and install it locally:</p>
 <div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git clone https://github.com/Catchxu/STANDS.git
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>cd STANDS/
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python3 setup.py install --user
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>python3 setup.py install
 </span></code></pre></div>
 <h2 id="datasets">Datasets<a class="headerlink" href="#datasets" title="Permanent link">&para;</a></h2>
-<p>All experimental datasets involved in this paper are available from their respective original sources: the 10x-Visium datasets of healthy human breast tissues (10x-hNB datasets) are available at the <a href="https://cellxgene.cziscience.com/collections/4195ab4c-20bd-4cd3-8b3d-65601277e731">CELLxGENE</a>; The 10x-Visium datasets of human breast cancer tissues (10x-hBC datasets) are available at the <a href="https://github.com/almaan/her2st/tree/master">github</a>; The scRNA-seq dataset of human pancreatic ductal (sc-hPD) and 10x-Visium datasets of the human pancreatic ductal adenocarcinomas (10x-hPDAC) are available at the <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE111672">Gene Expression Omnibus</a>; The slide-seqV2 datasets of mouse embryo tissues (ssq-mEmb datasets) are available at the <a href="https://cellxgene.cziscience.com/collections/d74b6979-efba-47cd-990a-9d80ccf29055">CELLxGENE</a>.</p>
-<p>We also provide organized and processed small datasets to demo the our code and tutorials.
-You can download the demo datasets from <a href="https://drive.google.com/file/d/1_eaOOiBfJtM-OZ3Ptdkylubn5cD17aUs/view?usp=drive_link">Google Drive</a>.</p>
+<p>All experimental datasets involved in this paper are available from their respective original sources: the 10x-Visium datasets of healthy human breast tissues (10x-hNB datasets) are available at <a href="https://cellxgene.cziscience.com/collections/4195ab4c-20bd-4cd3-8b3d-65601277e731">CELLxGENE</a>; The 10x-Visium datasets of human breast cancer tissues (10x-hBC datasets) are available at <a href="https://github.com/almaan/her2st/tree/master">github</a>; The 10x-Visium datasets of human primary sclerosing cholangitis tissue (10x-hPSC datasets) and human liver caudate lobe tissue are available at <a href="https://cellxgene.cziscience.com/collections/0c8a364b-97b5-4cc8-a593-23c38c6f0ac5">CELLxGENE</a>; The 10x-Visium datasets of human renal cell cancer tissue (10x-hRCC datasets) are available at <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE175540">Gene Expression Omnibus</a>; The scRNA-seq dataset of human pancreatic ductal (sc-hPD) and 10x-Visium datasets of the human pancreatic ductal adenocarcinomas (10x-hPDAC) are available at <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE111672">Gene Expression Omnibus</a>; The slide-seqV2 datasets of mouse embryo tissues (ssq-mEmb datasets) are available at <a href="https://cellxgene.cziscience.com/collections/d74b6979-efba-47cd-990a-9d80ccf29055">CELLxGENE</a>; The Stereo-seq datasets of mouse embryo tissue (Stereo-mEmb datasets) are available at <a href="https://db.cngb.org/stomics/mosta/">STOmicsDB</a>. We also provide organized and processed small datasets to demo the our code and tutorials. You can download the demo datasets from <a href="https://drive.google.com/file/d/1_eaOOiBfJtM-OZ3Ptdkylubn5cD17aUs/view?usp=drive_link">Google Drive</a>.</p>
 <h2 id="getting-help">Getting help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h2>
-<p>See the tutorial for more complete documentation of all the functions of STANDS.</p>
-<p>For questions or comments, please use the <a href="https://github.com/Catchxu/STANDS/issues">GitHub issues</a>.</p>
+<p>See the tutorial for more complete documentation of all the functions of STANDS. For questions or comments, please use the <a href="https://github.com/Catchxu/STANDS/issues">GitHub issues</a>.</p>
 <h2 id="tested-environment">Tested environment<a class="headerlink" href="#tested-environment" title="Permanent link">&para;</a></h2>
 <h3 id="environment-1">Environment 1<a class="headerlink" href="#environment-1" title="Permanent link">&para;</a></h3>
 <ul>
@@ -1239,7 +1236,7 @@ You can download the demo datasets from <a href="https://drive.google.com/file/d
 <li>rpy2&gt;=3.5.13</li>
 <li>scanpy&gt;=1.10.1</li>
 <li>scikit_learn&gt;=1.2.0</li>
-<li>scipy&gt;=1.13.1</li>
+<li>scipy&gt;=1.11.4</li>
 <li>torch&gt;=2.0.0</li>
 <li>torchvision&gt;=0.15.1</li>
 <li>tqdm&gt;=4.64.1</li>
@@ -1250,7 +1247,7 @@ You can download the demo datasets from <a href="https://drive.google.com/file/d
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">June 1, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">June 2, 2024</span>
       
     
   </small>
