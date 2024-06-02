@@ -38,7 +38,7 @@ STANDS is an innovative framework built on a suite of specialized Generative Adv
 
 
 ## Source codes
-All the source codes of STANDS are available on [STANDS](https://github.com/Catchxu/STANDS/tree/master/src/stands).
+All the source codes of STANDS are available on [STANDS](https://github.com/Catchxu/STANDS/tree/master/src/stands). We also provide [API documentation](https://catchxu.github.io/STANDS/reference/stands/) to help you understand the code and functionality of STANDS.
 
 
 
