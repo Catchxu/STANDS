@@ -116,6 +116,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://Catchxu.github.io/STANDS/tutorial/Pretrain/</loc>
+         <lastmod>2024-06-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/alignment/</loc>
          <lastmod>2024-06-02</lastmod>
          <changefreq>daily</changefreq>
@@ -127,11 +132,6 @@
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/overview/</loc>
-         <lastmod>2024-06-02</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://Catchxu.github.io/STANDS/tutorial/pretrain/</loc>
          <lastmod>2024-06-02</lastmod>
          <changefreq>daily</changefreq>
     </url>
