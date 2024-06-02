@@ -72,7 +72,14 @@ python3 setup.py install
 
 
 ## Getting Started
-Please see https://Catchxu.github.io/STANDS/ for online documentation and tutorials in how to use the package.
+STANDS offers a variety of functionalities, including but not limited to: 
+- Detect anomaly spots on spatial transcriptomics datasets ([tutorial](https://catchxu.github.io/STANDS/tutorial/detection/))
+- Correct multi-sample batch effects from vertical or horizontal slices ([tutorial](https://catchxu.github.io/STANDS/tutorial/alignment/))
+- Detect anomaly subtypes on spatial transcriptomics datasets ([tutorial](https://catchxu.github.io/STANDS/tutorial/subtype/))
+
+Before starting the tutorial, we need to make some preparations, including: installing STANDS and its required Python packages, downloading the datasets required for the tutorial, and so on. The preparations is available at [STANDS Preparations](https://catchxu.github.io/STANDS/start/). Additionally, when dealing with multimodal data structures involving both images and gene expression matrices, we strongly recommend using a GPU and pretraining STANDS on large-scale public spatial transcriptomics datasets. This ensures faster execution of STANDS and improved performance in modules related to image feature extraction and feature fusion.
+
+Finally, more useful and helpful information can be found at the [online documentation](https://Catchxu.github.io/STANDS/) and [tutorials](https://catchxu.github.io/STANDS/tutorial/overview/) for a quick run.
 
 
 
