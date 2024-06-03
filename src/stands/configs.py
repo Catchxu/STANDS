@@ -111,6 +111,6 @@ class ClusterConfigs(object):
 
         # training process
         self.learning_rate = 1e-4
-        self.n_epochs = 20000
+        self.n_epochs = 3000
         self.update_interval = 10
         self.weight_decay = 1e-4

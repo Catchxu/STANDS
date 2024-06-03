@@ -52,7 +52,8 @@ class Cluster(nn.Module):
         return res_z
 
     def forward(self, z, res_z):
-        x = self.fusion(z, res_z)
+        x1, x2 = self.fusion(z, res_z)
+        x = torch.cat([x1, x2], dim=1)
         q = 1.0 / ((1.0 + torch.sum((x.unsqueeze(1) - self.mu)**2, dim=2) / self.alpha) + 1e-8)
         q = q**(self.alpha+1.0)/2.0
         q = q / torch.sum(q, dim=1, keepdim=True)
@@ -100,8 +101,8 @@ class Cluster(nn.Module):
                                weight_decay=self.weight_decay)
 
         z, res_z = self.fusion(z, res_z)
-        z = torch.concat([z, res_z], dim=-1)
-        self.mu_init(z.cpu().detach().numpy())
+        com_z = torch.concat([z, res_z], dim=-1)
+        self.mu_init(com_z.cpu().detach().numpy())
 
         self.train()
         with tqdm(total=self.n_epochs) as t:
@@ -115,13 +116,13 @@ class Cluster(nn.Module):
                 optimizer.zero_grad()
                 _, q = self.forward(z, res_z)
                 loss = self.loss_function(p, q)
-                loss.backward()
+                loss.backward(retain_graph=True)
                 optimizer.step()
-            
+
                 t.set_postfix(Loss = loss.item())
                 t.update(1)
 
         with torch.no_grad():
             self.eval()
-            new_z, q = self.forward(new_z)
+            new_z, q = self.forward(z, res_z)
             return q
