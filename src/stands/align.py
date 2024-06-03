@@ -175,7 +175,7 @@ class BatchAlign:
             shuffle=True, drop_last=False, num_workers=0, device=self.device
         )
 
-        self.init_model(generator, raw)
+        self.init_model(raw, generator)
 
         tqdm.write('Begin to correct spatial transcriptomics datasets...')
         self.G.train()
