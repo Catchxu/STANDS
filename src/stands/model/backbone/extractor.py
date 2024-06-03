@@ -30,8 +30,12 @@ class Extractor(nn.Module):
         self.only_ST = False
 
     def encode(self, g_block, feat_g, feat_p):
-        z_g = self.GeneEncoder(g_block, feat_g)
-        z_p = self.ImageEncoder(g_block[1], feat_p)
+        if isinstance(g_block, list):
+            z_g = self.GeneEncoder(g_block, feat_g)
+            z_p = self.ImageEncoder(g_block[1], feat_p)
+        else:
+            z_g = self.GeneEncoder(g_block, feat_g)
+            z_p = self.ImageEncoder(g_block, feat_p)            
         return z_g, z_p
 
     def decode(self, z_g, z_p):
