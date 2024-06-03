@@ -101,8 +101,8 @@ class ClusterConfigs(object):
         self.KMeans_n_init = 20
         self.cross_attn = True
         self.TFBlock = {
-            'g_dim': z_dim,
-            'p_dim': z_dim,
+            'g_dim': z_dim*2,
+            'p_dim': z_dim*2,
             'num_layers': 3,
             'nheads': 8,
             'hidden_dim': 512, 
@@ -111,6 +111,6 @@ class ClusterConfigs(object):
 
         # training process
         self.learning_rate = 1e-4
-        self.n_epochs = 20000,
+        self.n_epochs = 20000
         self.update_interval = 10
         self.weight_decay = 1e-4
