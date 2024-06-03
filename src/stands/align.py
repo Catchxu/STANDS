@@ -150,6 +150,7 @@ class BatchAlign:
         self.lr = learning_rate
         self.n_dis = n_dis
         self.device = select_device(GPU)
+        self.GPU = GPU
 
         self.seed = random_state
         if random_state is not None:
@@ -166,7 +167,7 @@ class BatchAlign:
         adata_tgt = ad.concat(adatas[1:])
 
         # find Kin Pairs
-        Aligner = FindPairs(random_state=self.seed, **alignerkwargs)
+        Aligner = FindPairs(GPU=self.GPU, random_state=self.seed, **alignerkwargs)
         _, tgt_g = Aligner.fit(generator, raw)
 
         self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
@@ -221,7 +222,7 @@ class BatchAlign:
         return adata
 
     def init_model(self, raw: Dict[str, Any], generator: GeneratorAD):
-        z_dim = generator.extract.z_dim
+        z_dim = generator.extract.g_dim
         self.G = GeneratorBC(generator.extract, raw['data_n'], z_dim).to(self.device)
         self.D = Discriminator(raw['gene_dim'], raw['patch_size']).to(self.device)
 

@@ -13,6 +13,8 @@ class Extractor(nn.Module):
         super().__init__()
         z_dim = configs.out_dim[-1]
         self.z_dim = z_dim*2
+        self.g_dim = z_dim
+        self.p_dim = z_dim
         self.GeneEncoder = GATEncoder(configs.gene_dim, configs.out_dim, **configs.GATEncoder)
         self.GeneDecoder = MLPDecoder(configs.gene_dim, configs.out_dim)
         self.ImageEncoder = ResNetEncoder(configs.patch_size, z_dim=z_dim, **configs.ImageEncoder)
