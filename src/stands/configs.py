@@ -101,8 +101,8 @@ class ClusterConfigs(object):
         self.KMeans_n_init = 20
         self.cross_attn = True
         self.TFBlock = {
-            'g_dim': z_dim*2,
-            'p_dim': z_dim*2,
+            'g_dim': z_dim,
+            'p_dim': z_dim,
             'num_layers': 3,
             'nheads': 8,
             'hidden_dim': 512, 
