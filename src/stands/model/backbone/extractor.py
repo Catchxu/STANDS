@@ -138,7 +138,7 @@ class ExtractorDis(nn.Module):
         self.z_dim = z_dim = configs.out_dim[-1]
         self.GeneEncoder = MLPEncoder(configs.gene_dim, configs.out_dim)
         self.ImageEncoder = ResNetEncoder(configs.patch_size, z_dim=z_dim, **configs.ImageEncoder)
-    
+
     def encode(self, feat_g, feat_p):
         z_g = self.GeneEncoder(feat_g)
         z_p = self.ImageEncoder.woGAT_forward(feat_p)

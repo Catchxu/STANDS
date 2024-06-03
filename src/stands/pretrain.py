@@ -51,9 +51,9 @@ def pretrain(adata_list: List[ad.AnnData],
 
     if random_state is not None:
         seed_everything(random_state)
-    
+
     # Initialize dataloader for train data
-    train = read_multi(adata_list, patch_size)
+    train = read_multi(adata_list, patch_size, preprocess=False)
     graph = train['graph']
     sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
     dataset = dgl.dataloading.DataLoader(

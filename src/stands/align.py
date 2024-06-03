@@ -84,7 +84,7 @@ class FindPairs:
 
     def init_model(self, raw, n_ref, n_tgt):
         self.M = KinPair(n_ref, n_tgt).to(self.device)
-        self.D = Discriminator(raw['gene_dim'], raw['patch_size']).to(self.device)
+        self.D = Discriminator(raw['gene_dim'], raw['patch_size'], only_ST=True).to(self.device)
 
         self.opt_M = optim.Adam(self.M.parameters(), lr=self.lr, betas=(0.5, 0.999))
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
