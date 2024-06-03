@@ -17,6 +17,7 @@ nav:
     - SingleAD: tutorial/SingleAD.ipynb
     - MultiAD: tutorial/MultiAD.ipynb
     - SharedBC: tutorial/ShareBC.ipynb
+    - AnoBC: tutorial/AnoBC.ipynb
     - sub: tutorial/subtype.ipynb
 
 theme:
