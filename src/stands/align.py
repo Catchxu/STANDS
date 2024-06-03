@@ -32,8 +32,8 @@ class FindPairs:
         self.weight = weight
 
     def fit(self, generator: GeneratorAD,  raw: Dict[str, Any]):
-        '''Find kin pairs'''
-        tqdm.write('Begin to find kin pairs between datasets...')
+        '''Find Kin Pairs'''
+        tqdm.write('Begin to find Kin Pairs between datasets...')
 
         raw_g = raw['graph']
         ref_g, tgt_g = self.split(raw_g)
@@ -48,8 +48,8 @@ class FindPairs:
                 t.set_description(f'Train Epochs')
 
                 # generate embeddings
-                z_ref = self.G.extract.encode(ref_g, ref_g.ndata['gene'])
-                z_tgt = self.G.extract.encode(tgt_g, tgt_g.ndata['gene'])
+                z_ref = self.G.extract.GeneEncoder(ref_g, ref_g.ndata['gene'])
+                z_tgt = self.G.extract.GeneEncoder(tgt_g, tgt_g.ndata['gene'])
 
                 self.UpdateD(z_ref, z_tgt)
                 self.UpdateM(z_ref, z_tgt)
@@ -70,7 +70,7 @@ class FindPairs:
             ref_g = dgl.node_subgraph(ref_g, pair_id)
             tgt_g.ndata['ref_gene'] = ref_g.ndata['gene']
 
-        tqdm.write('Kin pairs have been found.\n')
+        tqdm.write('Kin Pairs have been found.\n')
         return ref_g, tgt_g
 
     def split(self, graph: dgl.DGLGraph):

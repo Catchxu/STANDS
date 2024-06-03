@@ -12,8 +12,12 @@ class GATEncoder(nn.Module):
                         False, False, False)
 
     def forward(self, g_block, feat):
-        feat = self.GAT1(g_block[0], feat)
-        z = self.GAT2(g_block[1], feat)
+        if isinstance(g_block, list):
+            feat = self.GAT1(g_block[0], feat)
+            z = self.GAT2(g_block[1], feat)
+        else:
+            feat = self.GAT1(g_block, feat)
+            z = self.GAT2(g_block, feat)            
         return z
 
 
