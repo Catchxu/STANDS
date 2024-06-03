@@ -24,6 +24,8 @@ class Subtype:
             seed_everything(random_state)
         self.seed = random_state
 
+        generator = None  # remove model
+
     def fit(self, data: Dict[str, Any]):
         '''Detect subtypes of samples'''
 

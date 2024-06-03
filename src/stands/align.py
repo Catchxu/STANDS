@@ -37,7 +37,11 @@ class FindPairs:
 
         raw_g = raw['graph']
         ref_g, tgt_g = self.split(raw_g)
-        self.G = copy.deepcopy(generator).to(self.device)
+        self.G = generator.to(self.device)
+
+        # freeze self.G weight
+        for param in self.G.parameters():
+            param.requires_grad = False
 
         self.init_model(raw, ref_g.num_nodes(), tgt_g.num_nodes())
 

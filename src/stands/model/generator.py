@@ -1,3 +1,4 @@
+import os
 import copy
 import math
 import torch
@@ -88,6 +89,7 @@ class GeneratorBC(nn.Module):
     def __init__(self, extractor, n_batch, z_dim):
         super().__init__()
         self.extractor = copy.deepcopy(extractor)
+        extractor = None  # remove model
         self.Style = StyleBlock(n_batch, z_dim)
 
     def STforward(self, g_block, feat_g, batchid):
