@@ -109,7 +109,7 @@ class FindPairs:
         z_ref, z_tgt, _ = self.M(z_ref, z_tgt)
         d1 = torch.mean(self.D.Zforward(z_ref.detach()))
         d2 = torch.mean(self.D.Zforward(z_tgt.detach()))
-        gp = calculate_gradient_penalty(self.D, z_ref.detach(), z_tgt.detach())
+        gp = calculate_gradient_penalty(self.D, z_ref.detach(), z_tgt.detach(), Zforward=True)
 
         # store discriminator loss for printing training information
         self.D_loss = - d1 + d2 + gp * self.weight['w_gp']
