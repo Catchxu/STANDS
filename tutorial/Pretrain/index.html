@@ -16,7 +16,7 @@
         <link rel="prev" href="../overview/">
       
       
-        <link rel="next" href="../detection/">
+        <link rel="next" href="../SingleAD/">
       
       <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.5.1, mkdocs-material-9.1.21">
@@ -909,6 +909,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -1012,8 +1014,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../detection/" class="md-nav__link">
-        Tutorial 2: Detect anomalous regions with multimodal data
+      <a href="../SingleAD/" class="md-nav__link">
+        Tutorial 1: Identify cancerous domains in single ST dataset
       </a>
     </li>
   
@@ -1026,8 +1028,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../alignment/" class="md-nav__link">
-        Tutorial 3: Align multi-batch ST datasets
+      <a href="../MultiAD/" class="md-nav__link">
+        Tutorial 2: Identify cancerous domains across multiple ST datasets concurrently
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ShareBC/" class="md-nav__link">
+        Tutorial 3: Align multiple ST datasets sharing identical domain types
       </a>
     </li>
   
@@ -2293,7 +2309,6 @@ import scanpy as sc</div>
 <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data_name</span><span class="p">:</span>
     <span class="n">read_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="n">d</span> <span class="o">+</span> <span class="s1">'.h5ad'</span>
     <span class="n">a</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">read_h5ad</span><span class="p">(</span><span class="n">read_path</span><span class="p">)</span>
-    <span class="n">a</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
     <span class="n">adata_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-3">adata_list = []
@@ -2302,7 +2317,6 @@ data_name = ['V05', 'V06', 'V07']
 for d in data_name:
     read_path = path + d + '.h5ad'
     a = sc.read_h5ad(read_path)
-    a.X = a.X.toarray()
     adata_list.append(a)</div>
 </div>
 </div>
@@ -2394,7 +2408,7 @@ for d in data_name:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">June 2, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">June 3, 2024</span>
       
     
   </small>
@@ -2441,13 +2455,13 @@ for d in data_name:
         
         
           
-          <a href="../detection/" class="md-footer__link md-footer__link--next" aria-label="Next: Tutorial 2: Detect anomalous regions with multimodal data" rel="next">
+          <a href="../SingleAD/" class="md-footer__link md-footer__link--next" aria-label="Next: Tutorial 1: Identify cancerous domains in single ST dataset" rel="next">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Tutorial 2: Detect anomalous regions with multimodal data
+                Tutorial 1: Identify cancerous domains in single ST dataset
               </div>
             </div>
             <div class="md-footer__button md-icon">

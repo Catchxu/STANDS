@@ -952,6 +952,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -1000,8 +1002,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorial/detection/" class="md-nav__link">
-        Tutorial 2: Detect anomalous regions with multimodal data
+      <a href="../../../tutorial/SingleAD/" class="md-nav__link">
+        Tutorial 1: Identify cancerous domains in single ST dataset
       </a>
     </li>
   
@@ -1014,8 +1016,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../tutorial/alignment/" class="md-nav__link">
-        Tutorial 3: Align multi-batch ST datasets
+      <a href="../../../tutorial/MultiAD/" class="md-nav__link">
+        Tutorial 2: Identify cancerous domains across multiple ST datasets concurrently
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../tutorial/ShareBC/" class="md-nav__link">
+        Tutorial 3: Align multiple ST datasets sharing identical domain types
       </a>
     </li>
   
@@ -1407,7 +1423,7 @@ After the completion of pre-training, the weights will be automatically saved.</
 </span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53"></a>        <span class="n">seed_everything</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>
 </span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54"></a>
 </span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55"></a>    <span class="c1"># Initialize dataloader for train data</span>
-</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">train</span> <span class="o">=</span> <span class="n">read_multi</span><span class="p">(</span><span class="n">adata_list</span><span class="p">,</span> <span class="n">patch_size</span><span class="p">)</span>
+</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56"></a>    <span class="n">train</span> <span class="o">=</span> <span class="n">read_multi</span><span class="p">(</span><span class="n">adata_list</span><span class="p">,</span> <span class="n">patch_size</span><span class="p">,</span> <span class="n">preprocess</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a>    <span class="n">graph</span> <span class="o">=</span> <span class="n">train</span><span class="p">[</span><span class="s1">&#39;graph&#39;</span><span class="p">]</span>
 </span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a>    <span class="n">sampler</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">dataloading</span><span class="o">.</span><span class="n">MultiLayerFullNeighborSampler</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a>    <span class="n">dataset</span> <span class="o">=</span> <span class="n">dgl</span><span class="o">.</span><span class="n">dataloading</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
@@ -1467,7 +1483,7 @@ After the completion of pre-training, the weights will be automatically saved.</
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">June 2, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">June 3, 2024</span>
       
     
   </small>
