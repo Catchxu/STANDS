@@ -40,16 +40,16 @@ class Subtype:
         '''Generate reconstructed data'''
         self.G.eval()
         if self.G.extract.only_ST:
-            z, fake_g = self.G.STforward([graph, graph], graph.ndata['gene'])
+            z, fake_g = self.G.STforward(graph, graph.ndata['gene'])
             res_g = graph.ndata['gene'] - fake_g.detach()
-            res_z = self.C.STforward([graph, graph], res_g)
+            res_z = self.C.STforward(graph, res_g)
 
         else:
             z, fake_g, fake_p = self.G.Fullforward(
-                [graph, graph], graph.ndata['gene'], graph.ndata['patch']
+                graph, graph.ndata['gene'], graph.ndata['patch']
             )
             res_g = graph.ndata['gene'] - fake_g.detach()
             res_p = graph.ndata['patch'] - fake_p.detach()
-            res_z = self.C.Fullforward([graph, graph], res_g, res_p)
+            res_z = self.C.Fullforward(graph, res_g, res_p)
 
         return z, res_z

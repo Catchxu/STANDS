@@ -48,8 +48,8 @@ class FindPairs:
                 t.set_description(f'Train Epochs')
 
                 # generate embeddings
-                z_ref = self.G.extract.encode(ref_g, ref_g[0].srcdata['gene'])
-                z_tgt = self.G.extract.encode(tgt_g, tgt_g[0].srcdata['gene'])
+                z_ref = self.G.extract.encode(ref_g, ref_g.ndata['gene'])
+                z_tgt = self.G.extract.encode(tgt_g, tgt_g.ndata['gene'])
 
                 self.UpdateD(z_ref, z_tgt)
                 self.UpdateM(z_ref, z_tgt)
@@ -63,8 +63,8 @@ class FindPairs:
 
         self.M.eval()
         with torch.no_grad():
-            z_ref = self.G.extract.encode(ref_g, ref_g[0].srcdata['gene'])
-            z_tgt = self.G.extract.encode(tgt_g, tgt_g[0].srcdata['gene'])
+            z_ref = self.G.extract.encode(ref_g, ref_g.ndata['gene'])
+            z_tgt = self.G.extract.encode(tgt_g, ref_g.ndata['gene'])
             _, _, m = self.M(z_ref, z_tgt)
             pair_id = list(ref_g.nodes().cpu().numpy()[m.argmax(axis=1)])
             ref_g = dgl.node_subgraph(ref_g, pair_id)
@@ -218,7 +218,7 @@ class BatchAlign:
         tqdm.write('Datasets have been corrected.\n')
         return adata
 
-    def init_model(self, generator: GeneratorAD, raw, weight_dir):
+    def init_model(self, generator: GeneratorAD, raw):
         z_dim = generator.extract.z_dim
         self.G = GeneratorBC(generator.extract, raw['data_n'], z_dim).to(self.device)
         self.D = Discriminator(raw['gene_dim'], raw['patch_size']).to(self.device)
@@ -269,6 +269,6 @@ class BatchAlign:
         Loss_adv = - torch.mean(d)
 
         # store generator loss for printing training information and backward
-        self.G_loss = self.weight['w_rec'] * Loss_rec + self.weight['w_adv'] * Loss_adv
+        self.G_loss = self.weight['w_rec']*Loss_rec + self.weight['w_adv']*Loss_adv
         self.G_loss.backward()
         self.opt_G.step()
