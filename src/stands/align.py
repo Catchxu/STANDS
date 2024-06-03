@@ -159,16 +159,14 @@ class BatchAlign:
             weight = {'w_rec': 30, 'w_adv': 1, 'w_gp': 10}
         self.weight = weight
 
-    def fit(self, raw: Dict[str, Any], generator: GeneratorAD,
-            Aligner: Optional[FindPairs] = None, weight_dir: Optional[str] = None):
+    def fit(self, raw: Dict[str, Any], generator: GeneratorAD, **alignerkwargs):
         '''Remove batch effects'''
         adatas = raw['adata']
         adata_ref = adatas[0]
         adata_tgt = ad.concat(adatas[1:])
 
-        # find kin pairs
-        if Aligner is None:
-            Aligner = FindPairs(random_state=self.seed)
+        # find Kin Pairs
+        Aligner = FindPairs(random_state=self.seed, **alignerkwargs)
         _, tgt_g = Aligner.fit(generator, raw)
 
         self.sampler = dgl.dataloading.MultiLayerFullNeighborSampler(2)
@@ -177,7 +175,7 @@ class BatchAlign:
             shuffle=True, drop_last=False, num_workers=0, device=self.device
         )
 
-        self.init_model(generator, raw, weight_dir)
+        self.init_model(generator, raw)
 
         tqdm.write('Begin to correct spatial transcriptomics datasets...')
         self.G.train()
@@ -222,7 +220,7 @@ class BatchAlign:
         tqdm.write('Datasets have been corrected.\n')
         return adata
 
-    def init_model(self, generator: GeneratorAD, raw):
+    def init_model(self, raw: Dict[str, Any], generator: GeneratorAD):
         z_dim = generator.extract.z_dim
         self.G = GeneratorBC(generator.extract, raw['data_n'], z_dim).to(self.device)
         self.D = Discriminator(raw['gene_dim'], raw['patch_size']).to(self.device)
