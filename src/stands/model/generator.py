@@ -3,6 +3,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from typing import Optional
 
 from .backbone import Extractor, ExtractorOnlyST, ExtractorOnlySC
 from .backbone import MemoryBlock, StyleBlock
@@ -33,7 +34,7 @@ class GeneratorAD(nn.Module):
         z_g, z_p = self.extract.encode(g_block, feat_g, feat_p)
         z_g, z_p = self.extract.fusion(z_g, z_p)
         z = torch.concat([z_g, z_p], dim=-1)
-        mem_z = self.Memory(z)
+        mem_z = z# self.Memory(z)
         z_g, z_p = torch.chunk(mem_z, 2, dim = -1)
         feat_g, feat_p = self.extract.decode(z_g, z_p)
         return z, feat_g, feat_p
@@ -49,6 +50,18 @@ class GeneratorAD(nn.Module):
         mem_z = self.Memory(z)
         feat_g = self.extract.decode(mem_z)
         return z, feat_g
+    
+    def load_weight(self, weight_dir: Optional[str]):
+        if weight_dir:
+            pre_weights = torch.load(weight_dir)
+        else:
+            pre_weights = torch.load(os.path.dirname(__file__) + '/generator.pth')
+        
+        # load the pre-trained weights for extractor
+        model_dict = self.state_dict()
+        pretrained_dict = {k: v for k, v in pre_weights.items()}
+        model_dict.update(pretrained_dict)
+        self.load_state_dict(model_dict)
 
 
 
