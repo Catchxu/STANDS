@@ -140,7 +140,7 @@ class BatchAlign:
                  n_epochs: int = 10, 
                  batch_size: int = 128,
                  learning_rate: float = 3e-4, 
-                 n_dis: int = 2,
+                 n_dis: int = 3,
                  GPU: Union[bool, str] = True, 
                  random_state: Optional[int] = None,
                  weight: Optional[Dict[str, float]] = None):
