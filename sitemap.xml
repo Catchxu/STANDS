@@ -116,6 +116,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://Catchxu.github.io/STANDS/tutorial/AnoBC/</loc>
+         <lastmod>2024-06-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/MultiAD/</loc>
          <lastmod>2024-06-03</lastmod>
          <changefreq>daily</changefreq>
@@ -132,11 +137,6 @@
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/SingleAD/</loc>
-         <lastmod>2024-06-03</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://Catchxu.github.io/STANDS/tutorial/alignment/</loc>
          <lastmod>2024-06-03</lastmod>
          <changefreq>daily</changefreq>
     </url>
