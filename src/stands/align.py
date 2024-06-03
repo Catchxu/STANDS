@@ -14,7 +14,7 @@ from ._utils import select_device, seed_everything, calculate_gradient_penalty
 
 class FindPairs:
     def __init__(self, 
-                 n_epochs: int = 2000, 
+                 n_epochs: int = 1000, 
                  learning_rate: float = 2e-4,
                  GPU: Union[bool, str] = True, 
                  random_state: Optional[int] = None,
@@ -67,8 +67,8 @@ class FindPairs:
 
         self.M.eval()
         with torch.no_grad():
-            z_ref = self.G.extract.encode(ref_g, ref_g.ndata['gene'])
-            z_tgt = self.G.extract.encode(tgt_g, ref_g.ndata['gene'])
+            z_ref = self.G.extract.GeneEncoder(ref_g, ref_g.ndata['gene'])
+            z_tgt = self.G.extract.GeneEncoder(tgt_g, ref_g.ndata['gene'])
             _, _, m = self.M(z_ref, z_tgt)
             pair_id = list(ref_g.nodes().cpu().numpy()[m.argmax(axis=1)])
             ref_g = dgl.node_subgraph(ref_g, pair_id)
