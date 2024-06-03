@@ -14,7 +14,7 @@ nav:
   - Tutorials:
     - Overview: tutorial/overview.md
     - Pretrain: tutorial/Pretrain.ipynb
-    - AD: tutorial/detection.ipynb
+    - SingleAD: tutorial/SingleAD.ipynb
     - BC: tutorial/alignment.ipynb
     - sub: tutorial/subtype.ipynb
 
