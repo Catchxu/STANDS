@@ -61,7 +61,7 @@ class FindPairs:
                 # update learning rate for G and D
                 self.D_sch.step()
                 self.M_sch.step()
-                t.set_postfix(G_Loss = self.G_loss.item(),
+                t.set_postfix(G_Loss = self.M_loss.item(),
                               D_Loss = self.D_loss.item())
                 t.update(1)
 
