@@ -16,7 +16,7 @@ nav:
     - Pretrain: tutorial/Pretrain.ipynb
     - SingleAD: tutorial/SingleAD.ipynb
     - MultiAD: tutorial/MultiAD.ipynb
-    - BC: tutorial/alignment.ipynb
+    - SharedBC: tutorial/ShareBC.ipynb
     - sub: tutorial/subtype.ipynb
 
 theme:

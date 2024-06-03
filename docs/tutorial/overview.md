@@ -9,5 +9,5 @@ Before starting the tutorial, we need to make some preparations, including: inst
 - [Tutorial 0: Pretrain STANDS basic extractor](./Pretrain.ipynb)
 - [Tutorial 1: Identify cancerous domains in single ST dataset](./SingleAD.ipynb)
 - [Tutorial 2: Identify cancerous domains across multiple ST datasets concurrently](./MultiAD.ipynb)
-- [Tutorial 3: Align multi-batch ST datasets](./alignment.ipynb)
+- [Tutorial 3: Align multiple ST datasets sharing identical domain types](./ShareBC.ipynb)
 - [Tutorial 4: Detect anomalous subdomains with multimodal data](./subtype.ipynb)
