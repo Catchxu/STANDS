@@ -1,4 +1,3 @@
-import copy
 import dgl
 import torch
 from typing import Optional, Union, Dict, Any
@@ -17,7 +16,7 @@ class Subtype:
 
         self.n_subtype = n_subtypes
         self.device = select_device(GPU)
-        self.G = copy.deepcopy(generator).to(self.device)
+        self.G = generator.to(self.device)
         self.C = Cluster(self.G, self.n_subtype)
 
         if random_state is not None:
