@@ -1,3 +1,4 @@
+import copy
 import dgl
 import torch
 from typing import Optional, Union, Dict, Any
@@ -17,7 +18,7 @@ class Subtype:
         self.n_subtype = n_subtypes
         self.device = select_device(GPU)
         self.G = generator.to(self.device)
-        self.C = Cluster(self.G, self.n_subtype)
+        self.C = Cluster(self.G, self.n_subtype).to(self.device)
 
         if random_state is not None:
             seed_everything(random_state)
@@ -28,7 +29,7 @@ class Subtype:
     def fit(self, data: Dict[str, Any]):
         '''Detect subtypes of samples'''
 
-        graph = data['graph']
+        graph = data['graph'].to(self.device)
 
         self.G.eval()
         self.C.train()

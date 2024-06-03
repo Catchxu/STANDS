@@ -33,7 +33,7 @@ class Cluster(nn.Module):
         else:
             self.fusion = TFBlock(**configs.TFBlock)
 
-        self.mu = Parameter(torch.Tensor(self.subtypes, self.z_dim))
+        self.mu = Parameter(torch.Tensor(self.subtypes, self.z_dim * 2))
 
         # classifer for supervised pre-training
         self.classifer = nn.Linear(self.z_dim, n_subtypes)
@@ -99,7 +99,9 @@ class Cluster(nn.Module):
                                lr=self.learning_rate, 
                                weight_decay=self.weight_decay)
 
-        self.mu_init(self.fusion(z, res_z).cpu().detach().numpy())
+        z, res_z = self.fusion(z, res_z)
+        z = torch.concat([z, res_z], dim=-1)
+        self.mu_init(z.cpu().detach().numpy())
 
         self.train()
         with tqdm(total=self.n_epochs) as t:
