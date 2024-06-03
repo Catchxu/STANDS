@@ -68,7 +68,7 @@ class FindPairs:
         self.M.eval()
         with torch.no_grad():
             z_ref = self.G.extract.GeneEncoder(ref_g, ref_g.ndata['gene'])
-            z_tgt = self.G.extract.GeneEncoder(tgt_g, ref_g.ndata['gene'])
+            z_tgt = self.G.extract.GeneEncoder(tgt_g, tgt_g.ndata['gene'])
             _, _, m = self.M(z_ref, z_tgt)
             pair_id = list(ref_g.nodes().cpu().numpy()[m.argmax(axis=1)])
             ref_g = dgl.node_subgraph(ref_g, pair_id)
