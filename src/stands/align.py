@@ -224,7 +224,7 @@ class BatchAlign:
     def init_model(self, raw: Dict[str, Any], generator: GeneratorAD):
         z_dim = generator.extract.g_dim
         self.G = GeneratorBC(generator.extract, raw['data_n'], z_dim).to(self.device)
-        self.D = Discriminator(raw['gene_dim'], raw['patch_size']).to(self.device)
+        self.D = Discriminator(raw['gene_dim'], raw['patch_size'], only_ST=True).to(self.device)
 
         self.opt_G = optim.Adam(self.G.parameters(), lr=self.lr, betas=(0.5, 0.999))
         self.opt_D = optim.Adam(self.D.parameters(), lr=self.lr, betas=(0.5, 0.999))
