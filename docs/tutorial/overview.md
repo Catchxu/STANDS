@@ -11,4 +11,4 @@ Before starting the tutorial, we need to make some preparations, including: inst
 - [Tutorial 2: Identify cancerous domains across multiple ST datasets concurrently](./MultiAD.ipynb)
 - [Tutorial 3: Align multiple ST datasets sharing identical domain types](./ShareBC.ipynb)
 - [Tutorial 4: Align multiple ST datasets with non-overlapping domain types](./AnoBC.ipynb)
-- [Tutorial 4: Detect anomalous subdomains with multimodal data](./subtype.ipynb)
+- [Tutorial 5: Discern biologically distinct anomalous tissue subdomains in single ST datasets](./SingleAS.ipynb)
