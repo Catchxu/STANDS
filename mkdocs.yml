@@ -19,6 +19,7 @@ nav:
     - SharedBC: tutorial/ShareBC.ipynb
     - AnoBC: tutorial/AnoBC.ipynb
     - SingleAS: tutorial/SingleAS.ipynb
+    - MultiAS: tutorial/MultiAS.ipynb
 
 theme:
     name: "material"

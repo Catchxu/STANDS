@@ -12,3 +12,4 @@ Before starting the tutorial, we need to make some preparations, including: inst
 - [Tutorial 3: Align multiple ST datasets sharing identical domain types](./ShareBC.ipynb)
 - [Tutorial 4: Align multiple ST datasets with non-overlapping domain types](./AnoBC.ipynb)
 - [Tutorial 5: Discern biologically distinct anomalous tissue subdomains in single ST datasets](./SingleAS.ipynb)
+- [Tutorial 6: Discern biologically distinct anomalous tissue subdomains across multiple ST datasets](./MultiAS.ipynb)
