@@ -103,5 +103,12 @@ Finally, more useful and helpful information can be found at the [online documen
 
 
 
+## Getting help
+Please see the tutorial for more complete documentation of all the functions of STANDS. For any questions or comments, please use the [GitHub issues](https://github.com/Catchxu/STANDS/issues) or
+directly contact Wenlin Li at the email: kaichenxu358@gmail.com.
+
+
+
+
 ## Citation
 Coming soon.

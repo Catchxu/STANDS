@@ -24,7 +24,8 @@ All experimental datasets involved in this paper are available from their respec
 
 
 ## Getting help
-See the tutorial for more complete documentation of all the functions of STANDS. For questions or comments, please use the [GitHub issues](https://github.com/Catchxu/STANDS/issues).
+Please see the tutorial for more complete documentation of all the functions of STANDS. For any questions or comments, please use the [GitHub issues](https://github.com/Catchxu/STANDS/issues) or
+directly contact Wenlin Li at the email: kaichenxu358@gmail.com.
 
 
 
