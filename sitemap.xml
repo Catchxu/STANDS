@@ -2,157 +2,157 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://Catchxu.github.io/STANDS/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/license/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/start/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/SUMMARY/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/align/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/anomaly/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/configs/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/pretrain/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/subtype/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/evaluate/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/evaluate/SGD/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/evaluate/eval/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/GMM/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/cluster/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/discriminator/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/generator/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/backbone/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/backbone/extractor/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/backbone/gene/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/backbone/image/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/reference/stands/model/backbone/layer/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/AnoBC/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/MultiAD/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/MultiAS/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/Pretrain/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/ShareBC/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/SingleAD/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/SingleAS/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://Catchxu.github.io/STANDS/tutorial/overview/</loc>
-         <lastmod>2024-06-08</lastmod>
+         <lastmod>2024-06-12</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
