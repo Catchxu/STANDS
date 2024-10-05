@@ -110,4 +110,16 @@ Please see the tutorial for more complete documentation of all the functions of 
 
 
 ## Citation
-Coming soon.
+
+```bibtex
+@article{xu2024detecting,
+  title={Detecting anomalous anatomic regions in spatial transcriptomics with {STANDS}},
+  author={Xu, Kaichen and Lu, Yan and Hou, Suyang and Liu, Kainan and Du, Yihang and Huang, Mengqian and Feng, Hao and Wu, Hao and Sun, Xiaobo},
+  journal={Nature Communications},
+  volume={15},
+  number={1},
+  pages={8223},
+  year={2024},
+  publisher={Nature Publishing Group UK London}
+}
+```

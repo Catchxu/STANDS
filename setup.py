@@ -31,7 +31,7 @@ setup(
         'pyemd>=1.0.0',
         'rpy2>=3.5.13',
         'scanpy>=1.10.1',
-        'sklearn>=1.2.0',
+        'scikit-learn>=1.2.0',
         'scipy>=1.11.4',
         'torch>=2.0.0',
         'torchvision>=0.15.1',
