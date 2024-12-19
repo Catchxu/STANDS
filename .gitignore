@@ -164,5 +164,7 @@ cython_debug/
 # nohup
 *.out
 
-# data/
+data/
 demo/
+*.zip
+*.pth

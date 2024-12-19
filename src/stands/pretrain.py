@@ -15,7 +15,7 @@ from ._utils import seed_everything
 
 
 def pretrain(adata_list: List[ad.AnnData],
-             n_epochs: int = 100,
+             n_epochs: int = 50,
              patch_size: Optional[int] = None,
              batch_size: int = 128,
              learning_rate: float = 1e-4,

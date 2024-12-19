@@ -42,7 +42,7 @@ class FullConfigs(object):
             'num_layers': 3,
             'nheads': 4,
             'hidden_dim': 512,
-            'dropout': 0.1
+            'dropout': 0.3
         }
 
 
@@ -74,8 +74,8 @@ class MBConfigs(object):
         self.MBBlock = {
             'z_dim': z_dim,
             'mem_dim': 512,
-            'shrink_threshold': 0.005,
-            'temperature': 0.5
+            'shrink_threshold': 0.05,
+            'temperature': 0.07
         }
 
 

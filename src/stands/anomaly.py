@@ -1,6 +1,7 @@
 import dgl
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 from tqdm import tqdm
 from typing import Optional, Dict, Union, Any
@@ -14,8 +15,8 @@ class AnomalyDetect:
     def __init__(self, 
                  n_epochs: int = 10, 
                  batch_size: int = 128,
-                 learning_rate: float = 3e-4,
-                 n_dis: int = 2,
+                 learning_rate: float = 2e-4,
+                 n_dis: int = 3,
                  GPU: Union[bool, str] = True,
                  random_state: Optional[int] = None,
                  weight: Optional[Dict[str, float]] = None):
@@ -30,7 +31,7 @@ class AnomalyDetect:
             seed_everything(random_state)
 
         if weight is None:
-            weight = {'w_rec': 30, 'w_adv': 1, 'w_gp': 10}
+            weight = {'w_rec': 50, 'w_adv': 1, 'w_gp': 10}
         self.weight = weight
 
     def fit(self, ref: Dict[str, Any], only_ST: bool = False, weight_dir: Optional[str] = None):
@@ -217,19 +218,21 @@ class AnomalyDetect:
             if self.only_ST:
                 # generate fake data
                 _, fake_g = self.G.STforward(blocks, blocks[0].srcdata['gene'])
-                d = self.D.SCforward(fake_g.detach())
+                d = self.D.SCforward(blocks[1].dstdata['gene'])
+                d_hat = self.D.SCforward(fake_g.detach())
 
             else:
                 _, fake_g, fake_p = self.G.Fullforward(
                     blocks, blocks[0].srcdata['gene'], blocks[1].srcdata['patch']
                 )
-
-                d = self.D.Fullforward(fake_g.detach(), fake_p.detach())
-
-            dis.append(d.cpu().detach())
+                d = self.D.Fullforward(blocks[1].dstdata['gene'], blocks[1].dstdata['patch'])
+                d_hat = self.D.Fullforward(fake_g.detach(), fake_p.detach())
+            
+            cos_sim = F.cosine_similarity(d, d_hat, dim=1)
+            dis.append(cos_sim.cpu().detach())
 
         # Normalize anomaly scores
-        dis = torch.mean(torch.cat(dis, dim=0), dim=1).numpy()
+        dis = torch.cat(dis, dim=0).numpy()
         score = (dis.max() - dis)/(dis.max() - dis.min())
 
         score = list(score.reshape(-1))

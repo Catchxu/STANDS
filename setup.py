@@ -6,7 +6,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 setup(
     name='stands',
-    version='1.0.0',
+    version='1.1.0',
     description='Detecting and dissecting anomalous anatomic regions in spatial transcriptomics with STANDS',
     long_description=LONG_DESCRIPTION,
     long_description_content_type='text/markdown',

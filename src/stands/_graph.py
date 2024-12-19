@@ -52,8 +52,7 @@ class BuildGraph:
         ])
  
         preprocess = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+            transforms.ToTensor()
         ])
 
         p_list = []
@@ -151,8 +150,7 @@ class BuildMultiGraph:
             ])
             
             preprocess = transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+                transforms.ToTensor()
             ])
 
             for i in range(len(position)):
