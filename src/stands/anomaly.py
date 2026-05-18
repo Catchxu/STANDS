@@ -233,7 +233,7 @@ class AnomalyDetect:
 
         # Normalize anomaly scores
         dis = torch.cat(dis, dim=0).numpy()
-        score = (dis.max() - dis)/(dis.max() - dis.min())
+        score = (dis - dis.min())/(dis.max() - dis.min())
 
         score = list(score.reshape(-1))
         return score
